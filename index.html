@@ -13,23 +13,22 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = { theme: { extend: {
-  colors: {
-    ink:{50:'#EEF1FA',100:'#D9DEF2',200:'#B3BCE4',300:'#8B97CF',400:'#5F6FAE',500:'#3D4C8C',600:'#2A3768',700:'#1C2750',800:'#131C3D',900:'#0B1230',950:'#070C22'},
-    biru:{50:'#EFF4FF',100:'#DFE8FF',200:'#BFD0FF',300:'#93AEFF',400:'#5B7FFF',500:'#2E5BFF',600:'#2148E8',700:'#1B39BE',800:'#182F94',900:'#162A75'},
-    pensil:{50:'#FFF8EB',100:'#FFEEC7',200:'#FFDD8A',300:'#FFC94D',400:'#FFB020',500:'#F59E0B',600:'#D97F06',700:'#B45E09',800:'#92490E',900:'#783C0F'},
-    sukses:{50:'#ECFDF3',100:'#D1FADF',300:'#6CE9A6',500:'#12B76A',600:'#039855',700:'#027A48'},
-    bahaya:{50:'#FEF3F2',100:'#FEE4E2',300:'#FDA29B',500:'#F04438',600:'#D92D20',700:'#B42318'},
-    esai:{50:'#F4F3FF',100:'#EBE9FE',300:'#C3B5FD',500:'#7A5AF8',600:'#6938EF',700:'#5925DC'},
-    info:{50:'#ECFEFF',100:'#CFF9FE',300:'#67E3F9',500:'#06AED4',600:'#0E7090',700:'#0E5F7A'},
-    kertas:{50:'#FBFAF5',100:'#F6F4ED',200:'#EFECE0',300:'#E7E2D4',400:'#D6CFBB'},
-    magenta:{500:'#DD2590'}, teal:{500:'#0E9384'}
-  },
-  fontFamily:{ sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], disp:['"Space Grotesk"','sans-serif'], mono:['"IBM Plex Mono"','monospace'], arab:['Amiri','serif'] },
-  boxShadow:{ lift:'0 16px 40px -16px rgba(11,18,48,.28)', card:'0 2px 10px -2px rgba(11,18,48,.08)', glow:'0 0 0 4px rgba(46,91,255,.16)', amber:'0 0 0 4px rgba(255,176,32,.22)' }
+colors: {
+ink:{50:'#EEF1FA',100:'#D9DEF2',200:'#B3BCE4',300:'#8B97CF',400:'#5F6FAE',500:'#3D4C8C',600:'#2A3768',700:'#1C2750',800:'#131C3D',900:'#0B1230',950:'#070C22'},
+biru:{50:'#EFF4FF',100:'#DFE8FF',200:'#BFD0FF',300:'#93AEFF',400:'#5B7FFF',500:'#2E5BFF',600:'#2148E8',700:'#1B39BE',800:'#182F94',900:'#162A75'},
+pensil:{50:'#FFF8EB',100:'#FFEEC7',200:'#FFDD8A',300:'#FFC94D',400:'#FFB020',500:'#F59E0B',600:'#D97F06',700:'#B45E09',800:'#92490E',900:'#783C0F'},
+sukses:{50:'#ECFDF3',100:'#D1FADF',300:'#6CE9A6',500:'#12B76A',600:'#039855',700:'#027A48'},
+bahaya:{50:'#FEF3F2',100:'#FEE4E2',300:'#FDA29B',500:'#F04438',600:'#D92D20',700:'#B42318'},
+esai:{50:'#F4F3FF',100:'#EBE9FE',300:'#C3B5FD',500:'#7A5AF8',600:'#6938EF',700:'#5925DC'},
+info:{50:'#ECFEFF',100:'#CFF9FE',300:'#67E3F9',500:'#06AED4',600:'#0E7090',700:'#0E5F7A'},
+kertas:{50:'#FBFAF5',100:'#F6F4ED',200:'#EFECE0',300:'#E7E2D4',400:'#D6CFBB'},
+magenta:{500:'#DD2590'}, teal:{500:'#0E9384'}
+},
+fontFamily:{ sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], disp:['"Space Grotesk"','sans-serif'], mono:['"IBM Plex Mono"','monospace'], arab:['Amiri','serif'] },
+boxShadow:{ lift:'0 16px 40px -16px rgba(11,18,48,.28)', card:'0 2px 10px -2px rgba(11,18,48,.08)', glow:'0 0 0 4px rgba(46,91,255,.16)', amber:'0 0 0 4px rgba(255,176,32,.22)' }
 }}}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<!-- xlsx & jspdf TIDAK dimuat di sini — diunduh on-demand hanya saat Guru/Admin ekspor -->
 <script>
 window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};
 </script>
@@ -80,11 +79,11 @@ body{background-color:#F6F4ED;background-image:radial-gradient(rgba(11,18,48,.07
 ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#FFB020,#F04438);}
 .grain{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");}
 .aurora{position:absolute;inset:-20%;pointer-events:none;filter:blur(70px);opacity:.5;background:
- radial-gradient(38% 42% at 18% 22%,rgba(46,91,255,.55),transparent 70%),
- radial-gradient(30% 34% at 82% 16%,rgba(122,90,248,.45),transparent 70%),
- radial-gradient(34% 40% at 70% 86%,rgba(6,174,212,.4),transparent 70%),
- radial-gradient(24% 28% at 26% 80%,rgba(255,176,32,.35),transparent 70%);
- animation:aur 16s ease-in-out infinite alternate;}
+radial-gradient(38% 42% at 18% 22%,rgba(46,91,255,.55),transparent 70%),
+radial-gradient(30% 34% at 82% 16%,rgba(122,90,248,.45),transparent 70%),
+radial-gradient(34% 40% at 70% 86%,rgba(6,174,212,.4),transparent 70%),
+radial-gradient(24% 28% at 26% 80%,rgba(255,176,32,.35),transparent 70%);
+animation:aur 16s ease-in-out infinite alternate;}
 @keyframes aur{to{transform:translate(3%,-3%) scale(1.06) rotate(2deg);}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
 .reveal{animation:fadeUp .55s cubic-bezier(.2,.7,.2,1) both;}
@@ -105,8 +104,8 @@ body{background-color:#F6F4ED;background-image:radial-gradient(rgba(11,18,48,.07
 .bub.fill{border-color:#FFB020;color:#0B1230;background:radial-gradient(circle at 35% 30%,#FFD98A,#FFB020 65%,#D97F06);box-shadow:0 0 14px rgba(255,176,32,.5);}
 .bub.anim{animation:bubfill 4.5s infinite;}
 @keyframes bubfill{0%,12%{background:transparent;border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.5);box-shadow:none;}
- 20%,80%{background:radial-gradient(circle at 35% 30%,#FFD98A,#FFB020 65%,#D97F06);border-color:#FFB020;color:#0B1230;box-shadow:0 0 14px rgba(255,176,32,.5);}
- 92%,100%{background:transparent;border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.5);box-shadow:none;}}
+20%,80%{background:radial-gradient(circle at 35% 30%,#FFD98A,#FFB020 65%,#D97F06);border-color:#FFB020;color:#0B1230;box-shadow:0 0 14px rgba(255,176,32,.5);}
+92%,100%{background:transparent;border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.5);box-shadow:none;}}
 .opsi{transition:all .18s ease;border:2px solid #E7E2D4;background:#fff;}
 .opsi:hover{border-color:#93AEFF;transform:translateX(3px);}
 .opsi.sel{border-color:#2E5BFF;background:#EFF4FF;box-shadow:0 6px 18px -8px rgba(46,91,255,.5);}
@@ -149,16 +148,12 @@ details>summary::-webkit-details-marker{display:none;}
 <div id="drawer-root"></div>
 <div id="toast-root" class="fixed bottom-5 right-5 z-[120] flex flex-col gap-2 items-end max-w-[92vw]"></div>
 <input type="file" id="hidden-file" class="hidden">
-
 <script>
 'use strict';
-/* ═══════════════════════ KONFIGURASI ═══════════════════════
-   KREDENSIAL SUPABASE SUDAH TERTANAM — tidak perlu menghubungkan manual.
-   (Kunci anon memang dirancang publik; akses data dilindungi policy/RPC.) */
+/* ═══════════════════════ KONFIGURASI ═══════════════════════ */
 const PRESET = { url:'https://yxggvhzjyusmhwbwdydh.supabase.co', anon:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4Z2d2aHpqeXVzbWh3YndkeWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3Nzg2MzYsImV4cCI6MjExMDM1NDYzNn0.-d-VxGvBwzoohGH-LJqn3LacieXgYpe5fHEf96yy-XU' };
 const SESSION_MS = 4*3600*1000;
 const APP = { name:'CBT PRO', ver:'5.2' };
-
 /* ═══════════════════════ UTILITAS ═══════════════════════ */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del(k){localStorage.removeItem(k);}};
@@ -178,18 +173,18 @@ function download(name,content,type){const b=content instanceof Blob?content:new
 async function copyText(t,msg){try{await navigator.clipboard.writeText(t);}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}toast(msg||'Disalin ke clipboard','ok');}
 function typeset(el){if(window.MathJax&&MathJax.typesetPromise){try{MathJax.typesetClear&&MathJax.typesetClear([el]);}catch(e){}MathJax.typesetPromise([el]).catch(()=>{});}}
 const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone;}catch(e){return'WITA';}})();
-
-/* ═══════════ LAZY-LOAD LIBRARY BERAT (hanya Guru/Admin) ═══════════ */
+/* ═══════════ LAZY-LOAD LIBRARY BERAT (hanya Guru/Admin) ═══════════
+   [FIX #1] Objek LIB sebelumnya ditutup prematur dengan "};" sebelum
+   method sqljs(), menyebabkan SyntaxError. Sekarang ditutup dengan benar. */
 const LIB={_c:{},
 load(u){if(!this._c[u])this._c[u]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Gagal memuat library '+u));document.head.appendChild(s);});return this._c[u];},
 xlsx(){return this.load('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');},
-async pdf(){await this.load('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');await this.load('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js');}};
-
+async pdf(){await this.load('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');await this.load('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js');},
+sqljs(){if(!this._sql)this._sql=this.load('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.min.js').then(()=>initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/'+f}));return this._sql;}};
 /* ═══════════════════════ IKON ═══════════════════════ */
 const ICONS={cap:'M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z',book:'M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z',clock:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',users:'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-3-6.7',chart:'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',img:'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',cog:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z',out:'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',plus:'M12 4v16m8-8H4',search:'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',trash:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',edit:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',copy:'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z',x:'M6 18L18 6M6 6l12 12',check:'M5 13l4 4L19 7',eye:'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',up:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12',down:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',chevL:'M15 19l-7-7 7-7',chevR:'M9 5l7 7-7 7',grip:'M4 8h16M4 16h16',filter:'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',play:'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z',shield:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',wifi:'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',alert:'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',refresh:'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',db:'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',link:'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',save:'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4',arrU:'M5 15l7-7 7 7',arrD:'M19 9l-7 7-7-7',menu:'M4 6h16M4 12h16M4 18h16',live:'M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z',flag:'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9',doc:'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',cal:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',dice:'M4 4h16v16H4z M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',key:'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z'};
 function ic(n,cls){return `<svg class="${cls||'w-4 h-4'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${ICONS[n]||''}"/></svg>`;}
 const LOGO=(sz)=>`<svg width="${sz||38}" height="${sz||38}" viewBox="0 0 48 48" fill="none"><rect x="2" y="2" width="44" height="44" rx="12" fill="#0B1230"/><rect x="2" y="2" width="44" height="44" rx="12" stroke="#2E5BFF" stroke-width="2"/><circle cx="16" cy="17" r="5.5" stroke="#5B7FFF" stroke-width="2.2"/><circle cx="32" cy="17" r="5.5" fill="#FFB020"/><path d="M29.6 17l1.7 1.7 3.1-3.4" stroke="#0B1230" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="31" r="5.5" stroke="#5B7FFF" stroke-width="2.2"/><circle cx="32" cy="31" r="5.5" stroke="#5B7FFF" stroke-width="2.2"/><path d="M8 40h32" stroke="#FFB020" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 5"/></svg>`;
-
 /* ═══════════════════════ UI KIT ═══════════════════════ */
 function toast(msg,type='ok',action){const r=$('#toast-root');const t=document.createElement('div');const col={ok:'border-sukses-500 text-sukses-700',err:'border-bahaya-500 text-bahaya-700',warn:'border-pensil-500 text-pensil-700',info:'border-biru-500 text-biru-700'}[type];const icn={ok:'check',err:'alert',warn:'alert',info:'live'}[type];
 t.className=`pop-in bg-white border-l-4 ${col} shadow-lift rounded-xl px-4 py-3 flex items-center gap-3 text-sm font-semibold max-w-sm`;
@@ -210,8 +205,9 @@ function bindActs(root,map){root.addEventListener('click',e=>{const el=e.target.
 function statusKey(p){const n=Date.now(),m=new Date(p.waktu_mulai).getTime(),s=new Date(p.waktu_selesai).getTime();return n<m?'akan':n<=s?'aktif':'selesai';}
 function chipStatus(p){const k=statusKey(p);return k==='akan'?'<span class="chip-amber">⏳ Akan Datang</span>':k==='aktif'?'<span class="chip-green"><span class="w-1.5 h-1.5 rounded-full bg-sukses-500 live-dot"></span> Aktif</span>':'<span class="chip-gray">🛑 Selesai</span>';}
 function ljkArt(rows=6){let h='<div class="ljk">';const keys=[1,2,0,3,1,2];for(let r=0;r<rows;r++){h+=`<div class="ljk-row"><span class="ljk-no">${pad(r+1)}</span>`;for(let c=0;c<4;c++){const fill=c===keys[r%6];h+=`<span class="bub ${fill?'anim':''}" style="animation-delay:${(r*0.55+c*0.12).toFixed(2)}s">${'ABCD'[c]}</span>`;}h+='</div>';}return h+'</div>';}
-
-/* ═══════════════════════ FORMAT SOAL (Arab · Math · Gambar) ═══════════════════════ */
+/* ═══════════════════════ FORMAT SOAL (Arab · Math · Gambar) ═══════════════════════
+   [FIX #2 & #3] Regex & string yang mengandung newline mentah diganti menjadi \n
+   agar valid secara sintaks JavaScript. */
 const RE_AR=/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
 function formatTeksSoal(teks){if(!teks)return'';let t=esc(String(teks));t=t.replace(/\n/g,'<br>');
 t=t.replace(/\[([^\]\[]+\.(?:jpe?g|png|gif|webp|bmp|avif))\]/gi,(m,f)=>{const url=DB.imageUrl(f);return `<div class="my-4 flex flex-col items-center"><img src="${url}" loading="lazy" data-zoom="${url}" class="max-w-full max-h-[300px] object-contain rounded-2xl shadow-card border border-kertas-300 cursor-zoom-in hover:opacity-90 transition bg-white" onerror="this.outerHTML='<span class=&quot;chip-red my-2&quot;>Gambar tidak ditemukan: ${esc(f)}</span>'"><span class="text-[10px] text-ink-300 italic mt-1.5">ketuk untuk memperbesar</span></div>`;});
@@ -222,7 +218,6 @@ return t;}
 document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(!z)return;const w=openModal(`<div class="relative bg-ink-950/95 rounded-3xl p-4 flex flex-col items-center cursor-zoom-out" data-zclose><img src="${z.dataset.zoom}" class="max-w-full max-h-[80vh] object-contain rounded-xl"><span class="text-white/70 text-xs font-semibold mt-3 bg-white/10 px-4 py-1.5 rounded-full">Ketuk di mana saja untuk menutup</span></div>`,'max-w-4xl');w.querySelector('[data-zclose]').onclick=()=>closeModal(w);});
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function orderSoal(soal,acakSoal,acakOpsi){const clone=soal.map((s,i)=>({...s,opsi:[...(s.opsi||[])],_orig:i}));let pg=clone.filter(s=>(s.tipe||'PG')==='PG'),es=clone.filter(s=>s.tipe==='Essay');if(acakSoal){pg=shuffle(pg);es=shuffle(es);}if(acakOpsi)pg.forEach(s=>s.opsi=shuffle(s.opsi));return[...pg,...es];}
-
 /* ═══════════════════════ DATA DEMO ═══════════════════════ */
 function DEMO(){const now=Date.now(),H=3600e3,D=24*H;const iso=t=>new Date(t).toISOString();
 const mtk=[
@@ -278,536 +273,471 @@ H_(9,'IPA7C','IPA Terpadu','Galih Saputra','7C','2301',80,0,{"Soal_5":"Fotosinte
 H_(10,'IPA7C','IPA Terpadu','Maya Sari','7C','2302',60,1,{"Soal_5":"Tumbuhan memasak makanan dengan cahaya matahari."},null)],
 log:[{id:9001,waktu:iso(now-2*H),username:'agus',role:'guru',aksi:'BUAT_PAKET',detail:'Token MTK8A'},{id:9002,waktu:iso(now-2*H),username:'hasan',role:'guru',aksi:'BUAT_PAKET',detail:'Token PAI8B'},{id:9003,waktu:iso(now-1*H),username:'admin',role:'admin',aksi:'LOGIN',detail:'Admin masuk panel'}],
 images:{}};}
-
 /* ═══════════════════════ SQL SUPABASE v5.2 (AMAN) ═══════════════════════ */
 const SQL_SCHEMA=`-- ══════════════════════════════════════════════════════════════
 -- CBT PRO v5.2 · Skema + Fungsi Aman Supabase
 -- Jalankan SEKALI di SQL Editor. Aman dijalankan ulang (idempotent).
--- Juga berfungsi sebagai UPGRADE dari skema v5.0 lama:
--- policy anon_all lama dicabut, tabel dikunci, fungsi RPC dibuat.
--- KEAMANAN:
---  · Tabel sensitif TIDAK bisa diakses langsung oleh anon (revoked)
---  · Siswa hanya lewat RPC: soal dikirim TANPA kunci jawaban
---  · Koreksi PG dilakukan di SERVER (tidak bisa dicurangi)
---  · Login panel divalidasi server + token sesi HMAC-SHA256 (4 jam)
+-- Juga berfungsi sebagai UPGRADE dari skema v5.0 lama.
 -- ══════════════════════════════════════════════════════════════
 create extension if not exists pgcrypto;
-
 create table if not exists public.users (
-  id bigint primary key,
-  username text unique not null,
-  password_hash text not null,
-  nama_lengkap text not null,
-  mapel text default '',
-  role text not null check (role in ('admin','pengawas','guru')),
-  created_at timestamptz default now()
+id bigint primary key,
+username text unique not null,
+password_hash text not null,
+nama_lengkap text not null,
+mapel text default '',
+role text not null check (role in ('admin','pengawas','guru')),
+created_at timestamptz default now()
 );
 create table if not exists public.bank_soal (
-  id bigint primary key,
-  guru_id bigint references public.users(id) on delete cascade,
-  nama_bank text not null,
-  mapel text not null,
-  soal_json jsonb default '[]',
-  created_at timestamptz default now()
+id bigint primary key,
+guru_id bigint references public.users(id) on delete cascade,
+nama_bank text not null,
+mapel text not null,
+soal_json jsonb default '[]',
+created_at timestamptz default now()
 );
 create table if not exists public.paket (
-  token text primary key,
-  mapel text not null,
-  waktu_mulai timestamptz not null,
-  waktu_selesai timestamptz not null,
-  durasi_menit int default 90,
-  soal_json jsonb default '[]',
-  guru_id bigint,
-  keterangan text default '',
-  acak_soal boolean default true,
-  acak_opsi boolean default true,
-  mode_offline boolean default false,
-  created_at timestamptz default now()
+token text primary key,
+mapel text not null,
+waktu_mulai timestamptz not null,
+waktu_selesai timestamptz not null,
+durasi_menit int default 90,
+soal_json jsonb default '[]',
+guru_id bigint,
+keterangan text default '',
+acak_soal boolean default true,
+acak_opsi boolean default true,
+mode_offline boolean default false,
+created_at timestamptz default now()
 );
 create table if not exists public.hasil (
-  id bigint primary key,
-  waktu timestamptz default now(),
-  mapel text, nama text, kelas text, nis text,
-  skor_pg numeric default 0,
-  skor_essay numeric,
-  jawaban_essay jsonb default '{}',
-  nilai_essay jsonb,
-  detail_jawaban jsonb,
-  pelanggaran int default 0,
-  token text
+id bigint primary key,
+waktu timestamptz default now(),
+mapel text, nama text, kelas text, nis text,
+skor_pg numeric default 0,
+skor_essay numeric,
+jawaban_essay jsonb default '{}',
+nilai_essay jsonb,
+detail_jawaban jsonb,
+pelanggaran int default 0,
+token text
 );
 create unique index if not exists hasil_uniq on public.hasil(token, nis, mapel);
 create table if not exists public.pengaturan (key text primary key, value text);
 create table if not exists public.log_aktivitas (
-  id bigint primary key,
-  waktu timestamptz default now(),
-  username text, role text, aksi text, detail text
+id bigint primary key,
+waktu timestamptz default now(),
+username text, role text, aksi text, detail text
 );
--- Rahasia HMAC — TIDAK BISA dibaca klien
 create table if not exists public.app_secret (
-  id boolean primary key default true check (id),
-  secret text not null
+id boolean primary key default true check (id),
+secret text not null
 );
 insert into public.app_secret (id, secret)
 select true, encode(gen_random_bytes(32),'hex')
 where not exists (select 1 from public.app_secret);
-
--- ── RLS aktif + cabut akses langsung anon dari tabel sensitif ──
 do $$
 declare t text;
 begin
-  foreach t in array array['users','bank_soal','paket','hasil','pengaturan','log_aktivitas','app_secret'] loop
-    execute format('alter table public.%I enable row level security', t);
-  end loop;
-  foreach t in array array['users','bank_soal','paket','hasil','log_aktivitas'] loop
-    execute format('drop policy if exists anon_all on public.%I', t);
-  end loop;
+foreach t in array array['users','bank_soal','paket','hasil','pengaturan','log_aktivitas','app_secret'] loop
+execute format('alter table public.%I enable row level security', t);
+end loop;
+foreach t in array array['users','bank_soal','paket','hasil','log_aktivitas'] loop
+execute format('drop policy if exists anon_all on public.%I', t);
+end loop;
 end $$;
 revoke all on public.users, public.bank_soal, public.paket, public.hasil,
-  public.log_aktivitas, public.app_secret from anon, authenticated;
+public.log_aktivitas, public.app_secret from anon, authenticated;
 revoke insert, update, delete on public.pengaturan from anon, authenticated;
 grant select on public.pengaturan to anon;
-
--- ── Storage gambar soal (publik) ──
 insert into storage.buckets (id, name, public) values ('gambar','gambar', true)
 on conflict (id) do nothing;
 drop policy if exists gambar_anon_all on storage.objects;
 create policy gambar_anon_all on storage.objects for all to anon
 using (bucket_id = 'gambar') with check (bucket_id = 'gambar');
-
--- ── Pengaturan & akun awal ──
 insert into public.pengaturan (key, value) values
- ('nama_sekolah','SMP Negeri 1 Amuntai'),
- ('nama_ujian','Penilaian Sumatif Akhir Semester Ganjil'),
- ('kkm','75'), ('durasi_default','90'),
- ('daftar_kelas','7A,7B,7C,8A,8B,8C,8D,9A,9B,9C,9D,9E')
+('nama_sekolah','SMP Negeri 1 Amuntai'),
+('nama_ujian','Penilaian Sumatif Akhir Semester Ganjil'),
+('kkm','75'), ('durasi_default','90'),
+('daftar_kelas','7A,7B,7C,8A,8B,8C,8D,9A,9B,9C,9D,9E')
 on conflict (key) do nothing;
-
 insert into public.users (id, username, password_hash, nama_lengkap, mapel, role) values
- (1,'admin','plain:adminagus','Administrator CBT','-','admin'),
- (2,'pengawas','plain:pengawas123','Pengawas Ujian','-','pengawas'),
- (3,'agus','plain:guru123','Agus Santoso, S.Pd','Matematika','guru'),
- (4,'hasan','plain:hasan123','H. Hasan Basri, S.Ag','Pendidikan Agama Islam','guru')
+(1,'admin','plain:adminagus','Administrator CBT','-','admin'),
+(2,'pengawas','plain:pengawas123','Pengawas Ujian','-','pengawas'),
+(3,'agus','plain:guru123','Agus Santoso, S.Pd','Matematika','guru'),
+(4,'hasan','plain:hasan123','H. Hasan Basri, S.Ag','Pendidikan Agama Islam','guru')
 on conflict (id) do nothing;
-
--- ── Helper internal (tidak dipanggil klien) ──
 create or replace function public.new_id() returns bigint language sql volatile as $$
-  select (floor(extract(epoch from clock_timestamp()) * 100))::bigint + (floor(random()*100))::int
+select (floor(extract(epoch from clock_timestamp()) * 100))::bigint + (floor(random()*100))::int
 $$;
 revoke execute on function public.new_id() from public, anon;
-
 create or replace function public.cocok_pass(p_hash text, p_input text) returns boolean
 language plpgsql security definer set search_path = public as $$
 begin
-  if p_hash like 'sha256:%' then
-    return p_hash = 'sha256:' || encode(digest(p_input,'sha256'),'hex');
-  elsif p_hash like 'plain:%' then
-    return p_hash = 'plain:' || p_input;
-  else
-    return p_hash = p_input;
-  end if;
+if p_hash like 'sha256:%' then
+return p_hash = 'sha256:' || encode(digest(p_input,'sha256'),'hex');
+elsif p_hash like 'plain:%' then
+return p_hash = 'plain:' || p_input;
+else
+return p_hash = p_input;
+end if;
 end $$;
 revoke execute on function public.cocok_pass(text,text) from public, anon;
-
 create or replace function public.buat_token(p_uid bigint, p_role text)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare v_secret text; v_exp bigint; v_payload text;
 begin
-  select secret into v_secret from public.app_secret;
-  v_exp := (extract(epoch from now()) + 14400)::bigint; -- 4 jam
-  v_payload := p_uid || ':' || p_role || ':' || v_exp;
-  return jsonb_build_object('token', v_payload || '.' || encode(hmac(v_payload, v_secret, 'sha256'),'hex'), 'exp', v_exp*1000);
+select secret into v_secret from public.app_secret;
+v_exp := (extract(epoch from now()) + 14400)::bigint;
+v_payload := p_uid || ':' || p_role || ':' || v_exp;
+return jsonb_build_object('token', v_payload || '.' || encode(hmac(v_payload, v_secret, 'sha256'),'hex'), 'exp', v_exp*1000);
 end $$;
 revoke execute on function public.buat_token(bigint,text) from public, anon;
-
 create or replace function public._auth(p_token text)
 returns table(user_id bigint, role text)
 language plpgsql security definer set search_path = public as $$
 declare v_secret text; v_parts text[]; v_exp bigint;
 begin
-  if p_token is null or position('.' in coalesce(p_token,'')) = 0 then
-    raise exception 'Sesi tidak valid. Silakan login ulang.';
-  end if;
-  v_parts := string_to_array(p_token, '.');
-  if array_length(v_parts,1) <> 2 then raise exception 'Sesi tidak valid. Silakan login ulang.'; end if;
-  select secret into v_secret from public.app_secret;
-  if encode(hmac(v_parts[1], v_secret, 'sha256'),'hex') <> v_parts[2] then
-    raise exception 'Sesi tidak valid. Silakan login ulang.';
-  end if;
-  v_exp := split_part(v_parts[1],':',3)::bigint;
-  if v_exp < extract(epoch from now())::bigint then
-    raise exception 'Sesi berakhir. Silakan login ulang.';
-  end if;
-  user_id := split_part(v_parts[1],':',1)::bigint;
-  role := split_part(v_parts[1],':',2);
-  return next;
+if p_token is null or position('.' in coalesce(p_token,'')) = 0 then
+raise exception 'Sesi tidak valid. Silakan login ulang.';
+end if;
+v_parts := string_to_array(p_token, '.');
+if array_length(v_parts,1) <> 2 then raise exception 'Sesi tidak valid. Silakan login ulang.'; end if;
+select secret into v_secret from public.app_secret;
+if encode(hmac(v_parts[1], v_secret, 'sha256'),'hex') <> v_parts[2] then
+raise exception 'Sesi tidak valid. Silakan login ulang.';
+end if;
+v_exp := split_part(v_parts[1],':',3)::bigint;
+if v_exp < extract(epoch from now())::bigint then
+raise exception 'Sesi berakhir. Silakan login ulang.';
+end if;
+user_id := split_part(v_parts[1],':',1)::bigint;
+role := split_part(v_parts[1],':',2);
+return next;
 end $$;
 revoke execute on function public._auth(text) from public, anon;
-
--- ── LOGIN PETUGAS/GURU (validasi server + upgrade hash otomatis) ──
 create or replace function public.login_petugas(p_username text, p_password text)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare u public.users%rowtype; v_ok boolean := false; v_tok jsonb;
 begin
-  if coalesce(trim(p_username),'') <> '' then
-    select * into u from public.users where username = trim(p_username) and role = 'guru';
-    if not found then return jsonb_build_object('status','error','msg','Username atau password salah!'); end if;
-    v_ok := public.cocok_pass(u.password_hash, p_password);
-  else
-    for u in select * from public.users where role in ('admin','pengawas') loop
-      if public.cocok_pass(u.password_hash, p_password) then v_ok := true; exit; end if;
-    end loop;
-  end if;
-  if not v_ok then return jsonb_build_object('status','error','msg', case when coalesce(trim(p_username),'')='' then 'Password salah!' else 'Username atau password salah!' end); end if;
-  if u.password_hash like 'plain:%' then
-    update public.users set password_hash = 'sha256:' || encode(digest(p_password,'sha256'),'hex') where id = u.id;
-  end if;
-  v_tok := public.buat_token(u.id, u.role);
-  insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
-  values (public.new_id(), now(), u.username, u.role, 'LOGIN', u.role || ' masuk panel');
-  return jsonb_build_object('status','success',
-    'user', jsonb_build_object('id',u.id,'username',u.username,'nama',u.nama_lengkap,'mapel',coalesce(u.mapel,''),'role',u.role),
-    'token', v_tok->>'token', 'exp', v_tok->>'exp');
+if coalesce(trim(p_username),'') <> '' then
+select * into u from public.users where username = trim(p_username) and role = 'guru';
+if not found then return jsonb_build_object('status','error','msg','Username atau password salah!'); end if;
+v_ok := public.cocok_pass(u.password_hash, p_password);
+else
+for u in select * from public.users where role in ('admin','pengawas') loop
+if public.cocok_pass(u.password_hash, p_password) then v_ok := true; exit; end if;
+end loop;
+end if;
+if not v_ok then return jsonb_build_object('status','error','msg', case when coalesce(trim(p_username),'')='' then 'Password salah!' else 'Username atau password salah!' end); end if;
+if u.password_hash like 'plain:%' then
+update public.users set password_hash = 'sha256:' || encode(digest(p_password,'sha256'),'hex') where id = u.id;
+end if;
+v_tok := public.buat_token(u.id, u.role);
+insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
+values (public.new_id(), now(), u.username, u.role, 'LOGIN', u.role || ' masuk panel');
+return jsonb_build_object('status','success',
+'user', jsonb_build_object('id',u.id,'username',u.username,'nama',u.nama_lengkap,'mapel',coalesce(u.mapel,''),'role',u.role),
+'token', v_tok->>'token', 'exp', v_tok->>'exp');
 end $$;
 grant execute on function public.login_petugas(text,text) to anon;
-
--- ── SISWA: ambil paket TANPA kunci jawaban ──
 create or replace function public.ambil_paket_siswa(p_token text)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare p public.paket%rowtype; v_soal jsonb;
 begin
-  select * into p from public.paket
-  where token = upper(regexp_replace(coalesce(p_token,''),'[^A-Za-z0-9]','','g'));
-  if not found then raise exception 'Token tidak ditemukan. Periksa kembali.'; end if;
-  if now() < p.waktu_mulai then
-    raise exception 'Ujian belum dimulai. Mulai: %', to_char(p.waktu_mulai at time zone 'Asia/Makassar','DD Mon YYYY HH24:MI');
-  end if;
-  if now() > p.waktu_selesai then raise exception 'Waktu ujian untuk token ini sudah berakhir.'; end if;
-  select coalesce(jsonb_agg(case when coalesce(elem->>'tipe','PG') = 'PG' then elem - 'jawaban' else elem end),'[]'::jsonb)
-  into v_soal from jsonb_array_elements(p.soal_json) elem;
-  if jsonb_array_length(v_soal) = 0 then raise exception 'Paket ini belum memiliki soal.'; end if;
-  return jsonb_build_object(
-    'token',p.token,'mapel',p.mapel,'durasi_menit',p.durasi_menit,
-    'keterangan',coalesce(p.keterangan,''),'acak_soal',p.acak_soal,'acak_opsi',p.acak_opsi,
-    'mode_offline',coalesce(p.mode_offline,false),'waktu_mulai',p.waktu_mulai,'waktu_selesai',p.waktu_selesai,
-    'soal_json',v_soal);
+select * into p from public.paket
+where token = upper(regexp_replace(coalesce(p_token,''),'[^A-Za-z0-9]','','g'));
+if not found then raise exception 'Token tidak ditemukan. Periksa kembali.'; end if;
+if now() < p.waktu_mulai then
+raise exception 'Ujian belum dimulai. Mulai: %', to_char(p.waktu_mulai at time zone 'Asia/Makassar','DD Mon YYYY HH24:MI');
+end if;
+if now() > p.waktu_selesai then raise exception 'Waktu ujian untuk token ini sudah berakhir.'; end if;
+select coalesce(jsonb_agg(case when coalesce(elem->>'tipe','PG') = 'PG' then elem - 'jawaban' else elem end),'[]'::jsonb)
+into v_soal from jsonb_array_elements(p.soal_json) elem;
+if jsonb_array_length(v_soal) = 0 then raise exception 'Paket ini belum memiliki soal.'; end if;
+return jsonb_build_object(
+'token',p.token,'mapel',p.mapel,'durasi_menit',p.durasi_menit,
+'keterangan',coalesce(p.keterangan,''),'acak_soal',p.acak_soal,'acak_opsi',p.acak_opsi,
+'mode_offline',coalesce(p.mode_offline,false),'waktu_mulai',p.waktu_mulai,'waktu_selesai',p.waktu_selesai,
+'soal_json',v_soal);
 end $$;
 grant execute on function public.ambil_paket_siswa(text) to anon;
-
--- ── PUBLIK: jadwal ringan (tanpa soal) ──
 create or replace function public.jadwal_publik()
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare v_out jsonb;
 begin
-  select coalesce(jsonb_agg(jsonb_build_object(
-    'token',token,'mapel',mapel,'waktu_mulai',waktu_mulai,'waktu_selesai',waktu_selesai,
-    'durasi_menit',durasi_menit,'keterangan',keterangan,'acak_soal',acak_soal,'acak_opsi',acak_opsi,
-    'mode_offline',coalesce(mode_offline,false),'guru_id',guru_id,'created_at',created_at)
-    order by waktu_mulai desc),'[]'::jsonb)
-  into v_out from public.paket;
-  return v_out;
+select coalesce(jsonb_agg(jsonb_build_object(
+'token',token,'mapel',mapel,'waktu_mulai',waktu_mulai,'waktu_selesai',waktu_selesai,
+'durasi_menit',durasi_menit,'keterangan',keterangan,'acak_soal',acak_soal,'acak_opsi',acak_opsi,
+'mode_offline',coalesce(mode_offline,false),'guru_id',guru_id,'created_at',created_at)
+order by waktu_mulai desc),'[]'::jsonb)
+into v_out from public.paket;
+return v_out;
 end $$;
 grant execute on function public.jadwal_publik() to anon;
-
--- ── SISWA: submit + KOREKSI PG DI SERVER ──
 create or replace function public.submit_jawaban_siswa(
-  p_token text, p_nama text, p_kelas text, p_nis text,
-  p_jawaban jsonb, p_pelanggaran int default 0)
+p_token text, p_nama text, p_kelas text, p_nis text,
+p_jawaban jsonb, p_pelanggaran int default 0)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare p public.paket%rowtype; elem jsonb; i int := 0;
-        v_skor numeric := 0; v_essay jsonb := '{}'::jsonb; v_jwb text;
+v_skor numeric := 0; v_essay jsonb := '{}'::jsonb; v_jwb text;
 begin
-  select * into p from public.paket
-  where token = upper(regexp_replace(coalesce(p_token,''),'[^A-Za-z0-9]','','g'));
-  if not found then raise exception 'Paket tidak ditemukan.'; end if;
-  for elem in select * from jsonb_array_elements(p.soal_json) loop
-    v_jwb := coalesce(p_jawaban->>i::text,'');
-    if coalesce(elem->>'tipe','PG') = 'PG' then
-      if trim(v_jwb) <> '' and trim(v_jwb) = trim(coalesce(elem->>'jawaban','')) then
-        v_skor := v_skor + coalesce((elem->>'poin')::numeric, 0);
-      end if;
-    else
-      v_essay := v_essay || jsonb_build_object('Soal_'||(i+1)::text, v_jwb);
-    end if;
-    i := i + 1;
-  end loop;
-  insert into public.hasil (id,waktu,token,mapel,nama,kelas,nis,skor_pg,jawaban_essay,detail_jawaban,pelanggaran)
-  values (public.new_id(), now(), p.token, p.mapel, p_nama, p_kelas, p_nis, v_skor,
-          v_essay, coalesce(p_jawaban,'{}'::jsonb), coalesce(p_pelanggaran,0))
-  on conflict (token,nis,mapel) do update set
-    waktu=now(), skor_pg=excluded.skor_pg, jawaban_essay=excluded.jawaban_essay,
-    detail_jawaban=excluded.detail_jawaban, pelanggaran=excluded.pelanggaran;
-  insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
-  values (public.new_id(), now(), p_nis, 'siswa', 'SUBMIT', p_nama||' · '||p.token||' · PG '||v_skor);
-  return jsonb_build_object('status','success','skor_pg',v_skor);
+select * into p from public.paket
+where token = upper(regexp_replace(coalesce(p_token,''),'[^A-Za-z0-9]','','g'));
+if not found then raise exception 'Paket tidak ditemukan.'; end if;
+for elem in select * from jsonb_array_elements(p.soal_json) loop
+v_jwb := coalesce(p_jawaban->>(i::text),'');
+if coalesce(elem->>'tipe','PG') = 'PG' then
+if trim(v_jwb) <> '' and trim(v_jwb) = trim(coalesce(elem->>'jawaban','')) then
+v_skor := v_skor + coalesce((elem->>'poin')::numeric, 0);
+end if;
+else
+v_essay := v_essay || jsonb_build_object('Soal_'||(i+1)::text, v_jwb);
+end if;
+i := i + 1;
+end loop;
+insert into public.hasil (id,waktu,token,mapel,nama,kelas,nis,skor_pg,jawaban_essay,detail_jawaban,pelanggaran)
+values (public.new_id(), now(), p.token, p.mapel, p_nama, p_kelas, p_nis, v_skor,
+v_essay, coalesce(p_jawaban,'{}'::jsonb), coalesce(p_pelanggaran,0))
+on conflict (token,nis,mapel) do update set
+waktu=now(), skor_pg=excluded.skor_pg, jawaban_essay=excluded.jawaban_essay,
+detail_jawaban=excluded.detail_jawaban, pelanggaran=excluded.pelanggaran;
+insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
+values (public.new_id(), now(), p_nis, 'siswa', 'SUBMIT', p_nama||' · '||p.token||' · PG '||v_skor);
+return jsonb_build_object('status','success','skor_pg',v_skor);
 end $$;
 grant execute on function public.submit_jawaban_siswa(text,text,text,text,jsonb,int) to anon;
-
--- ── PANEL: semua operasi Guru/Admin (wajib token HMAC) ──
 create or replace function public.panel(p_op text, p_payload jsonb default '{}'::jsonb, p_token text default '')
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
-  v_uid bigint; v_role text; v_out jsonb := '{}'::jsonb; v_tmp jsonb; v_id bigint; v_tok text;
+v_uid bigint; v_role text; v_out jsonb := '{}'::jsonb; v_tmp jsonb; v_id bigint; v_tok text;
 begin
-  if p_op = 'seed' and (select count(*) from public.users) = 0 then
-    v_uid := 0; v_role := 'admin';
-  else
-    select a.user_id, a.role into v_uid, v_role from public._auth(p_token) a;
-    if v_role not in ('admin','pengawas','guru') then raise exception 'Akses ditolak.'; end if;
-  end if;
-
-  case p_op
-
-  when 'guru_list' then
-    if v_role not in ('admin','pengawas') then raise exception 'Akses ditolak.'; end if;
-    select coalesce(jsonb_agg(jsonb_build_object('id',u.id,'username',u.username,'nama_lengkap',u.nama_lengkap,
-      'mapel',u.mapel,'role',u.role,'created_at',u.created_at,
-      'jumlah_bank',(select count(*) from public.bank_soal b where b.guru_id = u.id)) order by u.created_at desc),'[]'::jsonb)
-    into v_out from public.users u where u.role = 'guru';
-
-  when 'guru_save' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    if p_payload->>'id' is null then
-      if exists(select 1 from public.users where username = p_payload->>'username') then
-        raise exception 'Username sudah digunakan!';
-      end if;
-      insert into public.users (id,username,password_hash,nama_lengkap,mapel,role)
-      values (public.new_id(), p_payload->>'username',
-        'sha256:'||encode(digest(p_payload->>'password','sha256'),'hex'),
-        p_payload->>'nama', p_payload->>'mapel', 'guru');
-    else
-      update public.users set nama_lengkap = p_payload->>'nama', mapel = p_payload->>'mapel',
-        password_hash = case when coalesce(p_payload->>'password','') <> ''
-          then 'sha256:'||encode(digest(p_payload->>'password','sha256'),'hex') else password_hash end
-      where id = (p_payload->>'id')::bigint and role = 'guru';
-    end if;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'guru_del' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    select jsonb_build_object('user', row_to_json(u)::jsonb,
-      'banks', coalesce((select jsonb_agg(row_to_json(b)::jsonb) from public.bank_soal b
-                         where b.guru_id = (p_payload->>'id')::bigint),'[]'::jsonb))
-    into v_out from public.users u where u.id = (p_payload->>'id')::bigint and u.role='guru';
-    delete from public.users where id = (p_payload->>'id')::bigint and role='guru';
-
-  when 'guru_restore' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    insert into public.users select * from jsonb_populate_record(null::public.users, p_payload->'user') on conflict (id) do nothing;
-    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(p_payload->'banks','[]'::jsonb)) on conflict (id) do nothing;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'bank_list' then
-    if v_role = 'guru' then
-      select coalesce(jsonb_agg(row_to_json(b)::jsonb order by b.created_at desc),'[]'::jsonb)
-      into v_out from public.bank_soal b where b.guru_id = v_uid;
-    else
-      select coalesce(jsonb_agg(row_to_json(b)::jsonb order by b.created_at desc),'[]'::jsonb)
-      into v_out from public.bank_soal b;
-    end if;
-
-  when 'bank_get' then
-    select row_to_json(b)::jsonb into v_out from public.bank_soal b where b.id = (p_payload->>'id')::bigint;
-    if v_out is null then raise exception 'Bank tidak ditemukan.'; end if;
-    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
-
-  when 'bank_save' then
-    v_tmp := p_payload->'row';
-    if v_role = 'guru' then v_tmp := jsonb_set(v_tmp,'{guru_id}',to_jsonb(v_uid)); end if;
-    if v_tmp->>'id' is null then
-      v_id := public.new_id();
-      insert into public.bank_soal (id,guru_id,nama_bank,mapel,soal_json)
-      values (v_id,(v_tmp->>'guru_id')::bigint,v_tmp->>'nama_bank',v_tmp->>'mapel',coalesce(v_tmp->'soal_json','[]'::jsonb));
-      v_out := jsonb_build_object('id',v_id);
-    else
-      update public.bank_soal set nama_bank=v_tmp->>'nama_bank', mapel=v_tmp->>'mapel', soal_json=coalesce(v_tmp->'soal_json','[]'::jsonb)
-      where id=(v_tmp->>'id')::bigint and (v_role<>'guru' or guru_id=v_uid);
-      v_out := v_tmp;
-    end if;
-
-  when 'bank_del' then
-    select row_to_json(b)::jsonb into v_out from public.bank_soal b where b.id = (p_payload->>'id')::bigint;
-    if v_out is null then raise exception 'Bank tidak ditemukan.'; end if;
-    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
-    delete from public.bank_soal where id = (p_payload->>'id')::bigint;
-
-  when 'bank_restore' then
-    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(p_payload->'rows','[]'::jsonb)) on conflict (id) do nothing;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'paket_list' then
-    if v_role = 'guru' then
-      select coalesce(jsonb_agg(row_to_json(p)::jsonb order by p.waktu_mulai desc),'[]'::jsonb)
-      into v_out from public.paket p where p.guru_id = v_uid;
-    else
-      select coalesce(jsonb_agg(row_to_json(p)::jsonb order by p.waktu_mulai desc),'[]'::jsonb)
-      into v_out from public.paket p;
-    end if;
-
-  when 'paket_get' then
-    select row_to_json(p)::jsonb into v_out from public.paket p where p.token = p_payload->>'token';
-    if v_out is null then raise exception 'Paket tidak ditemukan.'; end if;
-    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
-
-  when 'paket_save' then
-    v_tmp := p_payload->'row';
-    if v_role = 'guru' then v_tmp := jsonb_set(v_tmp,'{guru_id}',to_jsonb(v_uid)); end if;
-    v_tok := v_tmp->>'token';
-    if coalesce(p_payload->>'old_token','') <> '' and p_payload->>'old_token' <> v_tok then
-      if exists(select 1 from public.paket where token = v_tok) then raise exception 'Token sudah digunakan.'; end if;
-      delete from public.paket where token = p_payload->>'old_token' and (v_role<>'guru' or guru_id=v_uid);
-      insert into public.paket select * from jsonb_populate_record(null::public.paket, v_tmp);
-    else
-      if exists(select 1 from public.paket where token = v_tok) then
-        update public.paket set mapel=v_tmp->>'mapel',
-          waktu_mulai=(v_tmp->>'waktu_mulai')::timestamptz, waktu_selesai=(v_tmp->>'waktu_selesai')::timestamptz,
-          durasi_menit=(v_tmp->>'durasi_menit')::int, soal_json=coalesce(v_tmp->'soal_json','[]'::jsonb),
-          keterangan=coalesce(v_tmp->>'keterangan',''),
-          acak_soal=coalesce((v_tmp->>'acak_soal')::boolean,true), acak_opsi=coalesce((v_tmp->>'acak_opsi')::boolean,true),
-          mode_offline=coalesce((v_tmp->>'mode_offline')::boolean,false)
-        where token=v_tok and (v_role<>'guru' or guru_id=v_uid);
-      else
-        insert into public.paket select * from jsonb_populate_record(null::public.paket, v_tmp);
-      end if;
-    end if;
-    v_out := jsonb_build_object('token',v_tok);
-
-  when 'paket_del' then
-    select row_to_json(p)::jsonb into v_out from public.paket p where p.token = p_payload->>'token';
-    if v_out is null then raise exception 'Paket tidak ditemukan.'; end if;
-    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
-    delete from public.paket where token = p_payload->>'token';
-
-  when 'paket_restore' then
-    insert into public.paket select * from jsonb_populate_record(null::public.paket, p_payload->'row') on conflict (token) do nothing;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'hasil_list' then
-    if v_role = 'guru' and jsonb_typeof(coalesce(p_payload->'tokens','null'::jsonb)) <> 'array' then
-      v_out := '[]'::jsonb;
-    elsif jsonb_typeof(coalesce(p_payload->'tokens','null'::jsonb)) = 'array' then
-      if jsonb_array_length(p_payload->'tokens') = 0 then
-        v_out := '[]'::jsonb;
-      elsif coalesce((p_payload->>'light')::boolean,false) then
-        select coalesce(jsonb_agg(jsonb_build_object('id',h.id,'waktu',h.waktu,'token',h.token,'mapel',h.mapel,
-          'nama',h.nama,'kelas',h.kelas,'nis',h.nis,'skor_pg',h.skor_pg,'skor_essay',h.skor_essay,
-          'pelanggaran',h.pelanggaran,'punya_essay',(h.jawaban_essay is not null and h.jawaban_essay <> '{}'::jsonb)) order by h.id desc),'[]'::jsonb)
-        into v_out from public.hasil h where h.token in (select jsonb_array_elements_text(p_payload->'tokens'));
-      else
-        select coalesce(jsonb_agg(row_to_json(h)::jsonb order by h.id desc),'[]'::jsonb)
-        into v_out from public.hasil h where h.token in (select jsonb_array_elements_text(p_payload->'tokens'));
-      end if;
-    elsif coalesce((p_payload->>'light')::boolean,false) then
-      select coalesce(jsonb_agg(jsonb_build_object('id',h.id,'waktu',h.waktu,'token',h.token,'mapel',h.mapel,
-        'nama',h.nama,'kelas',h.kelas,'nis',h.nis,'skor_pg',h.skor_pg,'skor_essay',h.skor_essay,
-        'pelanggaran',h.pelanggaran,'punya_essay',(h.jawaban_essay is not null and h.jawaban_essay <> '{}'::jsonb)) order by h.id desc),'[]'::jsonb)
-      into v_out from public.hasil h;
-    else
-      select coalesce(jsonb_agg(row_to_json(h)::jsonb order by h.id desc),'[]'::jsonb)
-      into v_out from (select * from public.hasil order by id desc limit 1500) h;
-    end if;
-
-  when 'hasil_grade' then
-    if v_role = 'pengawas' then raise exception 'Akses ditolak.'; end if;
-    update public.hasil set nilai_essay = p_payload->'nilai', skor_essay = (p_payload->>'skor')::numeric
-    where id = (p_payload->>'id')::bigint;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'hasil_del' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    select coalesce(jsonb_agg(row_to_json(h)::jsonb),'[]'::jsonb) into v_out
-    from public.hasil h where h.id in (select (jsonb_array_elements_text(p_payload->'ids'))::bigint);
-    delete from public.hasil where id in (select (jsonb_array_elements_text(p_payload->'ids'))::bigint);
-
-  when 'hasil_restore' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(p_payload->'rows','[]'::jsonb))
-    on conflict (token,nis,mapel) do nothing;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'hasil_clear' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    select coalesce(jsonb_agg(row_to_json(h)::jsonb),'[]'::jsonb) into v_out from public.hasil h;
-    delete from public.hasil;
-
-  when 'set_save' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    insert into public.pengaturan (key,value)
-    select k, v from jsonb_each_text(p_payload->'settings') as kv(k,v)
-    on conflict (key) do update set value = excluded.value;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'log_list' then
-    select coalesce(jsonb_agg(jsonb_build_object('waktu',waktu,'username',username,'role',role,'aksi',aksi,'detail',detail) order by id desc),'[]'::jsonb)
-    into v_out from (select * from public.log_aktivitas order by id desc limit coalesce((p_payload->>'limit')::int,30)) x;
-
-  when 'log_add' then
-    insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
-    values (public.new_id(), now(), (select username from public.users where id=v_uid), v_role,
-            p_payload->>'aksi', coalesce(p_payload->>'detail',''));
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'log_clear' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    delete from public.log_aktivitas;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'backup' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    select jsonb_build_object('app','CBT PRO','version',5,'exported_at',now(),
-      'data', jsonb_build_object(
-        'users',(select coalesce(jsonb_agg(row_to_json(u)),'[]'::jsonb) from public.users u),
-        'bank_soal',(select coalesce(jsonb_agg(row_to_json(b)),'[]'::jsonb) from public.bank_soal b),
-        'paket',(select coalesce(jsonb_agg(row_to_json(p)),'[]'::jsonb) from public.paket p),
-        'hasil',(select coalesce(jsonb_agg(row_to_json(h)),'[]'::jsonb) from public.hasil h),
-        'pengaturan',(select coalesce(jsonb_object_agg(key,value),'{}'::jsonb) from public.pengaturan),
-        'log_aktivitas',(select coalesce(jsonb_agg(row_to_json(l)),'[]'::jsonb) from public.log_aktivitas l)))
-    into v_out;
-
-  when 'restore' then
-    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
-    v_tmp := p_payload->'data';
-    if v_tmp is null or v_tmp->'users' is null or v_tmp->'paket' is null then raise exception 'Format backup tidak valid.'; end if;
-    delete from public.hasil; delete from public.log_aktivitas; delete from public.bank_soal;
-    delete from public.paket; delete from public.users;
-    insert into public.users select * from jsonb_populate_recordset(null::public.users, v_tmp->'users');
-    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(v_tmp->'bank_soal','[]'::jsonb));
-    insert into public.paket select * from jsonb_populate_recordset(null::public.paket, v_tmp->'paket');
-    insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(v_tmp->'hasil','[]'::jsonb));
-    insert into public.log_aktivitas select * from jsonb_populate_recordset(null::public.log_aktivitas, coalesce(v_tmp->'log_aktivitas','[]'::jsonb));
-    insert into public.pengaturan (key,value) select k,v from jsonb_each_text(coalesce(v_tmp->'pengaturan','{}'::jsonb)) as kv(k,v)
-      on conflict (key) do update set value = excluded.value;
-    v_out := '{"ok":true}'::jsonb;
-
-  when 'seed' then
-    if (select count(*) from public.users) > 0 and v_role <> 'admin' then
-      raise exception 'Login sebagai admin untuk memuat data demo.';
-    end if;
-    v_tmp := p_payload->'data';
-    insert into public.users select * from jsonb_populate_recordset(null::public.users, v_tmp->'users') on conflict (id) do nothing;
-    insert into public.pengaturan (key,value) select k,v from jsonb_each_text(coalesce(v_tmp->'pengaturan','{}'::jsonb)) as kv(k,v) on conflict (key) do nothing;
-    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(v_tmp->'bank_soal','[]'::jsonb)) on conflict (id) do nothing;
-    insert into public.paket select * from jsonb_populate_recordset(null::public.paket, coalesce(v_tmp->'paket','[]'::jsonb))
-      on conflict (token) do update set mapel=excluded.mapel, waktu_mulai=excluded.waktu_mulai, waktu_selesai=excluded.waktu_selesai,
-      durasi_menit=excluded.durasi_menit, soal_json=excluded.soal_json, keterangan=excluded.keterangan,
-      acak_soal=excluded.acak_soal, acak_opsi=excluded.acak_opsi, mode_offline=excluded.mode_offline;
-    insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(v_tmp->'hasil','[]'::jsonb)) on conflict (token,nis,mapel) do nothing;
-    v_out := '{"ok":true}'::jsonb;
-
-  else
-    raise exception 'Operasi tidak dikenal: %', p_op;
-  end case;
-
-  return v_out;
+if p_op = 'seed' and (select count(*) from public.users) = 0 then
+v_uid := 0; v_role := 'admin';
+else
+select a.user_id, a.role into v_uid, v_role from public._auth(p_token) a;
+if v_role not in ('admin','pengawas','guru') then raise exception 'Akses ditolak.'; end if;
+end if;
+case p_op
+when 'guru_list' then
+if v_role not in ('admin','pengawas') then raise exception 'Akses ditolak.'; end if;
+select coalesce(jsonb_agg(jsonb_build_object('id',u.id,'username',u.username,'nama_lengkap',u.nama_lengkap,
+'mapel',u.mapel,'role',u.role,'created_at',u.created_at,
+'jumlah_bank',(select count(*) from public.bank_soal b where b.guru_id = u.id)) order by u.created_at desc),'[]'::jsonb)
+into v_out from public.users u where u.role = 'guru';
+when 'guru_save' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+if p_payload->>'id' is null then
+if exists(select 1 from public.users where username = p_payload->>'username') then
+raise exception 'Username sudah digunakan!';
+end if;
+insert into public.users (id,username,password_hash,nama_lengkap,mapel,role)
+values (public.new_id(), p_payload->>'username',
+'sha256:'||encode(digest(p_payload->>'password','sha256'),'hex'),
+p_payload->>'nama', p_payload->>'mapel', 'guru');
+else
+update public.users set nama_lengkap = p_payload->>'nama', mapel = p_payload->>'mapel',
+password_hash = case when coalesce(p_payload->>'password','') <> ''
+then 'sha256:'||encode(digest(p_payload->>'password','sha256'),'hex') else password_hash end
+where id = (p_payload->>'id')::bigint and role = 'guru';
+end if;
+v_out := '{"ok":true}'::jsonb;
+when 'guru_del' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+select jsonb_build_object('user', row_to_json(u)::jsonb,
+'banks', coalesce((select jsonb_agg(row_to_json(b)::jsonb) from public.bank_soal b
+where b.guru_id = (p_payload->>'id')::bigint),'[]'::jsonb))
+into v_out from public.users u where u.id = (p_payload->>'id')::bigint and u.role='guru';
+delete from public.users where id = (p_payload->>'id')::bigint and role='guru';
+when 'guru_restore' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+insert into public.users select * from jsonb_populate_record(null::public.users, p_payload->'user') on conflict (id) do nothing;
+insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(p_payload->'banks','[]'::jsonb)) on conflict (id) do nothing;
+v_out := '{"ok":true}'::jsonb;
+when 'bank_list' then
+if v_role = 'guru' then
+select coalesce(jsonb_agg(row_to_json(b)::jsonb order by b.created_at desc),'[]'::jsonb)
+into v_out from public.bank_soal b where b.guru_id = v_uid;
+else
+select coalesce(jsonb_agg(row_to_json(b)::jsonb order by b.created_at desc),'[]'::jsonb)
+into v_out from public.bank_soal b;
+end if;
+when 'bank_get' then
+select row_to_json(b)::jsonb into v_out from public.bank_soal b where b.id = (p_payload->>'id')::bigint;
+if v_out is null then raise exception 'Bank tidak ditemukan.'; end if;
+if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+when 'bank_save' then
+v_tmp := p_payload->'row';
+if v_role = 'guru' then v_tmp := jsonb_set(v_tmp,'{guru_id}',to_jsonb(v_uid)); end if;
+if v_tmp->>'id' is null then
+v_id := public.new_id();
+insert into public.bank_soal (id,guru_id,nama_bank,mapel,soal_json)
+values (v_id,(v_tmp->>'guru_id')::bigint,v_tmp->>'nama_bank',v_tmp->>'mapel',coalesce(v_tmp->'soal_json','[]'::jsonb));
+v_out := jsonb_build_object('id',v_id);
+else
+update public.bank_soal set nama_bank=v_tmp->>'nama_bank', mapel=v_tmp->>'mapel', soal_json=coalesce(v_tmp->'soal_json','[]'::jsonb)
+where id=(v_tmp->>'id')::bigint and (v_role<>'guru' or guru_id=v_uid);
+v_out := v_tmp;
+end if;
+when 'bank_del' then
+select row_to_json(b)::jsonb into v_out from public.bank_soal b where b.id = (p_payload->>'id')::bigint;
+if v_out is null then raise exception 'Bank tidak ditemukan.'; end if;
+if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+delete from public.bank_soal where id = (p_payload->>'id')::bigint;
+when 'bank_restore' then
+insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(p_payload->'rows','[]'::jsonb)) on conflict (id) do nothing;
+v_out := '{"ok":true}'::jsonb;
+when 'paket_list' then
+if v_role = 'guru' then
+select coalesce(jsonb_agg(row_to_json(p)::jsonb order by p.waktu_mulai desc),'[]'::jsonb)
+into v_out from public.paket p where p.guru_id = v_uid;
+else
+select coalesce(jsonb_agg(row_to_json(p)::jsonb order by p.waktu_mulai desc),'[]'::jsonb)
+into v_out from public.paket p;
+end if;
+when 'paket_get' then
+select row_to_json(p)::jsonb into v_out from public.paket p where p.token = p_payload->>'token';
+if v_out is null then raise exception 'Paket tidak ditemukan.'; end if;
+if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+when 'paket_save' then
+v_tmp := p_payload->'row';
+if v_role = 'guru' then v_tmp := jsonb_set(v_tmp,'{guru_id}',to_jsonb(v_uid)); end if;
+v_tok := v_tmp->>'token';
+if coalesce(p_payload->>'old_token','') <> '' and p_payload->>'old_token' <> v_tok then
+if exists(select 1 from public.paket where token = v_tok) then raise exception 'Token sudah digunakan.'; end if;
+delete from public.paket where token = p_payload->>'old_token' and (v_role<>'guru' or guru_id=v_uid);
+insert into public.paket select * from jsonb_populate_record(null::public.paket, v_tmp);
+else
+if exists(select 1 from public.paket where token = v_tok) then
+update public.paket set mapel=v_tmp->>'mapel',
+waktu_mulai=(v_tmp->>'waktu_mulai')::timestamptz, waktu_selesai=(v_tmp->>'waktu_selesai')::timestamptz,
+durasi_menit=(v_tmp->>'durasi_menit')::int, soal_json=coalesce(v_tmp->'soal_json','[]'::jsonb),
+keterangan=coalesce(v_tmp->>'keterangan',''),
+acak_soal=coalesce((v_tmp->>'acak_soal')::boolean,true), acak_opsi=coalesce((v_tmp->>'acak_opsi')::boolean,true),
+mode_offline=coalesce((v_tmp->>'mode_offline')::boolean,false)
+where token=v_tok and (v_role<>'guru' or guru_id=v_uid);
+else
+insert into public.paket select * from jsonb_populate_record(null::public.paket, v_tmp);
+end if;
+end if;
+v_out := jsonb_build_object('token',v_tok);
+when 'paket_del' then
+select row_to_json(p)::jsonb into v_out from public.paket p where p.token = p_payload->>'token';
+if v_out is null then raise exception 'Paket tidak ditemukan.'; end if;
+if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+delete from public.paket where token = p_payload->>'token';
+when 'paket_restore' then
+insert into public.paket select * from jsonb_populate_record(null::public.paket, p_payload->'row') on conflict (token) do nothing;
+v_out := '{"ok":true}'::jsonb;
+when 'hasil_list' then
+if v_role = 'guru' and jsonb_typeof(coalesce(p_payload->'tokens','null'::jsonb)) <> 'array' then
+v_out := '[]'::jsonb;
+elsif jsonb_typeof(coalesce(p_payload->'tokens','null'::jsonb)) = 'array' then
+if jsonb_array_length(p_payload->'tokens') = 0 then
+v_out := '[]'::jsonb;
+elsif coalesce((p_payload->>'light')::boolean,false) then
+select coalesce(jsonb_agg(jsonb_build_object('id',h.id,'waktu',h.waktu,'token',h.token,'mapel',h.mapel,
+'nama',h.nama,'kelas',h.kelas,'nis',h.nis,'skor_pg',h.skor_pg,'skor_essay',h.skor_essay,
+'pelanggaran',h.pelanggaran,'punya_essay',(h.jawaban_essay is not null and h.jawaban_essay <> '{}'::jsonb)) order by h.id desc),'[]'::jsonb)
+into v_out from public.hasil h where h.token in (select jsonb_array_elements_text(p_payload->'tokens'));
+else
+select coalesce(jsonb_agg(row_to_json(h)::jsonb order by h.id desc),'[]'::jsonb)
+into v_out from public.hasil h where h.token in (select jsonb_array_elements_text(p_payload->'tokens'));
+end if;
+elsif coalesce((p_payload->>'light')::boolean,false) then
+select coalesce(jsonb_agg(jsonb_build_object('id',h.id,'waktu',h.waktu,'token',h.token,'mapel',h.mapel,
+'nama',h.nama,'kelas',h.kelas,'nis',h.nis,'skor_pg',h.skor_pg,'skor_essay',h.skor_essay,
+'pelanggaran',h.pelanggaran,'punya_essay',(h.jawaban_essay is not null and h.jawaban_essay <> '{}'::jsonb)) order by h.id desc),'[]'::jsonb)
+into v_out from public.hasil h;
+else
+select coalesce(jsonb_agg(row_to_json(h)::jsonb order by h.id desc),'[]'::jsonb)
+into v_out from (select * from public.hasil order by id desc limit 1500) h;
+end if;
+when 'hasil_grade' then
+if v_role = 'pengawas' then raise exception 'Akses ditolak.'; end if;
+update public.hasil set nilai_essay = p_payload->'nilai', skor_essay = (p_payload->>'skor')::numeric
+where id = (p_payload->>'id')::bigint;
+v_out := '{"ok":true}'::jsonb;
+when 'hasil_del' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+select coalesce(jsonb_agg(row_to_json(h)::jsonb),'[]'::jsonb) into v_out
+from public.hasil h where h.id in (select (jsonb_array_elements_text(p_payload->'ids'))::bigint);
+delete from public.hasil where id in (select (jsonb_array_elements_text(p_payload->'ids'))::bigint);
+when 'hasil_restore' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(p_payload->'rows','[]'::jsonb))
+on conflict (token,nis,mapel) do nothing;
+v_out := '{"ok":true}'::jsonb;
+when 'hasil_clear' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+select coalesce(jsonb_agg(row_to_json(h)::jsonb),'[]'::jsonb) into v_out from public.hasil h;
+delete from public.hasil;
+when 'set_save' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+insert into public.pengaturan (key,value)
+select k, v from jsonb_each_text(p_payload->'settings') as kv(k,v)
+on conflict (key) do update set value = excluded.value;
+v_out := '{"ok":true}'::jsonb;
+when 'log_list' then
+select coalesce(jsonb_agg(jsonb_build_object('waktu',waktu,'username',username,'role',role,'aksi',aksi,'detail',detail) order by id desc),'[]'::jsonb)
+into v_out from (select * from public.log_aktivitas order by id desc limit coalesce((p_payload->>'limit')::int,30)) x;
+when 'log_add' then
+insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
+values (public.new_id(), now(), (select username from public.users where id=v_uid), v_role,
+p_payload->>'aksi', coalesce(p_payload->>'detail',''));
+v_out := '{"ok":true}'::jsonb;
+when 'log_clear' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+delete from public.log_aktivitas;
+v_out := '{"ok":true}'::jsonb;
+when 'backup' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+select jsonb_build_object('app','CBT PRO','version',5,'exported_at',now(),
+'data', jsonb_build_object(
+'users',(select coalesce(jsonb_agg(row_to_json(u)),'[]'::jsonb) from public.users u),
+'bank_soal',(select coalesce(jsonb_agg(row_to_json(b)),'[]'::jsonb) from public.bank_soal b),
+'paket',(select coalesce(jsonb_agg(row_to_json(p)),'[]'::jsonb) from public.paket p),
+'hasil',(select coalesce(jsonb_agg(row_to_json(h)),'[]'::jsonb) from public.hasil h),
+'pengaturan',(select coalesce(jsonb_object_agg(key,value),'{}'::jsonb) from public.pengaturan),
+'log_aktivitas',(select coalesce(jsonb_agg(row_to_json(l)),'[]'::jsonb) from public.log_aktivitas l)))
+into v_out;
+when 'restore' then
+if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+v_tmp := p_payload->'data';
+if v_tmp is null or v_tmp->'users' is null or v_tmp->'paket' is null then raise exception 'Format backup tidak valid.'; end if;
+delete from public.hasil; delete from public.log_aktivitas; delete from public.bank_soal;
+delete from public.paket; delete from public.users;
+insert into public.users select * from jsonb_populate_recordset(null::public.users, v_tmp->'users');
+insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(v_tmp->'bank_soal','[]'::jsonb));
+insert into public.paket select * from jsonb_populate_recordset(null::public.paket, v_tmp->'paket');
+insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(v_tmp->'hasil','[]'::jsonb));
+insert into public.log_aktivitas select * from jsonb_populate_recordset(null::public.log_aktivitas, coalesce(v_tmp->'log_aktivitas','[]'::jsonb));
+insert into public.pengaturan (key,value) select k,v from jsonb_each_text(coalesce(v_tmp->'pengaturan','{}'::jsonb)) as kv(k,v)
+on conflict (key) do update set value = excluded.value;
+v_out := '{"ok":true}'::jsonb;
+when 'seed' then
+if (select count(*) from public.users) > 0 and v_role <> 'admin' then
+raise exception 'Login sebagai admin untuk memuat data demo.';
+end if;
+v_tmp := p_payload->'data';
+insert into public.users select * from jsonb_populate_recordset(null::public.users, v_tmp->'users') on conflict (id) do nothing;
+insert into public.pengaturan (key,value) select k,v from jsonb_each_text(coalesce(v_tmp->'pengaturan','{}'::jsonb)) as kv(k,v) on conflict (key) do nothing;
+insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(v_tmp->'bank_soal','[]'::jsonb)) on conflict (id) do nothing;
+insert into public.paket select * from jsonb_populate_recordset(null::public.paket, coalesce(v_tmp->'paket','[]'::jsonb))
+on conflict (token) do update set mapel=excluded.mapel, waktu_mulai=excluded.waktu_mulai, waktu_selesai=excluded.waktu_selesai,
+durasi_menit=excluded.durasi_menit, soal_json=excluded.soal_json, keterangan=excluded.keterangan,
+acak_soal=excluded.acak_soal, acak_opsi=excluded.acak_opsi, mode_offline=excluded.mode_offline;
+insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(v_tmp->'hasil','[]'::jsonb)) on conflict (token,nis,mapel) do nothing;
+v_out := '{"ok":true}'::jsonb;
+else
+raise exception 'Operasi tidak dikenal: %', p_op;
+end case;
+return v_out;
 end $$;
 grant execute on function public.panel(text,jsonb,text) to anon;
-
--- ══════════════════════════════════════════════════════════════
 -- SELESAI · Login awal: admin/adminagus · pengawas/pengawas123
---            guru: agus/guru123 · hasan/hasan123
--- (Password otomatis di-upgrade ke SHA-256 saat login pertama)
--- ══════════════════════════════════════════════════════════════`;
-
+--            guru: agus/guru123 · hasan/hasan123`;
 /* ═══════════════════════ ADAPTER: LOKAL (DEMO) ═══════════════════════ */
 class LocalDB{
 constructor(){this.mode='local';this.key='cbt_local_db_v5';this.d=LS.get(this.key,null);if(!this.d){this.d=DEMO();this.save();}}
@@ -876,9 +806,8 @@ async exportAll(){return{app:'CBT PRO',version:5,exported_at:nowISO(),data:{user
 async importAll(json){const d=json.data;if(!d||!d.users||!d.paket)throw new Error('Format backup tidak valid.');this.d={users:d.users,banks:d.bank_soal||[],pakets:d.paket,hasil:d.hasil||[],settings:d.pengaturan||{},log:d.log_aktivitas||[],images:this.d.images};this.save();}
 subscribe(cb){const fn=()=>cb();window.addEventListener('local-db',fn);return()=>window.removeEventListener('local-db',fn);}
 }
-
 /* ═══════════════ ADAPTER: SUPABASE (ADAPTIF AMAN/LEGACY) ═══════════════ */
-const LEGACY_META={}; // mode legacy: kunci disimpan hanya di memori selama sesi ujian
+const LEGACY_META={};
 class SupaDB{
 constructor(url,key){this.mode='supabase';this.url=url;this.secure=false;this.sb=supabase.createClient(url,key,{auth:{persistSession:false}});this._imgCache={};}
 err(e){if(e)throw new Error(e.message||'Kesalahan database');}
@@ -888,7 +817,6 @@ try{return await this.call('panel',{p_op:op,p_payload:payload,p_token:s?.token||
 catch(e){if(/sesi/i.test(e.message)){SES.clear();toast('Sesi berakhir. Silakan login kembali.','warn');go('#/login');}throw e;}}
 async ping(){const{data,error}=await this.sb.from('pengaturan').select('key').limit(1);if(error)throw new Error(error.message);
 try{await this.call('jadwal_publik',{});this.secure=true;}catch(e){this.secure=false;}return true;}
-/* ── login ── */
 async loginStaff(pass){if(this.secure){const r=await this.call('login_petugas',{p_username:null,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Password salah!');return{...r.user,token:r.token,exp:+r.exp};}
 const{data}=await this.sb.from('users').select('*').in('role',['admin','pengawas']);
 for(const u of(data||[])){if(await verifyPass(u.password_hash,pass)){if(String(u.password_hash).startsWith('plain:'))await this.upgradePass(u.id,'sha256:'+await sha256(pass));return{role:u.role,id:u.id,username:u.username,nama:u.nama_lengkap,mapel:u.mapel};}}
@@ -899,7 +827,6 @@ if(!data||!(await verifyPass(data.password_hash,pass)))throw new Error('Username
 if(String(data.password_hash).startsWith('plain:'))await this.upgradePass(data.id,'sha256:'+await sha256(pass));
 return{role:'guru',id:data.id,username:data.username,nama:data.nama_lengkap,mapel:data.mapel};}
 async upgradePass(id,hash){this.err((await this.sb.from('users').update({password_hash:hash}).eq('id',id)).error);}
-/* ── guru ── */
 async listGuru(){if(this.secure)return await this.rpc('guru_list');
 const{data:u,error}=await this.sb.from('users').select('id,username,nama_lengkap,mapel,role,created_at').eq('role','guru').order('created_at',{ascending:false});this.err(error);
 const{data:b,error:e2}=await this.sb.from('bank_soal').select('id,guru_id');this.err(e2);
@@ -917,7 +844,6 @@ const{data:banks}=await this.sb.from('bank_soal').select('*').eq('guru_id',id);c
 this.err((await this.sb.from('users').delete().eq('id',id)).error);return{user,banks:banks||[]};}
 async restoreGuru(c){if(this.secure)return await this.rpc('guru_restore',c);
 if(c.user)this.err((await this.sb.from('users').insert(c.user)).error);if(c.banks?.length)this.err((await this.sb.from('bank_soal').insert(c.banks)).error);}
-/* ── bank soal ── */
 async listBanks(guruId){if(this.secure)return await this.rpc('bank_list',{guruId:guruId??null});
 let q=this.sb.from('bank_soal').select('*').order('created_at',{ascending:false});if(guruId)q=q.eq('guru_id',guruId);const{data,error}=await q;this.err(error);return data||[];}
 async getBank(id){if(this.secure)return await this.rpc('bank_get',{id});const{data,error}=await this.sb.from('bank_soal').select('*').eq('id',id).maybeSingle();this.err(error);return data;}
@@ -925,7 +851,6 @@ async saveBank(b){if(this.secure)return await this.rpc('bank_save',{row:b});
 if(b.id){const{id,...rest}=b;this.err((await this.sb.from('bank_soal').update(rest).eq('id',id)).error);}else{b.id=uid();b.created_at=nowISO();this.err((await this.sb.from('bank_soal').insert(b)).error);}return b;}
 async deleteBank(id){if(this.secure)return await this.rpc('bank_del',{id});const{data}=await this.sb.from('bank_soal').select('*').eq('id',id).maybeSingle();this.err((await this.sb.from('bank_soal').delete().eq('id',id)).error);return data;}
 async restoreBanks(rows){if(this.secure)return await this.rpc('bank_restore',{rows});if(rows?.length)this.err((await this.sb.from('bank_soal').insert(rows)).error);}
-/* ── paket ── */
 async listPaket(o={}){if(this.secure){if(o.guruId)return await this.rpc('paket_list',{guruId:o.guruId});if(o.light)return await this.call('jadwal_publik',{});return await this.rpc('paket_list',{});}
 const cols=o.light?'token,mapel,waktu_mulai,waktu_selesai,durasi_menit,guru_id,keterangan,acak_soal,acak_opsi,mode_offline,created_at':'*';
 let q=this.sb.from('paket').select(cols).order('waktu_mulai',{ascending:false});if(o.guruId)q=q.eq('guru_id',o.guruId);const{data,error}=await q;this.err(error);return data||[];}
@@ -945,7 +870,6 @@ async savePaket(p,oldToken){if(this.secure)return await this.rpc('paket_save',{r
 if(oldToken&&oldToken!==p.token){const{data:ex}=await this.sb.from('paket').select('token').eq('token',p.token).maybeSingle();if(ex)throw new Error('Token sudah digunakan.');this.err((await this.sb.from('paket').delete().eq('token',oldToken)).error);p.created_at=nowISO();this.err((await this.sb.from('paket').insert(p)).error);}else{this.err((await this.sb.from('paket').upsert(p)).error);}return p;}
 async deletePaket(token){if(this.secure)return await this.rpc('paket_del',{token});const{data}=await this.sb.from('paket').select('*').eq('token',token).maybeSingle();this.err((await this.sb.from('paket').delete().eq('token',token)).error);return data;}
 async restorePaket(row){if(this.secure)return await this.rpc('paket_restore',{row});if(row)this.err((await this.sb.from('paket').insert(row)).error);}
-/* ── hasil ── */
 async listHasil(o={}){if(this.secure)return await this.rpc('hasil_list',{tokens:o.tokens||null,light:!!o.light});
 const cols=o.light?'id,waktu,token,mapel,nama,kelas,nis,skor_pg,skor_essay,pelanggaran':'*';
 let q=this.sb.from('hasil').select(cols).order('id',{ascending:false}).limit(1500);
@@ -963,14 +887,12 @@ async gradeHasil(id,nilai,skor){if(this.secure)return await this.rpc('hasil_grad
 async deleteHasil(ids){if(this.secure)return await this.rpc('hasil_del',{ids});const{data}=await this.sb.from('hasil').select('*').in('id',ids);this.err((await this.sb.from('hasil').delete().in('id',ids)).error);return data||[];}
 async restoreHasil(rows){if(this.secure)return await this.rpc('hasil_restore',{rows});if(rows?.length)this.err((await this.sb.from('hasil').insert(rows)).error);}
 async clearHasil(){if(this.secure)return await this.rpc('hasil_clear');const{data}=await this.sb.from('hasil').select('*');this.err((await this.sb.from('hasil').delete().neq('id',0)).error);return data||[];}
-/* ── log & pengaturan ── */
 async listLog(limit=30){if(this.secure)return await this.rpc('log_list',{limit});const{data,error}=await this.sb.from('log_aktivitas').select('*').order('id',{ascending:false}).limit(limit);this.err(error);return data||[];}
 async addLog(l){if(this.secure){try{await this.rpc('log_add',{aksi:l.aksi,detail:l.detail||''});}catch(e){}return;}
 try{await this.sb.from('log_aktivitas').insert({id:uid(),waktu:nowISO(),username:l.username,role:l.role,aksi:l.aksi,detail:l.detail||''});}catch(e){}}
 async clearLog(){if(this.secure)return await this.rpc('log_clear');this.err((await this.sb.from('log_aktivitas').delete().neq('id',0)).error);}
 async getSettings(){const{data,error}=await this.sb.from('pengaturan').select('*');this.err(error);const o={};(data||[]).forEach(r=>o[r.key]=r.value);return o;}
 async saveSettings(o){if(this.secure)return await this.rpc('set_save',{settings:o});this.err((await this.sb.from('pengaturan').upsert(Object.entries(o).map(([key,value])=>({key,value:String(value)})))).error);}
-/* ── backup / demo ── */
 async exportAll(){if(this.secure)return await this.rpc('backup');
 const t=async n=>{const{data}=await this.sb.from(n).select('*');return data||[];};
 const[users,bank_soal,paket,hasil,log_aktivitas]=await Promise.all([t('users'),t('bank_soal'),t('paket'),t('hasil'),t('log_aktivitas')]);
@@ -990,7 +912,6 @@ this.err((await this.sb.from('pengaturan').upsert(Object.entries(d.settings).map
 this.err((await this.sb.from('bank_soal').upsert(d.banks)).error);
 this.err((await this.sb.from('paket').upsert(d.pakets)).error);
 this.err((await this.sb.from('hasil').upsert(d.hasil,{onConflict:'token,nis,mapel'})).error);}
-/* ── dashboard gabungan ── */
 async dashboard(){const[gurus,banks,pakets,hasil,log]=await Promise.all([this.listGuru(),this.listBanks(),this.listPaket({light:true}),this.listHasil({light:true}),this.listLog(12)]);
 const t=h=>(parseFloat(h.skor_pg)||0)+(parseFloat(h.skor_essay)||0);
 const pm={};hasil.forEach(h=>{(pm[h.mapel]=pm[h.mapel]||[]).push(t(h));});
@@ -999,16 +920,13 @@ rata_rata:hasil.length?hasil.reduce((a,h)=>a+t(h),0)/hasil.length:0,
 jumlah_pelanggaran:hasil.reduce((a,h)=>a+(+h.pelanggaran||0),0),
 per_mapel:Object.entries(pm).map(([m,a])=>({m,avg:a.reduce((x,y)=>x+y,0)/a.length,n:a.length})).sort((a,b)=>b.n-a.n).slice(0,8),
 top:[...hasil].sort((a,b)=>t(b)-t(a)).slice(0,5).map(h=>({nama:h.nama,kelas:h.kelas,mapel:h.mapel,skor:t(h)})),log};}
-/* ── gambar (storage) ── */
 async listImages(prefix){const{data,error}=await this.sb.storage.from('gambar').list('',{limit:300,sortBy:{column:'created_at',order:'desc'}});this.err(error);return(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder'&&(!prefix||f.name.startsWith(prefix))).map(f=>({name:f.name,url:this.imageUrl(f.name),created_at:f.created_at}));}
 imageUrl(name){if(this._imgCache[name])return this._imgCache[name];const{data}=this.sb.storage.from('gambar').getPublicUrl(name);this._imgCache[name]=data.publicUrl;return data.publicUrl;}
 async uploadImage(blob,name){this.err((await this.sb.storage.from('gambar').upload(name,blob,{contentType:blob.type,upsert:false})).error);return{name,url:this.imageUrl(name)};}
 async deleteImage(name){let cached=null;try{const r=await fetch(this.imageUrl(name));if(r.ok){const b=await r.blob();cached={blob:b,type:b.type};}}catch(e){}this.err((await this.sb.storage.from('gambar').remove([name])).error);return cached;}
 async restoreImage(name,v){if(v?.blob)this.err((await this.sb.storage.from('gambar').upload(name,v.blob,{contentType:v.type,upsert:true})).error);}
-/* ── live monitor (polling hemat) ── */
 subscribe(cb){const iv=setInterval(()=>{try{cb({poll:true});}catch(e){}},20000);return()=>clearInterval(iv);}
 }
-
 /* ═══════════════════════ FASILITAS DATA & SESI ═══════════════════════ */
 let DB=new LocalDB();
 let SETTINGS={};
@@ -1031,7 +949,6 @@ const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('
 let blob=await new Promise(r=>cv.toBlob(r,'image/webp',q));let ext='webp';
 if(!blob){blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',q));ext='jpg';}
 return{blob,ext};}
-
 /* ═══════════════════════ ROUTER & NAVBAR ═══════════════════════ */
 let VIEW_CLEANUP=[];
 function onCleanup(fn){VIEW_CLEANUP.push(fn);}
@@ -1078,7 +995,6 @@ catch(e){console.error(e);v.innerHTML=`<div class="max-w-md mx-auto py-24 px-4 t
 window.addEventListener('hashchange',route);
 setInterval(()=>{const c=$('#nav-clock');if(c)c.textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+TZ.split('/').pop().replace('_',' ');},1000);
 window.addEventListener('scroll',()=>{$('#navbar').style.boxShadow=window.scrollY>8?'0 8px 30px -12px rgba(11,18,48,.18)':'none';},{passive:true});
-
 /* ═══════════════════════ HALAMAN: PORTAL PESERTA ═══════════════════════ */
 async function vPortal(v){const pakets=await DB.listPaket({light:true});const aktif=pakets.filter(p=>statusKey(p)==='aktif');
 const kelas=S('daftar_kelas','7A,7B,7C,8A,8B,8C,8D,9A,9B,9C,9D,9E').split(',').map(x=>x.trim()).filter(Boolean);
@@ -1133,7 +1049,6 @@ if(saved&&saved.jawaban&&Object.keys(saved.jawaban).length){resume=await confirm
 if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
 EXAM.start(p,{nama,kelas:kelasV,nis},resume?saved:null);
 }catch(err){toast(err.message,'err');btn.disabled=false;btn.innerHTML=ic('play','w-5 h-5')+' MASUK UJIAN';}});}
-
 /* ═══════════════════════ MESIN UJIAN ═══════════════════════ */
 const EXAM={st:null,
 start(paket,peserta,saved){const soal=saved?.soal||orderSoal(paket.soal_json,paket.acak_soal,paket.acak_opsi);
@@ -1242,7 +1157,6 @@ $('#exam-root').innerHTML=`<div class="fixed inset-0 z-50 bg-gradient-to-br from
 <div class="grid grid-cols-3 gap-2 text-center"><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold text-ink-900">${answered}/${s.soal.length}</div><div class="text-[10px] font-bold text-ink-400 uppercase">Terjawab</div></div><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold ${s.pelanggaran?'text-bahaya-600':'text-sukses-600'}">${s.pelanggaran}</div><div class="text-[10px] font-bold text-ink-400 uppercase">Pelanggaran</div></div><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold text-ink-400">✍️</div><div class="text-[10px] font-bold text-ink-400 uppercase">Essay oleh guru</div></div></div>
 <button class="btn-pri w-full !py-3.5" onclick="EXAM.destroy();go('#/siswa')">Kembali ke Portal</button></div></div>`;},
 destroy(){const s=this.st;if(s){s.active=false;clearInterval(s.timer);clearInterval(s.conn);this.unbindGuards();}document.body.classList.remove('exam-active');$('#exam-root').innerHTML='';this.st=null;if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});}};
-
 /* ═══════════════════════ HALAMAN: JADWAL ═══════════════════════ */
 async function vJadwal(v){const pakets=await DB.listPaket({light:true});pakets.sort((a,b)=>new Date(a.waktu_mulai)-new Date(b.waktu_mulai));
 v.innerHTML=`<div class="relative overflow-hidden"><div class="aurora opacity-[.14]"></div><div class="max-w-6xl mx-auto px-4 py-12 relative">
@@ -1263,7 +1177,6 @@ ${k==='aktif'?`<a href="#/siswa" class="btn-pri w-full mt-4">Masukkan Token ${ic
 </div></div>`;
 const tick=()=>{$$('[data-count]').forEach(el=>{const iso=el.dataset.count;if(!iso){el.textContent='selesai';el.classList.add('text-ink-300');return;}const ms=new Date(iso)-Date.now();el.textContent=ms>0?el.dataset.pre+fmtSisa(ms):'—';});};
 tick();const iv=setInterval(tick,1000);onCleanup(()=>clearInterval(iv));}
-
 /* ═══════════════════════ HALAMAN: LOGIN ═══════════════════════ */
 function loginShell(accent,iconName,title,sub,formHTML,altHTML){return `<div class="min-h-[calc(100vh-68px)] grid lg:grid-cols-2">
 <div class="hidden lg:flex relative bg-ink-950 items-center justify-center p-12 overflow-hidden"><div class="aurora"></div>
@@ -1294,7 +1207,6 @@ try{const u=await DB.loginGuru($('#g_user').value.trim(),$('#g_pass').value);RL.
 SES.save({role:'guru',uid:u.id,username:u.username,nama:u.nama,mapel:u.mapel,token:u.token||null,exp:u.exp||Date.now()+SESSION_MS});
 toast(`Selamat datang, ${u.nama}!`,'ok');go('#/guru');}
 catch(err){RL.hit('guru');toast(err.message,'err');}});}
-
 /* ═══════════════════════ SHELL PANEL (Guru/Admin) ═══════════════════════ */
 function panelShell(v,{role,accent,tabs,user,sub}){
 v.innerHTML=`<div class="lg:grid lg:grid-cols-[260px_1fr] min-h-[calc(100vh-68px)]">
@@ -1310,7 +1222,6 @@ const body=$('#panel-body');body.innerHTML='<div class="flex justify-center py-2
 tabs.find(t=>t.id===id).render(body);};
 v.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 return switchTab;}
-
 /* ═══════════════════════ EDITOR SOAL (dipakai Guru & Admin) ═══════════════════════ */
 const ED={cid:'ed-soal',counter:0,
 open(container,data){this.cid=container;this.counter=0;const c=$('#'+container);c.innerHTML='';(data&&data.length?data:[null]).forEach(s=>this.add(s));},
@@ -1354,7 +1265,9 @@ return{tipe,pertanyaan,opsi:['','','',''],jawaban:'',poin};},
 collect(){const out=[];$$('#'+this.cid+' [data-soal]').forEach(d=>{const s=this.readOne(d);if(s)out.push(s);});return out;},
 validate(data){if(!data.length)return'Tambahkan minimal 1 soal.';for(let i=0;i<data.length;i++){const s=data[i];if(s.tipe==='PG'){const filled=s.opsi.filter(o=>o.trim());if(filled.length<2)return`Soal #${i+1}: isi minimal 2 opsi.`;if(!s.jawaban)return`Soal #${i+1}: kunci jawaban kosong.`;if(!s.opsi.some(o=>o.trim()===s.jawaban.trim()))return`Soal #${i+1}: kunci harus sama persis dengan salah satu opsi.`;}if(!(s.poin>0))return`Soal #${i+1}: poin harus lebih dari 0.`;}return null;},
 toText(s){const ab='ABCD';let t=`[Tipe: ${s.tipe}]\nSoal: ${s.pertanyaan}\n`;if(s.tipe==='PG'){s.opsi.forEach((o,i)=>t+=`${ab[i]}. ${o}\n`);t+=`Kunci: ${s.jawaban}\n`;}return t+`Poin: ${s.poin}`;},
+/* [FIX #6] .join menggunakan '\n---\n' (escape), bukan newline mentah */
 copyAll(){const d=this.collect();if(!d.length)return toast('Belum ada soal.','warn');copyText(d.map((s,i)=>`SOAL ${i+1}\n`+this.toText(s)).join('\n---\n'),`${d.length} soal disalin.`);},
+/* [FIX #7] regex split & string split menggunakan \n escape */
 importText(){const w=openModal(`<div class="p-6"><h3 class="font-disp text-lg font-bold mb-1">📥 Import dari Teks</h3><p class="text-xs text-ink-400 mb-4">Pisahkan antar soal dengan <code class="chip-gray">---</code>. Format: <b>Soal:</b> …, <b>A.</b> … <b>B.</b> …, <b>Kunci:</b> …, <b>Poin:</b> …, <b>[Tipe: Essay]</b></p><textarea id="imp-txt" class="input !h-56 font-mono !text-xs" placeholder="Soal: Ibukota Indonesia?&#10;A. Bandung&#10;B. Jakarta&#10;C. Surabaya&#10;D. Medan&#10;Kunci: Jakarta&#10;Poin: 10&#10;---&#10;[Tipe: Essay]&#10;Soal: Jelaskan fotosintesis!&#10;Poin: 20"></textarea><div class="flex justify-end gap-2 mt-4"><button class="btn-ghost" onclick="closeModal()">Batal</button><button class="btn-pri" id="imp-go">Import</button></div></div>`,'max-w-xl');
 w.querySelector('#imp-go').onclick=()=>{const txt=w.querySelector('#imp-txt').value;if(!txt.trim())return;let added=0;
 txt.split(/\n---\n|^---$/m).forEach(block=>{const lines=block.trim().split('\n');let tipe='PG',soal='',opsi=['','','',''],kunci='',poin=10,mode='';
@@ -1391,14 +1304,15 @@ if(!nm||!mp)return toast('Isi nama dan mata pelajaran.','warn');
 const data=this.collect();const err=this.validate(data);if(err)return toast(err,'err');
 const btn=w.querySelector('#ed-save');btn.disabled=true;try{await onSave(nm,mp,data);closeModal(w);}catch(e){toast(e.message,'err');btn.disabled=false;}};
 return w;}};
-
 /* ═══════════════════════ EKSPOR / IMPOR (lazy-load) ═══════════════════════ */
+/* [FIX #4] flattenEssay .join('\n') */
 function flattenEssay(h){const o=h.jawaban_essay;if(!o||typeof o!=='object')return String(o||'-');return Object.entries(o).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n')||'-';}
 function totalSkor(h){return(parseFloat(h.skor_pg)||0)+(parseFloat(h.skor_essay)||0);}
 async function excelHasil(rows,label){try{await LIB.xlsx();if(!rows.length)return toast('Tidak ada data.','warn');
 const data=rows.map(h=>({'Waktu':fmtTgl(h.waktu),'Mapel':h.mapel,'Token':h.token,'Kelas':h.kelas,'Nama':h.nama,'NIS':h.nis,'Skor PG':h.skor_pg,'Skor Essay':h.skor_essay??'','Total':totalSkor(h),'KKM':totalSkor(h)>=+S('kkm',75)?'LULUS':'BELUM','Jawaban Essay':flattenEssay(h),'Pelanggaran':h.pelanggaran}));
 const ws=XLSX.utils.json_to_sheet(data);ws['!cols']=[{wch:18},{wch:22},{wch:10},{wch:8},{wch:26},{wch:10},{wch:9},{wch:10},{wch:8},{wch:9},{wch:70},{wch:12}];
 const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Hasil');XLSX.writeFile(wb,`REKAP_${label}_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Excel diunduh.','ok');}catch(e){toast(e.message,'err');}}
+/* [FIX #5] pdfHasil .replace(/\n/g,'; ') */
 async function pdfHasil(rows){try{await LIB.pdf();if(!rows.length)return toast('Tidak ada data.','warn');const{jsPDF}=window.jspdf;const doc=new jsPDF('landscape');
 doc.setFontSize(14);doc.text('Rekap Hasil Ujian — '+(S('nama_sekolah','CBT PRO')),14,14);
 doc.setFontSize(9);doc.setTextColor(110);doc.text(`${S('nama_ujian','')} · KKM ${S('kkm',75)} · Dicetak ${new Date().toLocaleString('id-ID')}`,14,20);
@@ -1417,14 +1331,14 @@ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Soal');XLSX.w
 function pickExcel(cb){const f=$('#hidden-file');f.accept='.xlsx,.xls';f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;try{await LIB.xlsx();const r=new FileReader();r.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});cb(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}));}catch(err){toast('Gagal membaca file Excel.','err');}};r.readAsArrayBuffer(file);}catch(e){toast(e.message,'err');}};f.click();}
 function importSoalExcel(mapel,onDone){pickExcel(rows=>{const soal=[];rows.forEach(r=>{const tp=String(r['Tipe']||'PG').toUpperCase().trim();const p=String(r['Soal']||'').trim();if(!p)return;soal.push({tipe:tp==='ESSAY'?'Essay':'PG',pertanyaan:p,opsi:[r['Opsi A'],r['Opsi B'],r['Opsi C'],r['Opsi D']].map(x=>String(x||'')),jawaban:String(r['Jawaban']||''),poin:parseFloat(r['Poin'])||(tp==='ESSAY'?20:10)});});
 if(!soal.length)return toast('Tidak ada soal valid pada file.','err');onDone(soal);});}
-
 /* ═══════════════════════ DRAWER: BANK / PAKET / HASIL ═══════════════════════ */
 function soalListHTML(soal,showKey=true){return soal.map((s,i)=>`<div class="card p-4"><div class="flex gap-2 mb-2 flex-wrap"><span class="chip bg-ink-900 text-white border-ink-900 font-disp !text-[10px]">${i+1}</span><span class="${s.tipe==='Essay'?'chip-violet':'chip-blue'} !text-[10px]">${s.tipe||'PG'}</span><span class="chip-amber !text-[10px]">${s.poin} poin</span></div><div class="text-sm font-semibold text-ink-900 mb-2">${formatTeksSoal(s.pertanyaan)}</div>${(s.tipe||'PG')==='PG'?`<div class="space-y-1.5">${(s.opsi||[]).map((o,j)=>{const key=showKey&&o&&o.trim()===String(s.jawaban).trim();return `<div class="flex items-center gap-2.5 text-sm ${key?'text-sukses-700 font-bold':'text-ink-600'}"><span class="w-6 h-6 rounded-full border-2 ${key?'border-sukses-500 bg-sukses-50':'border-kertas-300'} flex items-center justify-center text-[10px] font-bold shrink-0">${'ABCD'[j]}</span><span class="flex-1">${formatTeksSoal(o)}</span>${key?ic('check','w-4 h-4 text-sukses-600 shrink-0'):''}</div>`;}).join('')}</div>`:'<div class="text-[11px] text-esai-600 font-semibold">✍️ Dinilai manual oleh guru</div>'}</div>`).join('');}
 async function drawerBank(id,ctx){const b=await DB.getBank(id);if(!b)return toast('Bank tidak ditemukan.','err');const soal=Array.isArray(b.soal_json)?b.soal_json:JSON.parse(b.soal_json||'[]');
 const pg=soal.filter(s=>(s.tipe||'PG')==='PG').length,es=soal.length-pg,poin=soal.reduce((a,s)=>a+(+s.poin||0),0);
 const w=openDrawer(drawerHead(esc(b.nama_bank),`${esc(b.mapel)} · ${soal.length} soal · ${poin} poin · ${fmtTgl(b.created_at)}`)+`<div class="px-6 py-4 bg-white border-b border-kertas-300 flex gap-2 flex-wrap shrink-0"><button class="btn-pri btn-xs" data-d="edit">${ic('edit','w-3.5 h-3.5')} Edit</button><button class="btn-ok btn-xs" data-d="jadwal">${ic('cal','w-3.5 h-3.5')} Jadwalkan</button><button class="btn-ghost btn-xs" data-d="export">${ic('down','w-3.5 h-3.5')} Export Excel</button><button class="btn-ghost btn-xs" data-d="copy">${ic('copy','w-3.5 h-3.5')} Salin Teks</button></div><div class="flex-1 overflow-y-auto exam-scroll p-5 space-y-3"><div class="flex gap-2"><span class="chip-blue">PG: ${pg}</span><span class="chip-violet">Essay: ${es}</span></div>${soalListHTML(soal)}</div>`);
 typeset(w);
-bindActs(w,{edit:()=>{closeDrawer();ctx.editBank(b);},jadwal:()=>{closeDrawer();ctx.openPaketModal({bank:b});},export:()=>excelBank(b),copy:()=>{const ab='ABCD';copyText(soal.map((s,i)=>`SOAL ${i+1}\n`+ED.toText(s)).join('\n---\n'),'Semua soal disalin.');}});}
+/* [FIX #8] .join('\n---\n') */
+bindActs(w,{edit:()=>{closeDrawer();ctx.editBank(b);},jadwal:()=>{closeDrawer();ctx.openPaketModal({bank:b});},export:()=>excelBank(b),copy:()=>{copyText(soal.map((s,i)=>`SOAL ${i+1}\n`+ED.toText(s)).join('\n---\n'),'Semua soal disalin.');}});}
 async function drawerPaket(token,ctx){const p=await DB.getPaket(token);if(!p)return toast('Paket tidak ditemukan.','err');const soal=Array.isArray(p.soal_json)?p.soal_json:JSON.parse(p.soal_json||'[]');
 const share=`Ikuti ujian ${p.mapel} (${p.keterangan||''})\nBuka: ${location.origin+location.pathname}#/siswa\nToken: ${p.token}\nMulai: ${fmtTgl(p.waktu_mulai)} — Selesai: ${fmtTgl(p.waktu_selesai)}`;
 const w=openDrawer(drawerHead(esc(p.mapel),esc(p.keterangan||'')) +`<div class="flex-1 overflow-y-auto exam-scroll p-5 space-y-4">
@@ -1459,7 +1373,6 @@ bindActs(w,{savegrade:async()=>{const nilai={};let sum=0;let ok=true;
 w.querySelectorAll('[data-grade]').forEach(inp=>{const max=+inp.dataset.max;let val=parseFloat(inp.value);if(inp.value===''){val=0;}if(isNaN(val)||val<0||val>max){ok=false;inp.classList.add('!border-bahaya-500');}nilai[inp.dataset.grade]=val;sum+=val;});
 if(!ok)return toast('Nilai harus antara 0 dan poin maksimal.','err');
 try{await DB.gradeHasil(h.id,nilai,sum);logAct('KOREKSI',`${h.nama} · essay ${sum}`);toast('Nilai essay tersimpan. Total: '+(parseFloat(h.skor_pg)+sum),'ok');closeDrawer();ctx.refresh();}catch(e){toast(e.message,'err');}}});}
-
 /* ═══════════════════════ MODAL PAKET (Guru & Admin) ═══════════════════════ */
 function paketModal({paket,bank,guruId,banks,onSaved}){const isEdit=!!paket;const srcSoal=paket?(Array.isArray(paket.soal_json)?paket.soal_json:JSON.parse(paket.soal_json||'[]')):bank?(Array.isArray(bank.soal_json)?bank.soal_json:JSON.parse(bank.soal_json||'[]')):[];
 let soalData=[...srcSoal];
@@ -1496,7 +1409,6 @@ const row={token,mapel,waktu_mulai:mulai,waktu_selesai:selesai,durasi_menit:dura
 const btn=w.querySelector('#pk-save');btn.disabled=true;
 try{await DB.savePaket(row,isEdit?paket.token:null);logAct(isEdit?'EDIT_PAKET':'BUAT_PAKET','Token '+token);toast(`Paket tersimpan! Token: ${token}`,'ok');closeModal(w);onSaved();}
 catch(e){toast(e.message,'err');btn.disabled=false;}};}
-
 /* ═══════════════════════ PANEL GURU ═══════════════════════ */
 async function vGuru(v){const s=SES.load();
 const switchTab=panelShell(v,{role:'guru',accent:'#12B76A',user:s,sub:s.mapel||'Guru',tabs:[
@@ -1567,7 +1479,6 @@ const cached=await DB.deleteImage(n);logAct('HAPUS_GBR',n);load();
 toast('Gambar dihapus.','warn',{label:'Undo',fn:async()=>{try{await DB.restoreImage(n,cached);load();toast('Dipulihkan.','ok');}catch(e){toast('Gagal memulihkan: '+e.message,'err');}}});}});}
 async function tGuruHasil(c){const s=SES.load();const pakets=await DB.listPaket({guruId:s.uid});const tokens=pakets.map(p=>p.token);
 const rows=await DB.listHasil({tokens});renderHasilTable(c,rows,{title:'Hasil Siswa Saya',idx:'GURU / HASIL',canGrade:true,canDelete:false,refresh:()=>tGuruHasil(c),key:'ghasil'});}
-
 /* ═══════════════════════ TABEL HASIL (Guru/Admin) ═══════════════════════ */
 function renderHasilTable(c,rows,{title,idx,canGrade,canDelete,refresh,key}){const kkm=+S('kkm',75);
 const view=LS.get('cbt_v_'+key,{q:'',mapel:'',kelas:'',token:'',sort:'waktu',dir:-1});
@@ -1628,7 +1539,42 @@ $('#hs-clear').onclick=async()=>{if(!(await confirmBox({title:'Bersihkan SEMUA h
 const removed=await DB.clearHasil();logAct('HAPUS_RIWAYAT','semua');rows=[];draw();toast('Riwayat dibersihkan.','warn',{label:'Undo',fn:async()=>{await DB.restoreHasil(removed);rows.push(...removed);draw();toast('Dipulihkan.','ok');}});};}
 bindActs(c,{detail:el=>{const h=rows.find(r=>r.id===+el.dataset.id);if(h)drawerHasil(h,{canGrade,refresh:()=>{refresh();}});},
 del:canDelete?(async el=>{const id=+el.dataset.id;if(await confirmBox({title:'Hapus hasil ini?',body:'Satu baris hasil peserta. Bisa dibatalkan lewat Undo.',okText:'Hapus',danger:true}))doDelete([id]);}):null});}
-
+/* ════════════════════ IMPORT DATABASE APLIKASI LAMA (.sqlite) ═════════════════════ */
+async function importSqliteLama(file){
+toast('Membaca file SQLite di browser…','info');
+const SQL=await LIB.sqljs();
+const db=new SQL.Database(new Uint8Array(await file.arrayBuffer()));
+const q=sql=>{try{const r=db.exec(sql);if(!r.length)return[];const c=r[0].columns;return r[0].values.map(v=>Object.fromEntries(v.map((x,i)=>[c[i],x])));}catch(e){return[];}};
+const guru=q('SELECT * FROM guru'),banks=q('SELECT * FROM bank_soal'),pakets=q('SELECT * FROM paket'),hasil=q('SELECT * FROM hasil'),set=q('SELECT * FROM pengaturan');
+if(!guru.length&&!banks.length&&!pakets.length&&!hasil.length)throw new Error('Tabel aplikasi lama tidak ditemukan di file ini.');
+const ok=await confirmBox({title:'Import dari aplikasi lama?',body:`Akan diimport:<br>• <b>${guru.length}</b> akun guru (password sementara <code>cbt12345</code>)<br>• <b>${banks.length}</b> bank soal<br>• <b>${pakets.length}</b> paket ujian<br>• <b>${hasil.length}</b> baris hasil + pengaturan<br><br>Token paket & username yang sudah ada akan <b>dilewati</b> (aman dijalankan).`,okText:'Ya, Import'});
+if(!ok)return;
+const parse=(v,d)=>{try{const o=JSON.parse(v);return o??d;}catch(e){return d;}};
+const wkt=v=>{if(!v)return nowISO();const s=String(v).trim().replace(' ','T');const m=s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);if(!m){const d=new Date(s);return isNaN(d)?nowISO():d.toISOString();}return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0))-8*3600*1000).toISOString();};
+const made=[];
+for(const g of guru){try{await DB.createGuru({username:g.username,password:'cbt12345',nama_lengkap:g.nama_lengkap,mapel:g.mapel});made.push(g.username);}catch(e){}}
+const list=await DB.listGuru();const byU={};list.forEach(u=>byU[u.username]=u.id);
+const idMap={};guru.forEach(g=>idMap[g.id]=byU[g.username]||null);
+let nb=0;for(const b of banks){try{await DB.saveBank({guru_id:idMap[b.guru_id]||null,nama_bank:b.nama_bank,mapel:b.mapel,soal_json:parse(b.soal_json,[])});nb++;}catch(e){}}
+let np=0,skipP=0;for(const p of pakets){const tok=String(p.token||'').toUpperCase();if(!tok){skipP++;continue;}
+const ex=await DB.getPaket(tok).catch(()=>null);if(ex){skipP++;continue;}
+const soal=parse(p.soal_json,[]);if(!soal.length){skipP++;continue;}
+try{await DB.savePaket({token:tok,mapel:p.mapel,waktu_mulai:wkt(p.waktu_mulai),waktu_selesai:wkt(p.waktu_selesai),durasi_menit:+p.durasi_menit||90,soal_json:soal,guru_id:idMap[p.guru_id]||null,keterangan:p.keterangan||'',acak_soal:p.acak_soal==null?true:!!+p.acak_soal,acak_opsi:p.acak_opsi==null?true:!!+p.acak_opsi,mode_offline:false});np++;}catch(e){skipP++;}}
+let nh=0;const rows=hasil.map(h=>{let je=parse(h.jawaban_essay,null);if(je===null||typeof je!=='object')je=(h.jawaban_essay&&h.jawaban_essay!=='-')?{'Jawaban':String(h.jawaban_essay)}:{};
+return{id:uid(),waktu:wkt(h.waktu),mapel:h.mapel,nama:h.nama,kelas:h.kelas,nis:h.nis,skor_pg:+h.skor_pg||0,skor_essay:null,jawaban_essay:je,nilai_essay:null,detail_jawaban:null,pelanggaran:+h.pelanggaran||0,token:h.token||''};});
+if(rows.length){try{await DB.restoreHasil(rows);nh=rows.length;}catch(e){}}
+const so={};set.forEach(r=>{so[r.key]=r.value;});
+if(Object.keys(so).length){try{await DB.saveSettings(Object.assign({daftar_kelas:S('daftar_kelas','7A,7B,7C,8A,8B,8C,8D,9A,9B,9C,9D,9E')},so));}catch(e){}}
+logAct('IMPORT_SQLITE',`${nb} bank, ${np} paket, ${nh} hasil`);
+openModal(`<div class="p-7"><h3 class="font-disp text-xl font-bold text-sukses-600 mb-3">✅ Import Selesai</h3>
+<div class="text-sm text-ink-600 space-y-1.5">
+<div>👨‍🏫 Guru baru: <b>${made.length}</b>${made.length?' — password sementara <code class="chip-amber">cbt12345</code> (ganti lewat Admin → Guru)':''}</div>
+<div>📚 Bank soal: <b>${nb}</b></div>
+<div>📋 Paket ujian: <b>${np}</b>${skipP?` <span class="chip-red">${skipP} dilewati (token ada/soal kosong)</span>`:''}</div>
+<div>📈 Hasil siswa: <b>${nh}</b></div>
+<div class="text-pensil-700 text-xs mt-3">⚠️ Gambar soal tidak tersimpan di dalam .sqlite — upload ulang file gambar dengan <b>nama yang sama</b> agar tag <code>[file.jpg]</code> kembali tampil.</div>
+${made.length?`<div class="text-xs mt-2 flex gap-1 flex-wrap">${made.map(u=>`<code class="chip-gray !text-[10px]">${esc(u)}</code>`).join('')}</div>`:''}
+</div><div class="flex justify-end mt-6"><button class="btn-pri" onclick="closeModal();route()">Selesai</button></div></div>`);}
 /* ═══════════════════════ PANEL ADMIN ═══════════════════════ */
 async function vAdmin(v){const s=SES.load();
 const switchTab=panelShell(v,{role:'admin',accent:'#2E5BFF',user:s,sub:'Administrator',tabs:[
@@ -1729,6 +1675,7 @@ c.innerHTML=`<div class="mb-6"><div class="sect-idx">ADMIN / SISTEM</div><h2 cla
 <div class="card p-6 !border-pensil-300"><h3 class="font-bold text-pensil-700 mb-2">📤 Restore Database</h3><p class="text-xs text-ink-400 mb-4">Ganti seluruh data dengan file backup. <b>Berbahaya</b> — data saat ini ditimpa.</p><button class="btn-amber w-full" id="sys-restore">${ic('up')} Pilih File Backup…</button></div>
 <div class="card p-6"><h3 class="font-bold text-ink-900 mb-2">🧪 Data & Koneksi</h3><div class="grid grid-cols-2 gap-2.5">
 <button class="btn-soft" id="sys-demo">${ic('db')} Muat Data Demo</button>
+<button class="btn-amber" id="sys-sqlite">${ic('up')} Import App Lama (.sqlite)</button>
 <a href="#/setup" class="btn-ghost">${ic('link')} ${DB.mode==='supabase'?(DB.secure?'Kelola Koneksi':'Upgrade ke Mode Aman'):'Hubungkan Supabase'}</a></div>
 <p class="text-[11px] text-ink-400 mt-3">Mode aktif: <b>${DB.mode==='supabase'?(DB.secure?'Supabase Cloud (Aman)':'Supabase Cloud (Legacy)'):'Demo Lokal (browser)'}</b>${DB.mode==='supabase'?' · '+esc(DB.url):''}</p></div></div></div>`;
 $('#set-save').onclick=async()=>{try{await DB.saveSettings({nama_sekolah:$('#set-sek').value.trim(),nama_ujian:$('#set-uj').value.trim(),kkm:$('#set-kkm').value,durasi_default:$('#set-dur').value,daftar_kelas:$('#set-kelas').value});await refreshSettings();logAct('PENGATURAN','ubah');toast('Pengaturan tersimpan.','ok');renderNav();}catch(e){toast(e.message,'err');}};
@@ -1736,9 +1683,9 @@ $('#sys-backup').onclick=async()=>{try{const json=await DB.exportAll();download(
 $('#sys-restore').onclick=()=>{const f=$('#hidden-file');f.accept='.json';f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;
 try{const json=JSON.parse(await file.text());if(!(await confirmBox({title:'Restore database?',body:`Backup tanggal <b>${esc(json.exported_at||'?')}</b> akan MENGGANTI seluruh data saat ini.`,okText:'Ya, Restore',danger:true})))return;
 await DB.importAll(json);await refreshSettings();logAct('RESTORE','JSON');toast('Database direstore.','ok');route();}catch(e){toast('Gagal: '+e.message,'err');}};f.click();};
+$('#sys-sqlite').onclick=()=>{const f=$('#hidden-file');f.accept='.sqlite,.db';f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;try{await importSqliteLama(file);}catch(e){toast('Gagal import: '+e.message,'err');}};f.click();};
 $('#sys-demo').onclick=async()=>{if(!(await confirmBox({title:'Muat data demo?',body:'Menambahkan akun demo (agus/guru123, hasan/hasan123), 3 bank soal, 3 paket, dan 10 hasil. Data dengan ID sama ditimpa.',okText:'Muat Demo'})))return;
 try{await DB.seedDemo();await refreshSettings();toast('Data demo dimuat. Token aktif: MTK8A & PAI8B','ok');route();}catch(e){toast(e.message,'err');}};}
-
 /* ═══════════════════════ PANEL PENGAWAS ═══════════════════════ */
 async function vPengawas(v){const s=SES.load();const[pakets,hasil]=await Promise.all([DB.listPaket({light:true}),DB.listHasil({light:true})]);
 const aktif=pakets.filter(p=>statusKey(p)==='aktif');
@@ -1761,7 +1708,6 @@ const un=DB.subscribe(async p=>{try{rows=await DB.listHasil({light:true});draw()
 const feed=$('#pw-feed');if(feed&&p?.poll){feed.innerHTML=rows.slice(0,12).map(h=>feedItem(h)).join('')||'<p class="text-sm text-ink-300">Menunggu peserta…</p>';}
 aktif.forEach(pk=>{const el=document.querySelector(`[data-pwcount="${pk.token}"]`);if(el)el.textContent=rows.filter(x=>x.token===pk.token).length;});}catch(e){}});
 onCleanup(un);}
-
 /* ═══════════════════════ HALAMAN: SETUP (KHUSUS ADMIN) ═══════════════════════ */
 async function vSetup(v){const conn=LS.get('cbt_conn',null);
 v.innerHTML=`<div class="max-w-3xl mx-auto px-4 py-12">
@@ -1809,7 +1755,6 @@ else toast(`${checks.length-okCount} komponen belum siap — jalankan/upgrade SQ
 $('#su-seed').onclick=async()=>{if(DB.mode!=='supabase')return toast('Supabase belum tersambung.','warn');
 const s=SES.load();if(!s||s.role!=='admin')return toast('Login sebagai admin dahulu.','warn');
 try{await DB.seedDemo();await refreshSettings();toast('Data demo masuk ke Supabase! Token aktif: MTK8A & PAI8B','ok');}catch(e){toast(e.message,'err');}};}
-
 /* ═══════════════════════ INISIALISASI ═══════════════════════ */
 (async function init(){
 const conn=LS.get('cbt_conn',null)||((PRESET.url&&PRESET.anon)?PRESET:null);
