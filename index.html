@@ -152,10 +152,12 @@ details>summary::-webkit-details-marker{display:none;}
 
 <script>
 'use strict';
-/* ═══════════════════════ KONFIGURASI ═══════════════════════ */
-const PRESET = { url:'', anon:'' };
+/* ═══════════════════════ KONFIGURASI ═══════════════════════
+   KREDENSIAL SUPABASE SUDAH TERTANAM — tidak perlu menghubungkan manual.
+   (Kunci anon memang dirancang publik; akses data dilindungi policy/RPC.) */
+const PRESET = { url:'https://yxggvhzjyusmhwbwdydh.supabase.co', anon:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4Z2d2aHpqeXVzbWh3YndkeWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3Nzg2MzYsImV4cCI6MjExMDM1NDYzNn0.-d-VxGvBwzoohGH-LJqn3LacieXgYpe5fHEf96yy-XU' };
 const SESSION_MS = 4*3600*1000;
-const APP = { name:'CBT PRO', ver:'5.1' };
+const APP = { name:'CBT PRO', ver:'5.2' };
 
 /* ═══════════════════════ UTILITAS ═══════════════════════ */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -277,10 +279,12 @@ H_(10,'IPA7C','IPA Terpadu','Maya Sari','7C','2302',60,1,{"Soal_5":"Tumbuhan mem
 log:[{id:9001,waktu:iso(now-2*H),username:'agus',role:'guru',aksi:'BUAT_PAKET',detail:'Token MTK8A'},{id:9002,waktu:iso(now-2*H),username:'hasan',role:'guru',aksi:'BUAT_PAKET',detail:'Token PAI8B'},{id:9003,waktu:iso(now-1*H),username:'admin',role:'admin',aksi:'LOGIN',detail:'Admin masuk panel'}],
 images:{}};}
 
-/* ═══════════════════════ SQL SUPABASE v5.1 (AMAN) ═══════════════════════ */
+/* ═══════════════════════ SQL SUPABASE v5.2 (AMAN) ═══════════════════════ */
 const SQL_SCHEMA=`-- ══════════════════════════════════════════════════════════════
--- CBT PRO v5.1 OPTIMIZED · Skema + Fungsi Aman Supabase
--- Jalankan sekali di SQL Editor. Aman dijalankan ulang.
+-- CBT PRO v5.2 · Skema + Fungsi Aman Supabase
+-- Jalankan SEKALI di SQL Editor. Aman dijalankan ulang (idempotent).
+-- Juga berfungsi sebagai UPGRADE dari skema v5.0 lama:
+-- policy anon_all lama dicabut, tabel dikunci, fungsi RPC dibuat.
 -- KEAMANAN:
 --  · Tabel sensitif TIDAK bisa diakses langsung oleh anon (revoked)
 --  · Siswa hanya lewat RPC: soal dikirim TANPA kunci jawaban
@@ -873,67 +877,137 @@ async importAll(json){const d=json.data;if(!d||!d.users||!d.paket)throw new Erro
 subscribe(cb){const fn=()=>cb();window.addEventListener('local-db',fn);return()=>window.removeEventListener('local-db',fn);}
 }
 
-/* ═══════════════════════ ADAPTER: SUPABASE (RPC AMAN) ═══════════════════════ */
+/* ═══════════════ ADAPTER: SUPABASE (ADAPTIF AMAN/LEGACY) ═══════════════ */
+const LEGACY_META={}; // mode legacy: kunci disimpan hanya di memori selama sesi ujian
 class SupaDB{
-constructor(url,key){this.mode='supabase';this.url=url;this.sb=supabase.createClient(url,key,{auth:{persistSession:false}});this._imgCache={};}
+constructor(url,key){this.mode='supabase';this.url=url;this.secure=false;this.sb=supabase.createClient(url,key,{auth:{persistSession:false}});this._imgCache={};}
 err(e){if(e)throw new Error(e.message||'Kesalahan database');}
 async call(fn,args){const{data,error}=await this.sb.rpc(fn,args);if(error)throw new Error(error.message);return data;}
 async rpc(op,payload={}){const s=SES.load();
 try{return await this.call('panel',{p_op:op,p_payload:payload,p_token:s?.token||''});}
 catch(e){if(/sesi/i.test(e.message)){SES.clear();toast('Sesi berakhir. Silakan login kembali.','warn');go('#/login');}throw e;}}
-async ping(){await this.call('jadwal_publik',{});return true;}
-async seedDemo(){const d=DEMO();await this.rpc('seed',{data:{users:d.users,pengaturan:d.settings,bank_soal:d.banks,paket:d.pakets,hasil:d.hasil}});}
+async ping(){const{data,error}=await this.sb.from('pengaturan').select('key').limit(1);if(error)throw new Error(error.message);
+try{await this.call('jadwal_publik',{});this.secure=true;}catch(e){this.secure=false;}return true;}
+/* ── login ── */
+async loginStaff(pass){if(this.secure){const r=await this.call('login_petugas',{p_username:null,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Password salah!');return{...r.user,token:r.token,exp:+r.exp};}
+const{data}=await this.sb.from('users').select('*').in('role',['admin','pengawas']);
+for(const u of(data||[])){if(await verifyPass(u.password_hash,pass)){if(String(u.password_hash).startsWith('plain:'))await this.upgradePass(u.id,'sha256:'+await sha256(pass));return{role:u.role,id:u.id,username:u.username,nama:u.nama_lengkap,mapel:u.mapel};}}
+throw new Error('Password salah!');}
+async loginGuru(username,pass){if(this.secure){const r=await this.call('login_petugas',{p_username:username,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Username atau password salah!');return{...r.user,token:r.token,exp:+r.exp};}
+const{data}=await this.sb.from('users').select('*').eq('role','guru').eq('username',username).maybeSingle();
+if(!data||!(await verifyPass(data.password_hash,pass)))throw new Error('Username atau password salah!');
+if(String(data.password_hash).startsWith('plain:'))await this.upgradePass(data.id,'sha256:'+await sha256(pass));
+return{role:'guru',id:data.id,username:data.username,nama:data.nama_lengkap,mapel:data.mapel};}
+async upgradePass(id,hash){this.err((await this.sb.from('users').update({password_hash:hash}).eq('id',id)).error);}
+/* ── guru ── */
+async listGuru(){if(this.secure)return await this.rpc('guru_list');
+const{data:u,error}=await this.sb.from('users').select('id,username,nama_lengkap,mapel,role,created_at').eq('role','guru').order('created_at',{ascending:false});this.err(error);
+const{data:b,error:e2}=await this.sb.from('bank_soal').select('id,guru_id');this.err(e2);
+return(u||[]).map(x=>({...x,jumlah_bank:(b||[]).filter(y=>y.guru_id===x.id).length}));}
+async createGuru(g){if(this.secure)return await this.rpc('guru_save',{username:g.username,password:g.password,nama:g.nama_lengkap,mapel:g.mapel});
+const{data:ex}=await this.sb.from('users').select('id').eq('username',g.username).maybeSingle();if(ex)throw new Error('Username sudah digunakan!');
+const row={id:uid(),role:'guru',username:g.username,password_hash:'sha256:'+await sha256(g.password),nama_lengkap:g.nama_lengkap,mapel:g.mapel,created_at:nowISO()};
+this.err((await this.sb.from('users').insert(row)).error);return row;}
+async updateGuru(id,g){if(this.secure)return await this.rpc('guru_save',{id,nama:g.nama_lengkap,mapel:g.mapel,password:g.password||null});
+const upd={nama_lengkap:g.nama_lengkap,mapel:g.mapel};if(g.password)upd.password_hash='sha256:'+await sha256(g.password);
+this.err((await this.sb.from('users').update(upd).eq('id',id)).error);}
+async deleteGuru(id){try{const imgs=await this.listImages('g'+id+'_');for(const f of imgs){try{await this.deleteImage(f.name);}catch(e){}}}catch(e){}
+if(this.secure)return await this.rpc('guru_del',{id});
+const{data:banks}=await this.sb.from('bank_soal').select('*').eq('guru_id',id);const{data:user}=await this.sb.from('users').select('*').eq('id',id).maybeSingle();
+this.err((await this.sb.from('users').delete().eq('id',id)).error);return{user,banks:banks||[]};}
+async restoreGuru(c){if(this.secure)return await this.rpc('guru_restore',c);
+if(c.user)this.err((await this.sb.from('users').insert(c.user)).error);if(c.banks?.length)this.err((await this.sb.from('bank_soal').insert(c.banks)).error);}
+/* ── bank soal ── */
+async listBanks(guruId){if(this.secure)return await this.rpc('bank_list',{guruId:guruId??null});
+let q=this.sb.from('bank_soal').select('*').order('created_at',{ascending:false});if(guruId)q=q.eq('guru_id',guruId);const{data,error}=await q;this.err(error);return data||[];}
+async getBank(id){if(this.secure)return await this.rpc('bank_get',{id});const{data,error}=await this.sb.from('bank_soal').select('*').eq('id',id).maybeSingle();this.err(error);return data;}
+async saveBank(b){if(this.secure)return await this.rpc('bank_save',{row:b});
+if(b.id){const{id,...rest}=b;this.err((await this.sb.from('bank_soal').update(rest).eq('id',id)).error);}else{b.id=uid();b.created_at=nowISO();this.err((await this.sb.from('bank_soal').insert(b)).error);}return b;}
+async deleteBank(id){if(this.secure)return await this.rpc('bank_del',{id});const{data}=await this.sb.from('bank_soal').select('*').eq('id',id).maybeSingle();this.err((await this.sb.from('bank_soal').delete().eq('id',id)).error);return data;}
+async restoreBanks(rows){if(this.secure)return await this.rpc('bank_restore',{rows});if(rows?.length)this.err((await this.sb.from('bank_soal').insert(rows)).error);}
+/* ── paket ── */
+async listPaket(o={}){if(this.secure){if(o.guruId)return await this.rpc('paket_list',{guruId:o.guruId});if(o.light)return await this.call('jadwal_publik',{});return await this.rpc('paket_list',{});}
+const cols=o.light?'token,mapel,waktu_mulai,waktu_selesai,durasi_menit,guru_id,keterangan,acak_soal,acak_opsi,mode_offline,created_at':'*';
+let q=this.sb.from('paket').select(cols).order('waktu_mulai',{ascending:false});if(o.guruId)q=q.eq('guru_id',o.guruId);const{data,error}=await q;this.err(error);return data||[];}
+async getPaket(token){if(this.secure)return await this.rpc('paket_get',{token});const{data,error}=await this.sb.from('paket').select('*').eq('token',token).maybeSingle();this.err(error);return data;}
+async getPaketSiswa(token){if(this.secure)return await this.call('ambil_paket_siswa',{p_token:token});
+const{data:p,error}=await this.sb.from('paket').select('*').eq('token',token).maybeSingle();this.err(error);
+if(!p)throw new Error('Token tidak ditemukan. Periksa kembali.');
+const n=Date.now(),m=new Date(p.waktu_mulai).getTime(),s2=new Date(p.waktu_selesai).getTime();
+if(n<m)throw new Error('Ujian belum dimulai. Mulai: '+fmtTgl(p.waktu_mulai));
+if(n>s2)throw new Error('Waktu ujian untuk token ini sudah berakhir.');
+let soal=Array.isArray(p.soal_json)?p.soal_json:JSON.parse(p.soal_json||'[]');
+if(!soal.length)throw new Error('Paket ini belum memiliki soal.');
+LEGACY_META[p.token]={mapel:p.mapel,soal:soal.map(x=>({tipe:x.tipe||'PG',poin:x.poin||0,jawaban:x.jawaban||''}))};
+soal=soal.map(x=>{if((x.tipe||'PG')==='PG'){const{jawaban,...rest}=x;return rest;}return x;});
+return{token:p.token,mapel:p.mapel,durasi_menit:p.durasi_menit,keterangan:p.keterangan||'',acak_soal:!!p.acak_soal,acak_opsi:!!p.acak_opsi,mode_offline:!!p.mode_offline,waktu_mulai:p.waktu_mulai,waktu_selesai:p.waktu_selesai,soal_json:soal};}
+async savePaket(p,oldToken){if(this.secure)return await this.rpc('paket_save',{row:p,old_token:oldToken||null});
+if(oldToken&&oldToken!==p.token){const{data:ex}=await this.sb.from('paket').select('token').eq('token',p.token).maybeSingle();if(ex)throw new Error('Token sudah digunakan.');this.err((await this.sb.from('paket').delete().eq('token',oldToken)).error);p.created_at=nowISO();this.err((await this.sb.from('paket').insert(p)).error);}else{this.err((await this.sb.from('paket').upsert(p)).error);}return p;}
+async deletePaket(token){if(this.secure)return await this.rpc('paket_del',{token});const{data}=await this.sb.from('paket').select('*').eq('token',token).maybeSingle();this.err((await this.sb.from('paket').delete().eq('token',token)).error);return data;}
+async restorePaket(row){if(this.secure)return await this.rpc('paket_restore',{row});if(row)this.err((await this.sb.from('paket').insert(row)).error);}
+/* ── hasil ── */
+async listHasil(o={}){if(this.secure)return await this.rpc('hasil_list',{tokens:o.tokens||null,light:!!o.light});
+const cols=o.light?'id,waktu,token,mapel,nama,kelas,nis,skor_pg,skor_essay,pelanggaran':'*';
+let q=this.sb.from('hasil').select(cols).order('id',{ascending:false}).limit(1500);
+if(o.tokens?.length)q=q.in('token',o.tokens);else if(o.tokens)return[];
+const{data,error}=await q;this.err(error);return data||[];}
+async submitUjian(d){if(this.secure)return await this.call('submit_jawaban_siswa',{p_token:d.token,p_nama:d.nama,p_kelas:d.kelas,p_nis:d.nis,p_jawaban:d.jawaban,p_pelanggaran:d.pelanggaran||0});
+const meta=LEGACY_META[d.token];if(!meta)throw new Error('Sesi soal tidak ditemukan. Masuk ulang dengan token.');
+let pg=0;const essay={};
+meta.soal.forEach((s,i)=>{const j=d.jawaban[i]??'';if(s.tipe==='PG'){if(String(j).trim()===String(s.jawaban).trim())pg+=parseFloat(s.poin||0);}else essay['Soal_'+(i+1)]=j;});
+const row={waktu:nowISO(),token:d.token,mapel:meta.mapel,nama:d.nama,kelas:d.kelas,nis:d.nis,skor_pg:pg,jawaban_essay:essay,detail_jawaban:d.jawaban,pelanggaran:d.pelanggaran||0};
+const{data:ex}=await this.sb.from('hasil').select('id').eq('token',row.token).eq('nis',row.nis).eq('mapel',row.mapel).maybeSingle();
+if(ex){const{id,...rest}=row;this.err((await this.sb.from('hasil').update(rest).eq('id',ex.id)).error);}else{row.id=uid();this.err((await this.sb.from('hasil').insert(row)).error);}
+return{skor_pg:pg};}
+async gradeHasil(id,nilai,skor){if(this.secure)return await this.rpc('hasil_grade',{id,nilai,skor});this.err((await this.sb.from('hasil').update({nilai_essay:nilai,skor_essay:skor}).eq('id',id)).error);}
+async deleteHasil(ids){if(this.secure)return await this.rpc('hasil_del',{ids});const{data}=await this.sb.from('hasil').select('*').in('id',ids);this.err((await this.sb.from('hasil').delete().in('id',ids)).error);return data||[];}
+async restoreHasil(rows){if(this.secure)return await this.rpc('hasil_restore',{rows});if(rows?.length)this.err((await this.sb.from('hasil').insert(rows)).error);}
+async clearHasil(){if(this.secure)return await this.rpc('hasil_clear');const{data}=await this.sb.from('hasil').select('*');this.err((await this.sb.from('hasil').delete().neq('id',0)).error);return data||[];}
+/* ── log & pengaturan ── */
+async listLog(limit=30){if(this.secure)return await this.rpc('log_list',{limit});const{data,error}=await this.sb.from('log_aktivitas').select('*').order('id',{ascending:false}).limit(limit);this.err(error);return data||[];}
+async addLog(l){if(this.secure){try{await this.rpc('log_add',{aksi:l.aksi,detail:l.detail||''});}catch(e){}return;}
+try{await this.sb.from('log_aktivitas').insert({id:uid(),waktu:nowISO(),username:l.username,role:l.role,aksi:l.aksi,detail:l.detail||''});}catch(e){}}
+async clearLog(){if(this.secure)return await this.rpc('log_clear');this.err((await this.sb.from('log_aktivitas').delete().neq('id',0)).error);}
 async getSettings(){const{data,error}=await this.sb.from('pengaturan').select('*');this.err(error);const o={};(data||[]).forEach(r=>o[r.key]=r.value);return o;}
-async saveSettings(o){await this.rpc('set_save',{settings:o});}
-async loginStaff(pass){const r=await this.call('login_petugas',{p_username:null,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Password salah!');return{...r.user,token:r.token,exp:+r.exp};}
-async loginGuru(username,pass){const r=await this.call('login_petugas',{p_username:username,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Username atau password salah!');return{...r.user,token:r.token,exp:+r.exp};}
-async listGuru(){return await this.rpc('guru_list');}
-async createGuru(g){return await this.rpc('guru_save',{username:g.username,password:g.password,nama:g.nama_lengkap,mapel:g.mapel});}
-async updateGuru(id,g){await this.rpc('guru_save',{id,nama:g.nama_lengkap,mapel:g.mapel,password:g.password||null});}
-async deleteGuru(id){try{const imgs=await this.listImages('g'+id+'_');for(const f of imgs){try{await this.deleteImage(f.name);}catch(e){}}}catch(e){}return await this.rpc('guru_del',{id});}
-async restoreGuru(captured){await this.rpc('guru_restore',captured);}
-async listBanks(guruId){return await this.rpc('bank_list',{guruId:guruId??null});}
-async getBank(id){return await this.rpc('bank_get',{id});}
-async saveBank(b){return await this.rpc('bank_save',{row:b});}
-async deleteBank(id){return await this.rpc('bank_del',{id});}
-async restoreBanks(rows){await this.rpc('bank_restore',{rows});}
-async listPaket(o={}){if(o.guruId)return await this.rpc('paket_list',{guruId:o.guruId});if(o.light)return await this.call('jadwal_publik',{});return await this.rpc('paket_list',{});}
-async getPaket(token){return await this.rpc('paket_get',{token});}
-async getPaketSiswa(token){return await this.call('ambil_paket_siswa',{p_token:token});}
-async savePaket(p,oldToken){return await this.rpc('paket_save',{row:p,old_token:oldToken||null});}
-async deletePaket(token){return await this.rpc('paket_del',{token});}
-async restorePaket(row){await this.rpc('paket_restore',{row});}
-async listHasil(o={}){return await this.rpc('hasil_list',{tokens:o.tokens||null,light:!!o.light});}
-async submitUjian(d){return await this.call('submit_jawaban_siswa',{p_token:d.token,p_nama:d.nama,p_kelas:d.kelas,p_nis:d.nis,p_jawaban:d.jawaban,p_pelanggaran:d.pelanggaran||0});}
-async gradeHasil(id,nilai,skor){await this.rpc('hasil_grade',{id,nilai,skor});}
-async deleteHasil(ids){return await this.rpc('hasil_del',{ids});}
-async restoreHasil(rows){await this.rpc('hasil_restore',{rows});}
-async clearHasil(){return await this.rpc('hasil_clear');}
-async dashboard(){return await this.rpc('dash');}
-async listLog(limit=30){return await this.rpc('log_list',{limit});}
-async addLog(l){try{await this.rpc('log_add',{aksi:l.aksi,detail:l.detail||''});}catch(e){}}
-async clearLog(){await this.rpc('log_clear');}
+async saveSettings(o){if(this.secure)return await this.rpc('set_save',{settings:o});this.err((await this.sb.from('pengaturan').upsert(Object.entries(o).map(([key,value])=>({key,value:String(value)})))).error);}
+/* ── backup / demo ── */
+async exportAll(){if(this.secure)return await this.rpc('backup');
+const t=async n=>{const{data}=await this.sb.from(n).select('*');return data||[];};
+const[users,bank_soal,paket,hasil,log_aktivitas]=await Promise.all([t('users'),t('bank_soal'),t('paket'),t('hasil'),t('log_aktivitas')]);
+return{app:'CBT PRO',version:5,exported_at:nowISO(),data:{users,bank_soal,paket,hasil,pengaturan:await this.getSettings(),log_aktivitas}};}
+async importAll(json){if(this.secure)return await this.rpc('restore',{data:json.data});
+const d=json.data;if(!d?.users||!d?.paket)throw new Error('Format backup tidak valid.');
+for(const tb of['hasil','log_aktivitas','bank_soal','paket','users'])await this.sb.from(tb).delete().neq(tb==='paket'?'token':'id',tb==='paket'?'':'0');
+this.err((await this.sb.from('users').insert(d.users)).error);
+if(d.bank_soal?.length)this.err((await this.sb.from('bank_soal').insert(d.bank_soal)).error);
+this.err((await this.sb.from('paket').insert(d.paket)).error);
+if(d.hasil?.length)this.err((await this.sb.from('hasil').insert(d.hasil)).error);
+if(d.log_aktivitas?.length)this.err((await this.sb.from('log_aktivitas').insert(d.log_aktivitas)).error);
+if(d.pengaturan)await this.saveSettings(d.pengaturan);}
+async seedDemo(){const d=DEMO();if(this.secure)return await this.rpc('seed',{data:{users:d.users,pengaturan:d.settings,bank_soal:d.banks,paket:d.pakets,hasil:d.hasil}});
+this.err((await this.sb.from('users').upsert(d.users)).error);
+this.err((await this.sb.from('pengaturan').upsert(Object.entries(d.settings).map(([key,value])=>({key,value})))).error);
+this.err((await this.sb.from('bank_soal').upsert(d.banks)).error);
+this.err((await this.sb.from('paket').upsert(d.pakets)).error);
+this.err((await this.sb.from('hasil').upsert(d.hasil,{onConflict:'token,nis,mapel'})).error);}
+/* ── dashboard gabungan ── */
+async dashboard(){const[gurus,banks,pakets,hasil,log]=await Promise.all([this.listGuru(),this.listBanks(),this.listPaket({light:true}),this.listHasil({light:true}),this.listLog(12)]);
+const t=h=>(parseFloat(h.skor_pg)||0)+(parseFloat(h.skor_essay)||0);
+const pm={};hasil.forEach(h=>{(pm[h.mapel]=pm[h.mapel]||[]).push(t(h));});
+return{jumlah_guru:gurus.length,jumlah_bank:banks.length,jumlah_paket:pakets.length,jumlah_hasil:hasil.length,
+rata_rata:hasil.length?hasil.reduce((a,h)=>a+t(h),0)/hasil.length:0,
+jumlah_pelanggaran:hasil.reduce((a,h)=>a+(+h.pelanggaran||0),0),
+per_mapel:Object.entries(pm).map(([m,a])=>({m,avg:a.reduce((x,y)=>x+y,0)/a.length,n:a.length})).sort((a,b)=>b.n-a.n).slice(0,8),
+top:[...hasil].sort((a,b)=>t(b)-t(a)).slice(0,5).map(h=>({nama:h.nama,kelas:h.kelas,mapel:h.mapel,skor:t(h)})),log};}
+/* ── gambar (storage) ── */
 async listImages(prefix){const{data,error}=await this.sb.storage.from('gambar').list('',{limit:300,sortBy:{column:'created_at',order:'desc'}});this.err(error);return(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder'&&(!prefix||f.name.startsWith(prefix))).map(f=>({name:f.name,url:this.imageUrl(f.name),created_at:f.created_at}));}
 imageUrl(name){if(this._imgCache[name])return this._imgCache[name];const{data}=this.sb.storage.from('gambar').getPublicUrl(name);this._imgCache[name]=data.publicUrl;return data.publicUrl;}
 async uploadImage(blob,name){this.err((await this.sb.storage.from('gambar').upload(name,blob,{contentType:blob.type,upsert:false})).error);return{name,url:this.imageUrl(name)};}
 async deleteImage(name){let cached=null;try{const r=await fetch(this.imageUrl(name));if(r.ok){const b=await r.blob();cached={blob:b,type:b.type};}}catch(e){}this.err((await this.sb.storage.from('gambar').remove([name])).error);return cached;}
 async restoreImage(name,v){if(v?.blob)this.err((await this.sb.storage.from('gambar').upload(name,v.blob,{contentType:v.type,upsert:true})).error);}
-async exportAll(){return await this.rpc('backup');}
-async importAll(json){await this.rpc('restore',{data:json.data});}
+/* ── live monitor (polling hemat) ── */
 subscribe(cb){const iv=setInterval(()=>{try{cb({poll:true});}catch(e){}},20000);return()=>clearInterval(iv);}
 }
-/* Panel 'dash' untuk Supabase — dibangun dari op yang sudah ada */
-SupaDB.prototype.dashboard=function(){return(async()=>{
-const[gurus,banks,pakets,hasilFull,log]=await Promise.all([
- this.rpc('guru_list'),this.rpc('bank_list',{guruId:null}),this.rpc('paket_list',{}),
- this.rpc('hasil_list',{tokens:null,light:true}),this.rpc('log_list',{limit:12})]);
-const t=h=>(parseFloat(h.skor_pg)||0)+(parseFloat(h.skor_essay)||0);
-const pm={};hasilFull.forEach(h=>{(pm[h.mapel]=pm[h.mapel]||[]).push(t(h));});
-return{jumlah_guru:gurus.length,jumlah_bank:banks.length,jumlah_paket:pakets.length,jumlah_hasil:hasilFull.length,
-rata_rata:hasilFull.length?hasilFull.reduce((a,h)=>a+t(h),0)/hasilFull.length:0,
-jumlah_pelanggaran:hasilFull.reduce((a,h)=>a+(+h.pelanggaran||0),0),
-per_mapel:Object.entries(pm).map(([m,a])=>({m,avg:a.reduce((x,y)=>x+y,0)/a.length,n:a.length})).sort((a,b)=>b.n-a.n).slice(0,8),
-top:[...hasilFull].sort((a,b)=>t(b)-t(a)).slice(0,5).map(h=>({nama:h.nama,kelas:h.kelas,mapel:h.mapel,skor:t(h)})),log};})();};
 
 /* ═══════════════════════ FASILITAS DATA & SESI ═══════════════════════ */
 let DB=new LocalDB();
@@ -966,17 +1040,18 @@ function go(h){if(location.hash===h)route();else location.hash=h;}
 const ROUTES=['siswa','jadwal','login','login-guru','guru','admin','pengawas','setup'];
 function currentRoute(){const h=(location.hash||'#/siswa').replace('#/','').split('?')[0];return ROUTES.includes(h)?h:'siswa';}
 function renderNav(){const r=currentRoute();const s=SES.load();
+const isAdmin=!!s&&s.role==='admin';
 const link=(h,label)=>`<a href="#/${h}" class="navlink ${r===h?'active':''}">${label}</a>`;
-const conn=DB.mode==='supabase'?'<span class="w-2 h-2 rounded-full bg-sukses-500 live-dot"></span><span class="hidden sm:inline">Supabase</span>':'<span class="w-2 h-2 rounded-full bg-pensil-400"></span><span class="hidden sm:inline">Demo Lokal</span>';
+const conn=DB.mode==='supabase'?(DB.secure?'<span class="w-2 h-2 rounded-full bg-sukses-500 live-dot"></span><span class="hidden sm:inline">Supabase Aman</span>':'<span class="w-2 h-2 rounded-full bg-pensil-400"></span><span class="hidden sm:inline">Supabase Legacy</span>'):'<span class="w-2 h-2 rounded-full bg-pensil-400"></span><span class="hidden sm:inline">Demo Lokal</span>';
 let right='';
 if(s){const home=s.role==='guru'?'guru':s.role==='admin'?'admin':'pengawas';right=`<a href="#/${home}" class="btn-soft btn-xs hidden md:inline-flex">${ic('cap')}${esc(s.nama.split(' ')[0])}</a><button data-logout class="btn-danger btn-xs">${ic('out','w-3.5 h-3.5')}Keluar</button>`;}
 else right=`<a href="#/login-guru" class="btn-ghost btn-xs hidden md:inline-flex">${ic('book','w-3.5 h-3.5')}Guru</a><a href="#/login" class="btn-pri btn-xs">${ic('shield','w-3.5 h-3.5')}Petugas</a>`;
 $('#navbar').innerHTML=`<div class="bg-kertas-50/85 backdrop-blur-md border-b border-kertas-300"><div class="max-w-7xl mx-auto px-4 h-[68px] flex items-center justify-between gap-3">
 <a href="#/siswa" class="flex items-center gap-3 shrink-0">${LOGO(38)}<div class="leading-none"><div class="font-disp font-bold text-lg text-ink-900 tracking-tight">CBT<span class="text-biru-600">PRO</span></div><div class="text-[9px] font-bold tracking-[.28em] text-ink-400 uppercase mt-1">Lembar Jawab Digital</div></div></a>
-<div class="hidden lg:flex items-center gap-1">${link('siswa','Portal Peserta')}${link('jadwal','Jadwal Ujian')}${link('setup','Hubungkan')}</div>
+<div class="hidden lg:flex items-center gap-1">${link('siswa','Portal Peserta')}${link('jadwal','Jadwal Ujian')}${isAdmin?link('setup','Hubungkan'):''}</div>
 <div class="flex items-center gap-2.5">
 <span id="nav-clock" class="hidden md:block font-mono text-xs font-semibold text-ink-400 tabular-nums"></span>
-<a href="#/setup" class="chip-gray hover:border-biru-300 transition cursor-pointer" title="Status koneksi">${conn}</a>
+${isAdmin?`<a href="#/setup" class="chip-gray hover:border-biru-300 transition cursor-pointer" title="Status koneksi">${conn}</a>`:''}
 ${right}
 <button data-burger class="lg:hidden icon-btn">${ic('menu','w-5 h-5')}</button>
 </div></div></div>`;
@@ -987,14 +1062,15 @@ m.innerHTML=`<div class="fixed inset-0 z-[45]" data-mclose><div class="absolute 
 <a href="#/jadwal" class="side-link !text-ink-700 hover:!bg-biru-50">${ic('cal')}Jadwal Ujian</a>
 <a href="#/login-guru" class="side-link !text-ink-700 hover:!bg-biru-50">${ic('book')}Login Guru</a>
 <a href="#/login" class="side-link !text-ink-700 hover:!bg-biru-50">${ic('shield')}Login Petugas</a>
-<a href="#/setup" class="side-link !text-ink-700 hover:!bg-biru-50">${ic('db')}Hubungkan Supabase</a></div></div>`;
+${isAdmin?`<a href="#/setup" class="side-link !text-ink-700 hover:!bg-biru-50">${ic('db')}Hubungkan Supabase</a>`:''}</div></div>`;
 m.querySelector('[data-mclose]').addEventListener('click',e=>{if(e.target.closest('a')||!e.target.closest('.pop-in'))m.innerHTML='';});};
 $('#mobile-menu').innerHTML='';}
-function renderBanner(){const b=$('#demo-banner');if(DB.mode==='local'&&!sessionStorage.getItem('cbt_hide_banner')){b.innerHTML=`<div class="fixed bottom-0 left-0 right-0 z-[39] bg-ink-900 text-white text-xs"><div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-3 flex-wrap"><span class="w-2 h-2 rounded-full bg-pensil-400 shrink-0"></span><span class="font-semibold">MODE DEMO LOKAL — data tersimpan di browser ini.</span><a href="#/setup" class="font-bold text-pensil-300 hover:text-pensil-200 underline underline-offset-2">Hubungkan Supabase →</a><button class="ml-auto text-white/50 hover:text-white" onclick="sessionStorage.setItem('cbt_hide_banner','1');document.getElementById('demo-banner').innerHTML=''">${ic('x','w-4 h-4')}</button></div></div>`;}else b.innerHTML='';}
+function renderBanner(){const b=$('#demo-banner');if(DB.mode==='local'&&!sessionStorage.getItem('cbt_hide_banner')){b.innerHTML=`<div class="fixed bottom-0 left-0 right-0 z-[39] bg-ink-900 text-white text-xs"><div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-3 flex-wrap"><span class="w-2 h-2 rounded-full bg-pensil-400 shrink-0"></span><span class="font-semibold">MODE DEMO LOKAL — data tersimpan di browser ini.</span><a href="#/login" class="font-bold text-pensil-300 hover:text-pensil-200 underline underline-offset-2">Login Admin untuk menghubungkan →</a><button class="ml-auto text-white/50 hover:text-white" onclick="sessionStorage.setItem('cbt_hide_banner','1');document.getElementById('demo-banner').innerHTML=''">${ic('x','w-4 h-4')}</button></div></div>`;}else b.innerHTML='';}
 async function route(){runCleanup();const r=currentRoute();const s=SES.load();
 if(r==='guru'&&(!s||s.role!=='guru')){toast('Silakan login guru terlebih dahulu.','warn');return go('#/login-guru');}
 if(r==='admin'&&(!s||s.role!=='admin')){toast('Area admin memerlukan login.','warn');return go('#/login');}
 if(r==='pengawas'&&(!s||(s.role!=='pengawas'&&s.role!=='admin'))){return go('#/login');}
+if(r==='setup'&&(!s||s.role!=='admin')){toast('⛔ Halaman koneksi hanya dapat diakses oleh Admin.','warn');return go(s?(s.role==='guru'?'#/guru':'#/pengawas'):'#/login');}
 renderNav();renderBanner();window.scrollTo(0,0);
 const v=$('#view');v.innerHTML=`<div class="flex items-center justify-center py-32"><div class="w-9 h-9 border-4 border-biru-500 border-t-transparent rounded-full animate-spin"></div></div>`;
 try{await({siswa:vPortal,jadwal:vJadwal,login:vLogin,'login-guru':vLoginGuru,guru:vGuru,admin:vAdmin,pengawas:vPengawas,setup:vSetup}[r])(v);}
@@ -1226,7 +1302,7 @@ v.innerHTML=`<div class="lg:grid lg:grid-cols-[260px_1fr] min-h-[calc(100vh-68px
 <div class="relative p-5 border-b border-white/10"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl flex items-center justify-center text-white font-disp font-bold text-lg" style="background:${accent}">${esc(user.nama[0]||'?')}</div><div class="min-w-0"><div class="font-bold text-white text-sm truncate">${esc(user.nama)}</div><div class="text-[11px] text-ink-300 truncate">${esc(sub)}</div></div></div>
 <div class="chip bg-white/5 text-ink-200 border-white/10 mt-3 w-full justify-center">🕒 Sesi aktif · ${role.toUpperCase()}</div></div>
 <nav class="relative p-3 space-y-1 flex-1">${tabs.map(t=>`<button class="tabbtn ${t.id===tabs[0].id?'active':''}" data-tab="${t.id}">${ic(t.icon,'w-[18px] h-[18px]')} ${t.label}</button>`).join('')}</nav>
-<div class="relative p-4 border-t border-white/10"><div class="text-[10px] text-ink-400 font-mono text-center">CBT·PRO v${APP.ver} · ${DB.mode==='supabase'?'SUPABASE AMAN':'DEMO'}</div></div></aside>
+<div class="relative p-4 border-t border-white/10"><div class="text-[10px] text-ink-400 font-mono text-center">CBT·PRO v${APP.ver} · ${DB.mode==='supabase'?(DB.secure?'SUPABASE AMAN':'SUPABASE LEGACY'):'DEMO'}</div></div></aside>
 <div class="lg:hidden bg-white border-b border-kertas-300 px-3 py-2 flex gap-1.5 overflow-x-auto">${tabs.map(t=>`<button data-tab="${t.id}" class="tabbtn-m shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold ${t.id===tabs[0].id?'bg-ink-900 text-white':'bg-kertas-100 text-ink-500'}">${t.label}</button>`).join('')}</div>
 <div class="p-4 md:p-8 max-w-6xl w-full mx-auto" id="panel-body"></div></div>`;
 const switchTab=id=>{$$('[data-tab]').forEach(b=>{const on=b.dataset.tab===id;if(b.classList.contains('tabbtn'))b.classList.toggle('active',on);else{b.classList.toggle('bg-ink-900',on);b.classList.toggle('text-white',on);b.classList.toggle('bg-kertas-100',!on);b.classList.toggle('text-ink-500',!on);}});
@@ -1489,7 +1565,7 @@ bindActs(c,{tag:el=>copyText('['+el.dataset.n+']','Tag gambar disalin.'),
 del:async el=>{const n=el.dataset.n;if(!(await confirmBox({title:'Hapus gambar?',body:`<code>${esc(n)}</code> — soal yang memakainya akan menampilkan "gambar tidak ditemukan".`,okText:'Hapus',danger:true})))return;
 const cached=await DB.deleteImage(n);logAct('HAPUS_GBR',n);load();
 toast('Gambar dihapus.','warn',{label:'Undo',fn:async()=>{try{await DB.restoreImage(n,cached);load();toast('Dipulihkan.','ok');}catch(e){toast('Gagal memulihkan: '+e.message,'err');}}});}});}
-async function tGuruHasil(c){const s=SES.load();const pakets=await DB.listPaket({guruId:s.uid,light:false});const tokens=pakets.map(p=>p.token);
+async function tGuruHasil(c){const s=SES.load();const pakets=await DB.listPaket({guruId:s.uid});const tokens=pakets.map(p=>p.token);
 const rows=await DB.listHasil({tokens});renderHasilTable(c,rows,{title:'Hasil Siswa Saya',idx:'GURU / HASIL',canGrade:true,canDelete:false,refresh:()=>tGuruHasil(c),key:'ghasil'});}
 
 /* ═══════════════════════ TABEL HASIL (Guru/Admin) ═══════════════════════ */
@@ -1574,7 +1650,7 @@ $('#ad-clearlog').onclick=async()=>{if(await confirmBox({title:'Bersihkan log ak
 async function tAdminGuru(c){let gurus=await DB.listGuru();
 const draw=()=>{const q=($('#ag-q')?.value||'').toLowerCase();const list=gurus.filter(g=>(g.username+g.nama_lengkap+g.mapel).toLowerCase().includes(q));
 $('#ag-body').innerHTML=list.length?list.map(g=>`<tr class="hover:bg-biru-50/40"><td class="td font-mono font-bold">${esc(g.username)}</td><td class="td font-semibold">${esc(g.nama_lengkap)}</td><td class="td"><span class="chip-blue !text-[10px]">${esc(g.mapel)}</span></td><td class="td text-center"><span class="chip-green !text-[10px]">${g.jumlah_bank} bank</span></td><td class="td text-right whitespace-nowrap"><button class="btn-soft btn-xs" data-act="edit" data-id="${g.id}">Edit</button> <button class="btn-ghost btn-xs !text-bahaya-600" data-act="del" data-id="${g.id}">Hapus</button></td></tr>`).join(''):'<tr><td colspan="5" class="td">'+emptyBox('users','Belum ada guru','Tambah manual atau import Excel.')+'</td></tr>';};
-c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">ADMIN / GURU</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Manajemen Akun Guru</h2><p class="text-xs text-ink-400 mt-1">Password di-hash ${DB.mode==='supabase'?'di server (SHA-256 + validasi login server)':'SHA-256'} otomatis.</p></div>
+c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">ADMIN / GURU</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Manajemen Akun Guru</h2><p class="text-xs text-ink-400 mt-1">Password di-hash ${DB.mode==='supabase'&&DB.secure?'di server (SHA-256)':'SHA-256'} otomatis.</p></div>
 <div class="flex gap-2 flex-wrap"><button class="btn-ghost btn-xs" id="ag-tpl">${ic('down','w-3.5 h-3.5')} Template</button><button class="btn-amber btn-xs" id="ag-imp">${ic('up','w-3.5 h-3.5')} Import Excel</button><button class="btn-pri btn-xs" id="ag-new">${ic('plus','w-3.5 h-3.5')} Tambah Guru</button></div></div>
 <div class="relative mb-4 max-w-sm"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300">${ic('search')}</span><input id="ag-q" class="input !pl-10" placeholder="Cari guru…"></div>
 <div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full"><thead class="bg-kertas-100"><tr><th class="th">Username</th><th class="th">Nama Lengkap</th><th class="th">Mapel</th><th class="th text-center">Bank</th><th class="th text-right">Aksi</th></tr></thead><tbody id="ag-body" class="divide-y divide-kertas-200"></tbody></table></div></div>`;
@@ -1653,8 +1729,8 @@ c.innerHTML=`<div class="mb-6"><div class="sect-idx">ADMIN / SISTEM</div><h2 cla
 <div class="card p-6 !border-pensil-300"><h3 class="font-bold text-pensil-700 mb-2">📤 Restore Database</h3><p class="text-xs text-ink-400 mb-4">Ganti seluruh data dengan file backup. <b>Berbahaya</b> — data saat ini ditimpa.</p><button class="btn-amber w-full" id="sys-restore">${ic('up')} Pilih File Backup…</button></div>
 <div class="card p-6"><h3 class="font-bold text-ink-900 mb-2">🧪 Data & Koneksi</h3><div class="grid grid-cols-2 gap-2.5">
 <button class="btn-soft" id="sys-demo">${ic('db')} Muat Data Demo</button>
-<a href="#/setup" class="btn-ghost">${ic('link')} ${DB.mode==='supabase'?'Kelola Koneksi':'Hubungkan Supabase'}</a></div>
-<p class="text-[11px] text-ink-400 mt-3">Mode aktif: <b>${DB.mode==='supabase'?'Supabase Cloud (aman)':'Demo Lokal (browser)'}</b>${DB.mode==='supabase'?' · '+esc(DB.url):''}</p></div></div></div>`;
+<a href="#/setup" class="btn-ghost">${ic('link')} ${DB.mode==='supabase'?(DB.secure?'Kelola Koneksi':'Upgrade ke Mode Aman'):'Hubungkan Supabase'}</a></div>
+<p class="text-[11px] text-ink-400 mt-3">Mode aktif: <b>${DB.mode==='supabase'?(DB.secure?'Supabase Cloud (Aman)':'Supabase Cloud (Legacy)'):'Demo Lokal (browser)'}</b>${DB.mode==='supabase'?' · '+esc(DB.url):''}</p></div></div></div>`;
 $('#set-save').onclick=async()=>{try{await DB.saveSettings({nama_sekolah:$('#set-sek').value.trim(),nama_ujian:$('#set-uj').value.trim(),kkm:$('#set-kkm').value,durasi_default:$('#set-dur').value,daftar_kelas:$('#set-kelas').value});await refreshSettings();logAct('PENGATURAN','ubah');toast('Pengaturan tersimpan.','ok');renderNav();}catch(e){toast(e.message,'err');}};
 $('#sys-backup').onclick=async()=>{try{const json=await DB.exportAll();download('backup_cbt_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(json,null,2),'application/json');logAct('BACKUP','JSON');toast('Backup diunduh.','ok');}catch(e){toast(e.message,'err');}};
 $('#sys-restore').onclick=()=>{const f=$('#hidden-file');f.accept='.json';f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;
@@ -1686,34 +1762,35 @@ const feed=$('#pw-feed');if(feed&&p?.poll){feed.innerHTML=rows.slice(0,12).map(h
 aktif.forEach(pk=>{const el=document.querySelector(`[data-pwcount="${pk.token}"]`);if(el)el.textContent=rows.filter(x=>x.token===pk.token).length;});}catch(e){}});
 onCleanup(un);}
 
-/* ═══════════════════════ HALAMAN: SETUP SUPABASE ═══════════════════════ */
+/* ═══════════════════════ HALAMAN: SETUP (KHUSUS ADMIN) ═══════════════════════ */
 async function vSetup(v){const conn=LS.get('cbt_conn',null);
 v.innerHTML=`<div class="max-w-3xl mx-auto px-4 py-12">
-<div class="text-center mb-10 reveal"><div class="sect-idx mb-3">SETUP / KONEKSI</div><h1 class="font-disp text-3xl md:text-4xl font-bold text-ink-900">Hubungkan ke Supabase</h1><p class="text-sm text-ink-400 mt-3">Aplikasi 100% statis (GitHub Pages) · database & koreksi nilai di Supabase · <b>kunci jawaban tidak pernah dikirim ke peserta</b>.</p>
-<div class="mt-4">${DB.mode==='supabase'?'<span class="chip-green">● Tersambung: '+esc(DB.url)+'</span>':'<span class="chip-amber">● Mode Demo Lokal aktif — data hanya di browser ini</span>'}</div></div>
+<div class="text-center mb-10 reveal"><div class="sect-idx mb-3">SETUP / KONEKSI · AREA ADMIN</div>
+<div class="mb-4"><a href="#/admin" class="btn-ghost btn-xs">${ic('chevL','w-3.5 h-3.5')} Kembali ke Panel Admin</a></div>
+<h1 class="font-disp text-3xl md:text-4xl font-bold text-ink-900">Koneksi Supabase</h1><p class="text-sm text-ink-400 mt-3">Kredensial sudah tertanam di file (PRESET) — halaman ini hanya untuk verifikasi, upgrade skema, dan pemeliharaan.</p>
+<div class="mt-4 flex gap-2 justify-center flex-wrap">${DB.mode==='supabase'?(DB.secure?'<span class="chip-green">● Mode Aman (RPC) aktif: '+esc(DB.url)+'</span>':'<span class="chip-amber">● Mode Legacy — jalankan SQL di bawah untuk Mode Aman</span>'):'<span class="chip-amber">● Mode Demo Lokal — tabel Supabase belum terdeteksi</span>'}</div></div>
 <div class="space-y-5">
-<div class="card p-6 reveal"><div class="flex gap-4"><span class="stepdot on">1</span><div class="flex-1"><h3 class="font-bold text-ink-900">Buat proyek & tempel kredensial</h3><p class="text-xs text-ink-400 mt-1 mb-4">Daftar gratis di <a class="text-biru-600 font-bold underline" href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com/dashboard</a> → New Project → <b>Settings → API</b> → salin <b>Project URL</b> dan kunci <b>anon public</b>.</p>
-<div class="space-y-3"><div><label class="label">Project URL</label><input id="su-url" class="input font-mono !text-xs" placeholder="https://xxxx.supabase.co" value="${esc(conn?.url||PRESET.url||'')}"></div>
-<div><label class="label">Anon Public Key</label><input id="su-key" class="input font-mono !text-xs" placeholder="eyJhbGciOi…" value="${esc(conn?.anon||PRESET.anon||'')}"></div>
-<div class="flex gap-2 flex-wrap"><button class="btn-pri" id="su-test">${ic('link')} Simpan & Uji Koneksi</button>${DB.mode==='supabase'?'<button class="btn-ghost !text-bahaya-600" id="su-disc">Putuskan (kembali ke Demo)</button>':''}</div>
-<p class="text-[11px] text-ink-400">Kredensial disimpan di browser ini. Untuk semua pengunjung, isi konstanta <code class="chip-gray !text-[10px]">PRESET</code> di bagian atas file index.html.</p></div></div></div></div>
-<div class="card p-6 reveal" style="animation-delay:.08s"><div class="flex gap-4"><span class="stepdot ${conn?'on':''}">2</span><div class="flex-1"><h3 class="font-bold text-ink-900">Jalankan SQL v5.1 (sekali)</h3><p class="text-xs text-ink-400 mt-1 mb-3">Buka <b>SQL Editor</b> di dashboard Supabase → tempel → <b>Run</b>. SQL ini membuat tabel, mengunci akses langsung anon, membuat fungsi aman (login server, soal tanpa kunci, koreksi server, panel HMAC), bucket gambar & akun awal. Aman dijalankan ulang.</p>
+<div class="card p-6 reveal"><div class="flex gap-4"><span class="stepdot on">1</span><div class="flex-1"><h3 class="font-bold text-ink-900">Kredensial tertanam (PRESET)</h3><p class="text-xs text-ink-400 mt-1 mb-4">URL & anon key sudah berada di dalam <code class="chip-gray !text-[10px]">index.html</code> sehingga semua pengunjung otomatis tersambung. Ganti hanya jika proyek Supabase berubah.</p>
+<div class="space-y-3"><div><label class="label">Project URL</label><input id="su-url" class="input font-mono !text-xs" value="${esc(conn?.url||PRESET.url||'')}"></div>
+<div><label class="label">Anon Public Key</label><input id="su-key" class="input font-mono !text-xs" value="${esc(conn?.anon||PRESET.anon||'')}"></div>
+<div class="flex gap-2 flex-wrap"><button class="btn-pri" id="su-test">${ic('link')} Simpan & Uji Koneksi</button>${DB.mode==='supabase'?'<button class="btn-ghost !text-bahaya-600" id="su-disc">Putuskan (kembali ke Demo)</button>':''}</div></div></div></div></div>
+<div class="card p-6 reveal" style="animation-delay:.08s"><div class="flex gap-4"><span class="stepdot ${DB.mode==='supabase'&&DB.secure?'done':'on'}">2</span><div class="flex-1"><h3 class="font-bold text-ink-900">SQL skema v5.2 (sekali)</h3><p class="text-xs text-ink-400 mt-1 mb-3">Buka <b>SQL Editor</b> di dashboard Supabase → tempel → <b>Run</b>. Jika project Anda masih memakai skema lama, SQL ini sekaligus <b>meng-upgrade</b> ke Mode Aman (tabel dikunci + fungsi RPC). Aman dijalankan ulang.</p>
 <div class="flex gap-2 mb-3 flex-wrap"><button class="btn-amber btn-xs" id="su-copy">${ic('copy','w-3.5 h-3.5')} Salin SQL Lengkap</button><a class="btn-ghost btn-xs" target="_blank" rel="noopener" href="https://supabase.com/dashboard/project/_/sql">${ic('link','w-3.5 h-3.5')} Buka SQL Editor</a></div>
 <div class="sqlbox" id="su-sql">${esc(SQL_SCHEMA)}</div></div></div></div>
-<div class="card p-6 reveal" style="animation-delay:.16s"><div class="flex gap-4"><span class="stepdot" id="su-dot3">3</span><div class="flex-1"><h3 class="font-bold text-ink-900">Verifikasi & masuk</h3><p class="text-xs text-ink-400 mt-1 mb-4">Periksa seluruh komponen keamanan, lalu mulai memakai aplikasi.</p>
+<div class="card p-6 reveal" style="animation-delay:.16s"><div class="flex gap-4"><span class="stepdot" id="su-dot3">3</span><div class="flex-1"><h3 class="font-bold text-ink-900">Verifikasi komponen</h3><p class="text-xs text-ink-400 mt-1 mb-4">Periksa fungsi keamanan & bucket. Setelah menjalankan SQL baru, muat ulang halaman lalu verifikasi ulang.</p>
 <div id="su-checks" class="grid sm:grid-cols-2 gap-2 mb-4 text-xs"></div>
 <div class="flex gap-2 flex-wrap"><button class="btn-pri" id="su-verify">${ic('refresh')} Verifikasi Sekarang</button><button class="btn-soft" id="su-seed">${ic('db')} Isi Data Demo</button><a href="#/siswa" class="btn-ok">${ic('check')} Mulai Aplikasi</a></div>
-<div class="mt-5 bg-kertas-100 border border-kertas-300 rounded-xl p-4 text-xs"><b class="text-ink-700">Akun awal (dari SQL):</b><div class="grid sm:grid-cols-2 gap-1.5 mt-2 font-mono text-[11px]"><span>🛡 admin / <b>adminagus</b></span><span>👁 pengawas / <b>pengawas123</b></span><span>🎓 agus / <b>guru123</b></span><span>🎓 hasan / <b>hasan123</b></span></div><p class="text-ink-400 mt-2">Password otomatis升级为 SHA-256 saat login pertama. Ganti segera lewat Admin → Guru. Tombol "Isi Data Demo" memerlukan login admin.</p></div></div></div></div>
+<div class="mt-5 bg-kertas-100 border border-kertas-300 rounded-xl p-4 text-xs"><b class="text-ink-700">Akun awal (dari SQL):</b><div class="grid sm:grid-cols-2 gap-1.5 mt-2 font-mono text-[11px]"><span>🛡 admin / <b>adminagus</b></span><span>👁 pengawas / <b>pengawas123</b></span><span>🎓 agus / <b>guru123</b></span><span>🎓 hasan / <b>hasan123</b></span></div><p class="text-ink-400 mt-2">Password otomatis di-upgrade ke SHA-256 saat login pertama. Ganti segera lewat Admin → Guru.</p></div></div></div></div>
 </div></div>`;
 $('#su-copy').onclick=()=>copyText(SQL_SCHEMA,'SQL disalin — tempel di SQL Editor Supabase.');
 $('#su-test').onclick=async()=>{const url=$('#su-url').value.trim().replace(/\/$/,''),key=$('#su-key').value.trim();
 if(!url||!key)return toast('Isi URL dan anon key.','warn');
 const btn=$('#su-test');btn.disabled=true;btn.innerHTML='<span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Menguji…';
-try{const test=new SupaDB(url,key);await test.ping();LS.set('cbt_conn',{url,anon:key});DB=test;await refreshSettings();toast('Koneksi Supabase berhasil! Lanjut langkah 2 & 3.','ok');renderNav();renderBanner();$('#su-dot3').classList.add('on');}
+try{const test=new SupaDB(url,key);await test.ping();LS.set('cbt_conn',{url,anon:key});DB=test;await refreshSettings();toast('Koneksi Supabase berhasil! Mode: '+(DB.secure?'Aman':'Legacy'),'ok');renderNav();renderBanner();$('#su-dot3').classList.add('on');}
 catch(e){toast('Gagal: '+e.message+' — pastikan SQL langkah 2 sudah dijalankan.','err');}
 btn.disabled=false;btn.innerHTML=ic('link')+' Simpan & Uji Koneksi';};
 const disc=$('#su-disc');if(disc)disc.onclick=async()=>{LS.del('cbt_conn');DB=new LocalDB();await refreshSettings();toast('Kembali ke Mode Demo Lokal.','info');route();};
-$('#su-verify').onclick=async()=>{if(DB.mode!=='supabase')return toast('Hubungkan dulu (langkah 1).','warn');
+$('#su-verify').onclick=async()=>{if(DB.mode!=='supabase')return toast('Supabase belum tersambung — cek langkah 1.','warn');
 const checks=[
 ['Pengaturan (baca publik)',async()=>{await DB.getSettings();}],
 ['RPC jadwal_publik',async()=>{await DB.call('jadwal_publik',{});}],
@@ -1724,21 +1801,24 @@ const checks=[
 ['Storage gambar',async()=>{await DB.listImages();}],
 ];
 const box=$('#su-checks');box.innerHTML=checks.map((c,i)=>`<div class="chip-gray" id="chk-${i}">⏳ ${c[0]}</div>`).join('');
-let allOk=true;
-for(let i=0;i<checks.length;i++){try{await checks[i][1]();$('#chk-'+i).className='chip-green';$('#chk-'+i).textContent='✓ '+checks[i][0];}
-catch(e){allOk=false;$('#chk-'+i).className='chip-red';$('#chk-'+i).textContent='✗ '+checks[i][0];}}
-if(allOk){$('#su-dot3').classList.add('done');toast('Semua siap & aman! Silakan login & mulai ujian.','ok');}else toast('Ada komponen belum siap — jalankan SQL langkah 2.','err');};
-$('#su-seed').onclick=async()=>{if(DB.mode!=='supabase')return toast('Hubungkan dulu (langkah 1).','warn');
-const s=SES.load();if(!s||s.role!=='admin')return toast('Login sebagai admin dulu (#/login dengan adminagus), lalu klik tombol ini lagi.','warn');
+let okCount=0;
+for(let i=0;i<checks.length;i++){try{await checks[i][1]();okCount++;$('#chk-'+i).className='chip-green';$('#chk-'+i).textContent='✓ '+checks[i][0];}
+catch(e){$('#chk-'+i).className='chip-red';$('#chk-'+i).textContent='✗ '+checks[i][0];}}
+if(okCount===checks.length){$('#su-dot3').classList.add('done');toast('Semua siap & aman! Silakan mulai ujian.','ok');}
+else toast(`${checks.length-okCount} komponen belum siap — jalankan/upgrade SQL langkah 2 lalu muat ulang halaman.`,'err');};
+$('#su-seed').onclick=async()=>{if(DB.mode!=='supabase')return toast('Supabase belum tersambung.','warn');
+const s=SES.load();if(!s||s.role!=='admin')return toast('Login sebagai admin dahulu.','warn');
 try{await DB.seedDemo();await refreshSettings();toast('Data demo masuk ke Supabase! Token aktif: MTK8A & PAI8B','ok');}catch(e){toast(e.message,'err');}};}
 
 /* ═══════════════════════ INISIALISASI ═══════════════════════ */
 (async function init(){
 const conn=LS.get('cbt_conn',null)||((PRESET.url&&PRESET.anon)?PRESET:null);
-if(conn?.url&&conn?.anon){try{const test=new SupaDB(conn.url,conn.anon);await test.ping();DB=test;}catch(e){console.warn('Supabase gagal, fallback demo:',e.message);setTimeout(()=>toast('Koneksi Supabase gagal — Mode Demo Lokal aktif. Periksa halaman Hubungkan.','warn'),800);}}
+if(conn?.url&&conn?.anon){try{const test=new SupaDB(conn.url,conn.anon);await test.ping();DB=test;}
+catch(e){console.warn('Supabase gagal, fallback demo:',e.message);setTimeout(()=>toast('Koneksi Supabase gagal / tabel belum ada — Mode Demo Lokal aktif. Login admin lalu buka Hubungkan untuk menjalankan SQL.','warn'),800);}}
 await refreshSettings();
 if(!location.hash)location.hash='#/siswa';
 await route();
+if(DB.mode==='supabase'&&!DB.secure)setTimeout(()=>toast('Mode Legacy aktif — login Admin → menu Hubungkan → jalankan SQL v5.2 untuk Mode Aman.','info'),1500);
 })();
 </script>
 </body>
