@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBT PRO — Lembar Jawab Digital</title>
-<meta name="description" content="Sistem Ujian Berbasis Komputer dengan Supabase. PG & Essay, anti-curang, realtime, ekspor Excel/PDF.">
+<meta name="description" content="Sistem Ujian Berbasis Komputer dengan Supabase. PG & Essay, anti-curang, koreksi server-side, ekspor Excel/PDF.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -26,9 +29,7 @@ tailwind.config = { theme: { extend: {
 }}}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<!-- xlsx & jspdf TIDAK dimuat di sini — diunduh on-demand hanya saat Guru/Admin ekspor -->
 <script>
 window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};
 </script>
@@ -97,7 +98,6 @@ body{background-color:#F6F4ED;background-image:radial-gradient(rgba(11,18,48,.07
 .timer-danger{color:#F04438!important;background:#FEF3F2!important;border-color:#FEE4E2!important;animation:pulseRed 1s infinite;}
 .timer-warn{color:#D97F06!important;background:#FFF8EB!important;border-color:#FFEEC7!important;}
 .font-disp{font-feature-settings:'tnum';}
-/* LJK bubble art */
 .ljk{display:grid;gap:10px;}
 .ljk-row{display:flex;align-items:center;gap:10px;}
 .ljk-no{width:22px;font-family:'IBM Plex Mono';font-size:11px;font-weight:700;color:rgba(255,255,255,.45);text-align:right;}
@@ -107,7 +107,6 @@ body{background-color:#F6F4ED;background-image:radial-gradient(rgba(11,18,48,.07
 @keyframes bubfill{0%,12%{background:transparent;border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.5);box-shadow:none;}
  20%,80%{background:radial-gradient(circle at 35% 30%,#FFD98A,#FFB020 65%,#D97F06);border-color:#FFB020;color:#0B1230;box-shadow:0 0 14px rgba(255,176,32,.5);}
  92%,100%{background:transparent;border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.5);box-shadow:none;}}
-/* Exam option bubbles */
 .opsi{transition:all .18s ease;border:2px solid #E7E2D4;background:#fff;}
 .opsi:hover{border-color:#93AEFF;transform:translateX(3px);}
 .opsi.sel{border-color:#2E5BFF;background:#EFF4FF;box-shadow:0 6px 18px -8px rgba(46,91,255,.5);}
@@ -133,7 +132,6 @@ mjx-container{max-width:100%;}
 .stepdot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;border:2px solid #D6CFBB;color:#8B97CF;background:#fff;flex-shrink:0;}
 .stepdot.on{border-color:#2E5BFF;background:#2E5BFF;color:#fff;box-shadow:0 0 0 5px rgba(46,91,255,.15);}
 .stepdot.done{border-color:#12B76A;background:#D1FADF;color:#027A48;}
-.fade-mask{mask-image:linear-gradient(180deg,#000 82%,transparent);}
 input[type=checkbox].cbx{width:17px;height:17px;accent-color:#2E5BFF;cursor:pointer;}
 details>summary{list-style:none;cursor:pointer;}
 details>summary::-webkit-details-marker{display:none;}
@@ -154,13 +152,10 @@ details>summary::-webkit-details-marker{display:none;}
 
 <script>
 'use strict';
-/* ═══════════════════════ KONFIGURASI ═══════════════════════
-   Isi di sini agar semua pengunjung langsung memakai Supabase Anda,
-   atau biarkan kosong → aplikasi mulai dalam MODE DEMO LOKAL dan
-   koneksi bisa diatur lewat halaman "Hubungkan" di dalam aplikasi. */
-const PRESET = { url:'https://yxggvhzjyusmhwbwdydh.supabase.co', anon:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4Z2d2aHpqeXVzbWh3YndkeWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3Nzg2MzYsImV4cCI6MjExMDM1NDYzNn0.-d-VxGvBwzoohGH-LJqn3LacieXgYpe5fHEf96yy-XU' };
+/* ═══════════════════════ KONFIGURASI ═══════════════════════ */
+const PRESET = { url:'', anon:'' };
 const SESSION_MS = 4*3600*1000;
-const APP = { name:'CBT PRO', ver:'5.0' };
+const APP = { name:'CBT PRO', ver:'5.1' };
 
 /* ═══════════════════════ UTILITAS ═══════════════════════ */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -182,6 +177,12 @@ async function copyText(t,msg){try{await navigator.clipboard.writeText(t);}catch
 function typeset(el){if(window.MathJax&&MathJax.typesetPromise){try{MathJax.typesetClear&&MathJax.typesetClear([el]);}catch(e){}MathJax.typesetPromise([el]).catch(()=>{});}}
 const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone;}catch(e){return'WITA';}})();
 
+/* ═══════════ LAZY-LOAD LIBRARY BERAT (hanya Guru/Admin) ═══════════ */
+const LIB={_c:{},
+load(u){if(!this._c[u])this._c[u]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Gagal memuat library '+u));document.head.appendChild(s);});return this._c[u];},
+xlsx(){return this.load('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');},
+async pdf(){await this.load('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');await this.load('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js');}};
+
 /* ═══════════════════════ IKON ═══════════════════════ */
 const ICONS={cap:'M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z',book:'M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z',clock:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',users:'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-3-6.7',chart:'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',img:'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',cog:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z',out:'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',plus:'M12 4v16m8-8H4',search:'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',trash:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',edit:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',copy:'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z',x:'M6 18L18 6M6 6l12 12',check:'M5 13l4 4L19 7',eye:'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',up:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12',down:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',chevL:'M15 19l-7-7 7-7',chevR:'M9 5l7 7-7 7',grip:'M4 8h16M4 16h16',filter:'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',play:'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z',shield:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',wifi:'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',alert:'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',refresh:'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',db:'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',link:'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',save:'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4',arrU:'M5 15l7-7 7 7',arrD:'M19 9l-7 7-7-7',menu:'M4 6h16M4 12h16M4 18h16',live:'M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z',flag:'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9',doc:'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',cal:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',dice:'M4 4h16v16H4z M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',key:'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z'};
 function ic(n,cls){return `<svg class="${cls||'w-4 h-4'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${ICONS[n]||''}"/></svg>`;}
@@ -192,8 +193,8 @@ function toast(msg,type='ok',action){const r=$('#toast-root');const t=document.c
 t.className=`pop-in bg-white border-l-4 ${col} shadow-lift rounded-xl px-4 py-3 flex items-center gap-3 text-sm font-semibold max-w-sm`;
 t.innerHTML=`<span class="shrink-0">${ic(icn,'w-5 h-5')}</span><span class="text-ink-800 flex-1">${msg}</span>${action?`<button class="btn-xs btn-soft shrink-0">${esc(action.label)}</button>`:''}<button class="text-ink-300 hover:text-ink-600 shrink-0">${ic('x','w-4 h-4')}</button>`;
 const kill=()=>{t.style.transition='all .3s';t.style.opacity='0';t.style.transform='translateX(20px)';setTimeout(()=>t.remove(),300);};
-t.querySelectorAll('button')[action?1:0].onclick=kill;
-if(action)t.querySelectorAll('button')[0].onclick=()=>{action.fn();kill();};
+if(action){t.querySelectorAll('button')[0].onclick=()=>{action.fn();kill();};t.querySelectorAll('button')[1].onclick=kill;}
+else t.querySelectorAll('button')[0].onclick=kill;
 r.appendChild(t);setTimeout(kill,action?8000:4200);}
 let modalStack=[];
 function openModal(html,maxw='max-w-lg'){const r=$('#modal-root');const w=document.createElement('div');w.className='fixed inset-0 z-[90] flex items-center justify-center p-4 bg-ink-950/60 backdrop-blur-sm';w.innerHTML=`<div class="pop-in bg-kertas-50 rounded-3xl shadow-lift w-full ${maxw} max-h-[92vh] flex flex-col border border-kertas-300 overflow-hidden">${html}</div>`;w.addEventListener('mousedown',e=>{if(e.target===w)closeModal(w);});r.appendChild(w);modalStack.push(w);return w;}
@@ -276,11 +277,18 @@ H_(10,'IPA7C','IPA Terpadu','Maya Sari','7C','2302',60,1,{"Soal_5":"Tumbuhan mem
 log:[{id:9001,waktu:iso(now-2*H),username:'agus',role:'guru',aksi:'BUAT_PAKET',detail:'Token MTK8A'},{id:9002,waktu:iso(now-2*H),username:'hasan',role:'guru',aksi:'BUAT_PAKET',detail:'Token PAI8B'},{id:9003,waktu:iso(now-1*H),username:'admin',role:'admin',aksi:'LOGIN',detail:'Admin masuk panel'}],
 images:{}};}
 
-/* ═══════════════════════ SQL SUPABASE ═══════════════════════ */
-const SQL_SCHEMA=`-- ══════════════════════════════════════════════════════════
--- CBT PRO v5.0 · Skema Supabase (jalankan sekali di SQL Editor)
--- Aman dijalankan ulang (idempotent).
--- ══════════════════════════════════════════════════════════
+/* ═══════════════════════ SQL SUPABASE v5.1 (AMAN) ═══════════════════════ */
+const SQL_SCHEMA=`-- ══════════════════════════════════════════════════════════════
+-- CBT PRO v5.1 OPTIMIZED · Skema + Fungsi Aman Supabase
+-- Jalankan sekali di SQL Editor. Aman dijalankan ulang.
+-- KEAMANAN:
+--  · Tabel sensitif TIDAK bisa diakses langsung oleh anon (revoked)
+--  · Siswa hanya lewat RPC: soal dikirim TANPA kunci jawaban
+--  · Koreksi PG dilakukan di SERVER (tidak bisa dicurangi)
+--  · Login panel divalidasi server + token sesi HMAC-SHA256 (4 jam)
+-- ══════════════════════════════════════════════════════════════
+create extension if not exists pgcrypto;
+
 create table if not exists public.users (
   id bigint primary key,
   username text unique not null,
@@ -331,35 +339,39 @@ create table if not exists public.log_aktivitas (
   waktu timestamptz default now(),
   username text, role text, aksi text, detail text
 );
+-- Rahasia HMAC — TIDAK BISA dibaca klien
+create table if not exists public.app_secret (
+  id boolean primary key default true check (id),
+  secret text not null
+);
+insert into public.app_secret (id, secret)
+select true, encode(gen_random_bytes(32),'hex')
+where not exists (select 1 from public.app_secret);
 
--- ── RLS: akses anon untuk aplikasi sekolah statis ──
+-- ── RLS aktif + cabut akses langsung anon dari tabel sensitif ──
 do $$
 declare t text;
 begin
-  foreach t in array array['users','bank_soal','paket','hasil','pengaturan','log_aktivitas'] loop
+  foreach t in array array['users','bank_soal','paket','hasil','pengaturan','log_aktivitas','app_secret'] loop
     execute format('alter table public.%I enable row level security', t);
+  end loop;
+  foreach t in array array['users','bank_soal','paket','hasil','log_aktivitas'] loop
     execute format('drop policy if exists anon_all on public.%I', t);
-    execute format('create policy anon_all on public.%I for all to anon using (true) with check (true)', t);
   end loop;
 end $$;
-grant select, insert, update, delete on all tables in schema public to anon;
+revoke all on public.users, public.bank_soal, public.paket, public.hasil,
+  public.log_aktivitas, public.app_secret from anon, authenticated;
+revoke insert, update, delete on public.pengaturan from anon, authenticated;
+grant select on public.pengaturan to anon;
 
--- ── Realtime untuk monitor pengawas & dashboard ──
-do $$
-begin
-  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='hasil') then
-    alter publication supabase_realtime add table public.hasil;
-  end if;
-end $$;
-
--- ── Storage gambar soal (bucket publik) ──
+-- ── Storage gambar soal (publik) ──
 insert into storage.buckets (id, name, public) values ('gambar','gambar', true)
 on conflict (id) do nothing;
 drop policy if exists gambar_anon_all on storage.objects;
 create policy gambar_anon_all on storage.objects for all to anon
 using (bucket_id = 'gambar') with check (bucket_id = 'gambar');
 
--- ── Pengaturan default ──
+-- ── Pengaturan & akun awal ──
 insert into public.pengaturan (key, value) values
  ('nama_sekolah','SMP Negeri 1 Amuntai'),
  ('nama_ujian','Penilaian Sumatif Akhir Semester Ganjil'),
@@ -367,7 +379,6 @@ insert into public.pengaturan (key, value) values
  ('daftar_kelas','7A,7B,7C,8A,8B,8C,8D,9A,9B,9C,9D,9E')
 on conflict (key) do nothing;
 
--- ── Akun awal (password otomatis di-hash saat login pertama) ──
 insert into public.users (id, username, password_hash, nama_lengkap, mapel, role) values
  (1,'admin','plain:adminagus','Administrator CBT','-','admin'),
  (2,'pengawas','plain:pengawas123','Pengawas Ujian','-','pengawas'),
@@ -375,11 +386,423 @@ insert into public.users (id, username, password_hash, nama_lengkap, mapel, role
  (4,'hasan','plain:hasan123','H. Hasan Basri, S.Ag','Pendidikan Agama Islam','guru')
 on conflict (id) do nothing;
 
--- ══════════════════════════════════════════════════════════
--- SELESAI. Data demo soal/paket/hasil dapat diisi dari aplikasi:
--- Admin → Sistem → "Muat Data Demo".
--- Login: admin/adminagus · pengawas/pengawas123 · agus/guru123
--- ══════════════════════════════════════════════════════════`;
+-- ── Helper internal (tidak dipanggil klien) ──
+create or replace function public.new_id() returns bigint language sql volatile as $$
+  select (floor(extract(epoch from clock_timestamp()) * 100))::bigint + (floor(random()*100))::int
+$$;
+revoke execute on function public.new_id() from public, anon;
+
+create or replace function public.cocok_pass(p_hash text, p_input text) returns boolean
+language plpgsql security definer set search_path = public as $$
+begin
+  if p_hash like 'sha256:%' then
+    return p_hash = 'sha256:' || encode(digest(p_input,'sha256'),'hex');
+  elsif p_hash like 'plain:%' then
+    return p_hash = 'plain:' || p_input;
+  else
+    return p_hash = p_input;
+  end if;
+end $$;
+revoke execute on function public.cocok_pass(text,text) from public, anon;
+
+create or replace function public.buat_token(p_uid bigint, p_role text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare v_secret text; v_exp bigint; v_payload text;
+begin
+  select secret into v_secret from public.app_secret;
+  v_exp := (extract(epoch from now()) + 14400)::bigint; -- 4 jam
+  v_payload := p_uid || ':' || p_role || ':' || v_exp;
+  return jsonb_build_object('token', v_payload || '.' || encode(hmac(v_payload, v_secret, 'sha256'),'hex'), 'exp', v_exp*1000);
+end $$;
+revoke execute on function public.buat_token(bigint,text) from public, anon;
+
+create or replace function public._auth(p_token text)
+returns table(user_id bigint, role text)
+language plpgsql security definer set search_path = public as $$
+declare v_secret text; v_parts text[]; v_exp bigint;
+begin
+  if p_token is null or position('.' in coalesce(p_token,'')) = 0 then
+    raise exception 'Sesi tidak valid. Silakan login ulang.';
+  end if;
+  v_parts := string_to_array(p_token, '.');
+  if array_length(v_parts,1) <> 2 then raise exception 'Sesi tidak valid. Silakan login ulang.'; end if;
+  select secret into v_secret from public.app_secret;
+  if encode(hmac(v_parts[1], v_secret, 'sha256'),'hex') <> v_parts[2] then
+    raise exception 'Sesi tidak valid. Silakan login ulang.';
+  end if;
+  v_exp := split_part(v_parts[1],':',3)::bigint;
+  if v_exp < extract(epoch from now())::bigint then
+    raise exception 'Sesi berakhir. Silakan login ulang.';
+  end if;
+  user_id := split_part(v_parts[1],':',1)::bigint;
+  role := split_part(v_parts[1],':',2);
+  return next;
+end $$;
+revoke execute on function public._auth(text) from public, anon;
+
+-- ── LOGIN PETUGAS/GURU (validasi server + upgrade hash otomatis) ──
+create or replace function public.login_petugas(p_username text, p_password text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare u public.users%rowtype; v_ok boolean := false; v_tok jsonb;
+begin
+  if coalesce(trim(p_username),'') <> '' then
+    select * into u from public.users where username = trim(p_username) and role = 'guru';
+    if not found then return jsonb_build_object('status','error','msg','Username atau password salah!'); end if;
+    v_ok := public.cocok_pass(u.password_hash, p_password);
+  else
+    for u in select * from public.users where role in ('admin','pengawas') loop
+      if public.cocok_pass(u.password_hash, p_password) then v_ok := true; exit; end if;
+    end loop;
+  end if;
+  if not v_ok then return jsonb_build_object('status','error','msg', case when coalesce(trim(p_username),'')='' then 'Password salah!' else 'Username atau password salah!' end); end if;
+  if u.password_hash like 'plain:%' then
+    update public.users set password_hash = 'sha256:' || encode(digest(p_password,'sha256'),'hex') where id = u.id;
+  end if;
+  v_tok := public.buat_token(u.id, u.role);
+  insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
+  values (public.new_id(), now(), u.username, u.role, 'LOGIN', u.role || ' masuk panel');
+  return jsonb_build_object('status','success',
+    'user', jsonb_build_object('id',u.id,'username',u.username,'nama',u.nama_lengkap,'mapel',coalesce(u.mapel,''),'role',u.role),
+    'token', v_tok->>'token', 'exp', v_tok->>'exp');
+end $$;
+grant execute on function public.login_petugas(text,text) to anon;
+
+-- ── SISWA: ambil paket TANPA kunci jawaban ──
+create or replace function public.ambil_paket_siswa(p_token text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare p public.paket%rowtype; v_soal jsonb;
+begin
+  select * into p from public.paket
+  where token = upper(regexp_replace(coalesce(p_token,''),'[^A-Za-z0-9]','','g'));
+  if not found then raise exception 'Token tidak ditemukan. Periksa kembali.'; end if;
+  if now() < p.waktu_mulai then
+    raise exception 'Ujian belum dimulai. Mulai: %', to_char(p.waktu_mulai at time zone 'Asia/Makassar','DD Mon YYYY HH24:MI');
+  end if;
+  if now() > p.waktu_selesai then raise exception 'Waktu ujian untuk token ini sudah berakhir.'; end if;
+  select coalesce(jsonb_agg(case when coalesce(elem->>'tipe','PG') = 'PG' then elem - 'jawaban' else elem end),'[]'::jsonb)
+  into v_soal from jsonb_array_elements(p.soal_json) elem;
+  if jsonb_array_length(v_soal) = 0 then raise exception 'Paket ini belum memiliki soal.'; end if;
+  return jsonb_build_object(
+    'token',p.token,'mapel',p.mapel,'durasi_menit',p.durasi_menit,
+    'keterangan',coalesce(p.keterangan,''),'acak_soal',p.acak_soal,'acak_opsi',p.acak_opsi,
+    'mode_offline',coalesce(p.mode_offline,false),'waktu_mulai',p.waktu_mulai,'waktu_selesai',p.waktu_selesai,
+    'soal_json',v_soal);
+end $$;
+grant execute on function public.ambil_paket_siswa(text) to anon;
+
+-- ── PUBLIK: jadwal ringan (tanpa soal) ──
+create or replace function public.jadwal_publik()
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare v_out jsonb;
+begin
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'token',token,'mapel',mapel,'waktu_mulai',waktu_mulai,'waktu_selesai',waktu_selesai,
+    'durasi_menit',durasi_menit,'keterangan',keterangan,'acak_soal',acak_soal,'acak_opsi',acak_opsi,
+    'mode_offline',coalesce(mode_offline,false),'guru_id',guru_id,'created_at',created_at)
+    order by waktu_mulai desc),'[]'::jsonb)
+  into v_out from public.paket;
+  return v_out;
+end $$;
+grant execute on function public.jadwal_publik() to anon;
+
+-- ── SISWA: submit + KOREKSI PG DI SERVER ──
+create or replace function public.submit_jawaban_siswa(
+  p_token text, p_nama text, p_kelas text, p_nis text,
+  p_jawaban jsonb, p_pelanggaran int default 0)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare p public.paket%rowtype; elem jsonb; i int := 0;
+        v_skor numeric := 0; v_essay jsonb := '{}'::jsonb; v_jwb text;
+begin
+  select * into p from public.paket
+  where token = upper(regexp_replace(coalesce(p_token,''),'[^A-Za-z0-9]','','g'));
+  if not found then raise exception 'Paket tidak ditemukan.'; end if;
+  for elem in select * from jsonb_array_elements(p.soal_json) loop
+    v_jwb := coalesce(p_jawaban->>i::text,'');
+    if coalesce(elem->>'tipe','PG') = 'PG' then
+      if trim(v_jwb) <> '' and trim(v_jwb) = trim(coalesce(elem->>'jawaban','')) then
+        v_skor := v_skor + coalesce((elem->>'poin')::numeric, 0);
+      end if;
+    else
+      v_essay := v_essay || jsonb_build_object('Soal_'||(i+1)::text, v_jwb);
+    end if;
+    i := i + 1;
+  end loop;
+  insert into public.hasil (id,waktu,token,mapel,nama,kelas,nis,skor_pg,jawaban_essay,detail_jawaban,pelanggaran)
+  values (public.new_id(), now(), p.token, p.mapel, p_nama, p_kelas, p_nis, v_skor,
+          v_essay, coalesce(p_jawaban,'{}'::jsonb), coalesce(p_pelanggaran,0))
+  on conflict (token,nis,mapel) do update set
+    waktu=now(), skor_pg=excluded.skor_pg, jawaban_essay=excluded.jawaban_essay,
+    detail_jawaban=excluded.detail_jawaban, pelanggaran=excluded.pelanggaran;
+  insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
+  values (public.new_id(), now(), p_nis, 'siswa', 'SUBMIT', p_nama||' · '||p.token||' · PG '||v_skor);
+  return jsonb_build_object('status','success','skor_pg',v_skor);
+end $$;
+grant execute on function public.submit_jawaban_siswa(text,text,text,text,jsonb,int) to anon;
+
+-- ── PANEL: semua operasi Guru/Admin (wajib token HMAC) ──
+create or replace function public.panel(p_op text, p_payload jsonb default '{}'::jsonb, p_token text default '')
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  v_uid bigint; v_role text; v_out jsonb := '{}'::jsonb; v_tmp jsonb; v_id bigint; v_tok text;
+begin
+  if p_op = 'seed' and (select count(*) from public.users) = 0 then
+    v_uid := 0; v_role := 'admin';
+  else
+    select a.user_id, a.role into v_uid, v_role from public._auth(p_token) a;
+    if v_role not in ('admin','pengawas','guru') then raise exception 'Akses ditolak.'; end if;
+  end if;
+
+  case p_op
+
+  when 'guru_list' then
+    if v_role not in ('admin','pengawas') then raise exception 'Akses ditolak.'; end if;
+    select coalesce(jsonb_agg(jsonb_build_object('id',u.id,'username',u.username,'nama_lengkap',u.nama_lengkap,
+      'mapel',u.mapel,'role',u.role,'created_at',u.created_at,
+      'jumlah_bank',(select count(*) from public.bank_soal b where b.guru_id = u.id)) order by u.created_at desc),'[]'::jsonb)
+    into v_out from public.users u where u.role = 'guru';
+
+  when 'guru_save' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    if p_payload->>'id' is null then
+      if exists(select 1 from public.users where username = p_payload->>'username') then
+        raise exception 'Username sudah digunakan!';
+      end if;
+      insert into public.users (id,username,password_hash,nama_lengkap,mapel,role)
+      values (public.new_id(), p_payload->>'username',
+        'sha256:'||encode(digest(p_payload->>'password','sha256'),'hex'),
+        p_payload->>'nama', p_payload->>'mapel', 'guru');
+    else
+      update public.users set nama_lengkap = p_payload->>'nama', mapel = p_payload->>'mapel',
+        password_hash = case when coalesce(p_payload->>'password','') <> ''
+          then 'sha256:'||encode(digest(p_payload->>'password','sha256'),'hex') else password_hash end
+      where id = (p_payload->>'id')::bigint and role = 'guru';
+    end if;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'guru_del' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    select jsonb_build_object('user', row_to_json(u)::jsonb,
+      'banks', coalesce((select jsonb_agg(row_to_json(b)::jsonb) from public.bank_soal b
+                         where b.guru_id = (p_payload->>'id')::bigint),'[]'::jsonb))
+    into v_out from public.users u where u.id = (p_payload->>'id')::bigint and u.role='guru';
+    delete from public.users where id = (p_payload->>'id')::bigint and role='guru';
+
+  when 'guru_restore' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    insert into public.users select * from jsonb_populate_record(null::public.users, p_payload->'user') on conflict (id) do nothing;
+    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(p_payload->'banks','[]'::jsonb)) on conflict (id) do nothing;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'bank_list' then
+    if v_role = 'guru' then
+      select coalesce(jsonb_agg(row_to_json(b)::jsonb order by b.created_at desc),'[]'::jsonb)
+      into v_out from public.bank_soal b where b.guru_id = v_uid;
+    else
+      select coalesce(jsonb_agg(row_to_json(b)::jsonb order by b.created_at desc),'[]'::jsonb)
+      into v_out from public.bank_soal b;
+    end if;
+
+  when 'bank_get' then
+    select row_to_json(b)::jsonb into v_out from public.bank_soal b where b.id = (p_payload->>'id')::bigint;
+    if v_out is null then raise exception 'Bank tidak ditemukan.'; end if;
+    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+
+  when 'bank_save' then
+    v_tmp := p_payload->'row';
+    if v_role = 'guru' then v_tmp := jsonb_set(v_tmp,'{guru_id}',to_jsonb(v_uid)); end if;
+    if v_tmp->>'id' is null then
+      v_id := public.new_id();
+      insert into public.bank_soal (id,guru_id,nama_bank,mapel,soal_json)
+      values (v_id,(v_tmp->>'guru_id')::bigint,v_tmp->>'nama_bank',v_tmp->>'mapel',coalesce(v_tmp->'soal_json','[]'::jsonb));
+      v_out := jsonb_build_object('id',v_id);
+    else
+      update public.bank_soal set nama_bank=v_tmp->>'nama_bank', mapel=v_tmp->>'mapel', soal_json=coalesce(v_tmp->'soal_json','[]'::jsonb)
+      where id=(v_tmp->>'id')::bigint and (v_role<>'guru' or guru_id=v_uid);
+      v_out := v_tmp;
+    end if;
+
+  when 'bank_del' then
+    select row_to_json(b)::jsonb into v_out from public.bank_soal b where b.id = (p_payload->>'id')::bigint;
+    if v_out is null then raise exception 'Bank tidak ditemukan.'; end if;
+    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+    delete from public.bank_soal where id = (p_payload->>'id')::bigint;
+
+  when 'bank_restore' then
+    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(p_payload->'rows','[]'::jsonb)) on conflict (id) do nothing;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'paket_list' then
+    if v_role = 'guru' then
+      select coalesce(jsonb_agg(row_to_json(p)::jsonb order by p.waktu_mulai desc),'[]'::jsonb)
+      into v_out from public.paket p where p.guru_id = v_uid;
+    else
+      select coalesce(jsonb_agg(row_to_json(p)::jsonb order by p.waktu_mulai desc),'[]'::jsonb)
+      into v_out from public.paket p;
+    end if;
+
+  when 'paket_get' then
+    select row_to_json(p)::jsonb into v_out from public.paket p where p.token = p_payload->>'token';
+    if v_out is null then raise exception 'Paket tidak ditemukan.'; end if;
+    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+
+  when 'paket_save' then
+    v_tmp := p_payload->'row';
+    if v_role = 'guru' then v_tmp := jsonb_set(v_tmp,'{guru_id}',to_jsonb(v_uid)); end if;
+    v_tok := v_tmp->>'token';
+    if coalesce(p_payload->>'old_token','') <> '' and p_payload->>'old_token' <> v_tok then
+      if exists(select 1 from public.paket where token = v_tok) then raise exception 'Token sudah digunakan.'; end if;
+      delete from public.paket where token = p_payload->>'old_token' and (v_role<>'guru' or guru_id=v_uid);
+      insert into public.paket select * from jsonb_populate_record(null::public.paket, v_tmp);
+    else
+      if exists(select 1 from public.paket where token = v_tok) then
+        update public.paket set mapel=v_tmp->>'mapel',
+          waktu_mulai=(v_tmp->>'waktu_mulai')::timestamptz, waktu_selesai=(v_tmp->>'waktu_selesai')::timestamptz,
+          durasi_menit=(v_tmp->>'durasi_menit')::int, soal_json=coalesce(v_tmp->'soal_json','[]'::jsonb),
+          keterangan=coalesce(v_tmp->>'keterangan',''),
+          acak_soal=coalesce((v_tmp->>'acak_soal')::boolean,true), acak_opsi=coalesce((v_tmp->>'acak_opsi')::boolean,true),
+          mode_offline=coalesce((v_tmp->>'mode_offline')::boolean,false)
+        where token=v_tok and (v_role<>'guru' or guru_id=v_uid);
+      else
+        insert into public.paket select * from jsonb_populate_record(null::public.paket, v_tmp);
+      end if;
+    end if;
+    v_out := jsonb_build_object('token',v_tok);
+
+  when 'paket_del' then
+    select row_to_json(p)::jsonb into v_out from public.paket p where p.token = p_payload->>'token';
+    if v_out is null then raise exception 'Paket tidak ditemukan.'; end if;
+    if v_role = 'guru' and (v_out->>'guru_id')::bigint is distinct from v_uid then raise exception 'Tidak berhak.'; end if;
+    delete from public.paket where token = p_payload->>'token';
+
+  when 'paket_restore' then
+    insert into public.paket select * from jsonb_populate_record(null::public.paket, p_payload->'row') on conflict (token) do nothing;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'hasil_list' then
+    if v_role = 'guru' and jsonb_typeof(coalesce(p_payload->'tokens','null'::jsonb)) <> 'array' then
+      v_out := '[]'::jsonb;
+    elsif jsonb_typeof(coalesce(p_payload->'tokens','null'::jsonb)) = 'array' then
+      if jsonb_array_length(p_payload->'tokens') = 0 then
+        v_out := '[]'::jsonb;
+      elsif coalesce((p_payload->>'light')::boolean,false) then
+        select coalesce(jsonb_agg(jsonb_build_object('id',h.id,'waktu',h.waktu,'token',h.token,'mapel',h.mapel,
+          'nama',h.nama,'kelas',h.kelas,'nis',h.nis,'skor_pg',h.skor_pg,'skor_essay',h.skor_essay,
+          'pelanggaran',h.pelanggaran,'punya_essay',(h.jawaban_essay is not null and h.jawaban_essay <> '{}'::jsonb)) order by h.id desc),'[]'::jsonb)
+        into v_out from public.hasil h where h.token in (select jsonb_array_elements_text(p_payload->'tokens'));
+      else
+        select coalesce(jsonb_agg(row_to_json(h)::jsonb order by h.id desc),'[]'::jsonb)
+        into v_out from public.hasil h where h.token in (select jsonb_array_elements_text(p_payload->'tokens'));
+      end if;
+    elsif coalesce((p_payload->>'light')::boolean,false) then
+      select coalesce(jsonb_agg(jsonb_build_object('id',h.id,'waktu',h.waktu,'token',h.token,'mapel',h.mapel,
+        'nama',h.nama,'kelas',h.kelas,'nis',h.nis,'skor_pg',h.skor_pg,'skor_essay',h.skor_essay,
+        'pelanggaran',h.pelanggaran,'punya_essay',(h.jawaban_essay is not null and h.jawaban_essay <> '{}'::jsonb)) order by h.id desc),'[]'::jsonb)
+      into v_out from public.hasil h;
+    else
+      select coalesce(jsonb_agg(row_to_json(h)::jsonb order by h.id desc),'[]'::jsonb)
+      into v_out from (select * from public.hasil order by id desc limit 1500) h;
+    end if;
+
+  when 'hasil_grade' then
+    if v_role = 'pengawas' then raise exception 'Akses ditolak.'; end if;
+    update public.hasil set nilai_essay = p_payload->'nilai', skor_essay = (p_payload->>'skor')::numeric
+    where id = (p_payload->>'id')::bigint;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'hasil_del' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    select coalesce(jsonb_agg(row_to_json(h)::jsonb),'[]'::jsonb) into v_out
+    from public.hasil h where h.id in (select (jsonb_array_elements_text(p_payload->'ids'))::bigint);
+    delete from public.hasil where id in (select (jsonb_array_elements_text(p_payload->'ids'))::bigint);
+
+  when 'hasil_restore' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(p_payload->'rows','[]'::jsonb))
+    on conflict (token,nis,mapel) do nothing;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'hasil_clear' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    select coalesce(jsonb_agg(row_to_json(h)::jsonb),'[]'::jsonb) into v_out from public.hasil h;
+    delete from public.hasil;
+
+  when 'set_save' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    insert into public.pengaturan (key,value)
+    select k, v from jsonb_each_text(p_payload->'settings') as kv(k,v)
+    on conflict (key) do update set value = excluded.value;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'log_list' then
+    select coalesce(jsonb_agg(jsonb_build_object('waktu',waktu,'username',username,'role',role,'aksi',aksi,'detail',detail) order by id desc),'[]'::jsonb)
+    into v_out from (select * from public.log_aktivitas order by id desc limit coalesce((p_payload->>'limit')::int,30)) x;
+
+  when 'log_add' then
+    insert into public.log_aktivitas (id,waktu,username,role,aksi,detail)
+    values (public.new_id(), now(), (select username from public.users where id=v_uid), v_role,
+            p_payload->>'aksi', coalesce(p_payload->>'detail',''));
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'log_clear' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    delete from public.log_aktivitas;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'backup' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    select jsonb_build_object('app','CBT PRO','version',5,'exported_at',now(),
+      'data', jsonb_build_object(
+        'users',(select coalesce(jsonb_agg(row_to_json(u)),'[]'::jsonb) from public.users u),
+        'bank_soal',(select coalesce(jsonb_agg(row_to_json(b)),'[]'::jsonb) from public.bank_soal b),
+        'paket',(select coalesce(jsonb_agg(row_to_json(p)),'[]'::jsonb) from public.paket p),
+        'hasil',(select coalesce(jsonb_agg(row_to_json(h)),'[]'::jsonb) from public.hasil h),
+        'pengaturan',(select coalesce(jsonb_object_agg(key,value),'{}'::jsonb) from public.pengaturan),
+        'log_aktivitas',(select coalesce(jsonb_agg(row_to_json(l)),'[]'::jsonb) from public.log_aktivitas l)))
+    into v_out;
+
+  when 'restore' then
+    if v_role <> 'admin' then raise exception 'Akses ditolak.'; end if;
+    v_tmp := p_payload->'data';
+    if v_tmp is null or v_tmp->'users' is null or v_tmp->'paket' is null then raise exception 'Format backup tidak valid.'; end if;
+    delete from public.hasil; delete from public.log_aktivitas; delete from public.bank_soal;
+    delete from public.paket; delete from public.users;
+    insert into public.users select * from jsonb_populate_recordset(null::public.users, v_tmp->'users');
+    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(v_tmp->'bank_soal','[]'::jsonb));
+    insert into public.paket select * from jsonb_populate_recordset(null::public.paket, v_tmp->'paket');
+    insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(v_tmp->'hasil','[]'::jsonb));
+    insert into public.log_aktivitas select * from jsonb_populate_recordset(null::public.log_aktivitas, coalesce(v_tmp->'log_aktivitas','[]'::jsonb));
+    insert into public.pengaturan (key,value) select k,v from jsonb_each_text(coalesce(v_tmp->'pengaturan','{}'::jsonb)) as kv(k,v)
+      on conflict (key) do update set value = excluded.value;
+    v_out := '{"ok":true}'::jsonb;
+
+  when 'seed' then
+    if (select count(*) from public.users) > 0 and v_role <> 'admin' then
+      raise exception 'Login sebagai admin untuk memuat data demo.';
+    end if;
+    v_tmp := p_payload->'data';
+    insert into public.users select * from jsonb_populate_recordset(null::public.users, v_tmp->'users') on conflict (id) do nothing;
+    insert into public.pengaturan (key,value) select k,v from jsonb_each_text(coalesce(v_tmp->'pengaturan','{}'::jsonb)) as kv(k,v) on conflict (key) do nothing;
+    insert into public.bank_soal select * from jsonb_populate_recordset(null::public.bank_soal, coalesce(v_tmp->'bank_soal','[]'::jsonb)) on conflict (id) do nothing;
+    insert into public.paket select * from jsonb_populate_recordset(null::public.paket, coalesce(v_tmp->'paket','[]'::jsonb))
+      on conflict (token) do update set mapel=excluded.mapel, waktu_mulai=excluded.waktu_mulai, waktu_selesai=excluded.waktu_selesai,
+      durasi_menit=excluded.durasi_menit, soal_json=excluded.soal_json, keterangan=excluded.keterangan,
+      acak_soal=excluded.acak_soal, acak_opsi=excluded.acak_opsi, mode_offline=excluded.mode_offline;
+    insert into public.hasil select * from jsonb_populate_recordset(null::public.hasil, coalesce(v_tmp->'hasil','[]'::jsonb)) on conflict (token,nis,mapel) do nothing;
+    v_out := '{"ok":true}'::jsonb;
+
+  else
+    raise exception 'Operasi tidak dikenal: %', p_op;
+  end case;
+
+  return v_out;
+end $$;
+grant execute on function public.panel(text,jsonb,text) to anon;
+
+-- ══════════════════════════════════════════════════════════════
+-- SELESAI · Login awal: admin/adminagus · pengawas/pengawas123
+--            guru: agus/guru123 · hasan/hasan123
+-- (Password otomatis di-upgrade ke SHA-256 saat login pertama)
+-- ══════════════════════════════════════════════════════════════`;
 
 /* ═══════════════════════ ADAPTER: LOKAL (DEMO) ═══════════════════════ */
 class LocalDB{
@@ -389,14 +812,14 @@ async ping(){return true;}
 async seedDemo(){this.d=DEMO();this.save();}
 async getSettings(){return{...this.d.settings};}
 async saveSettings(o){Object.assign(this.d.settings,o);this.save();}
-async listStaff(){return this.d.users.filter(u=>u.role!=='guru');}
-async findGuru(username){return this.d.users.find(u=>u.role==='guru'&&u.username===username)||null;}
+async loginStaff(pass){for(const u of this.d.users.filter(x=>x.role!=='guru')){if(await verifyPass(u.password_hash,pass)){if(String(u.password_hash).startsWith('plain:'))await this.upgradePass(u.id,'sha256:'+await sha256(pass));return{role:u.role,id:u.id,username:u.username,nama:u.nama_lengkap,mapel:u.mapel};}}throw new Error('Password salah!');}
+async loginGuru(username,pass){const u=this.d.users.find(x=>x.role==='guru'&&x.username===username);if(!u||!(await verifyPass(u.password_hash,pass)))throw new Error('Username atau password salah!');if(String(u.password_hash).startsWith('plain:'))await this.upgradePass(u.id,'sha256:'+await sha256(pass));return{role:'guru',id:u.id,username:u.username,nama:u.nama_lengkap,mapel:u.mapel};}
 async upgradePass(id,hash){const u=this.d.users.find(x=>x.id===id);if(u){u.password_hash=hash;this.save();}}
 async listGuru(){const banks=this.d.banks;return this.d.users.filter(u=>u.role==='guru').map(u=>({...u,password_hash:undefined,jumlah_bank:banks.filter(b=>b.guru_id===u.id).length})).sort((a,b)=>b.id-a.id);}
-async createGuru(g){if(this.d.users.some(u=>u.username===g.username))throw new Error('Username sudah digunakan!');const row={id:uid(),created_at:nowISO(),role:'guru',...g};this.d.users.push(row);this.save();return row;}
-async updateGuru(id,g){const u=this.d.users.find(x=>x.id===id);if(!u)throw new Error('Guru tidak ditemukan');Object.assign(u,g);this.save();}
+async createGuru(g){if(this.d.users.some(u=>u.username===g.username))throw new Error('Username sudah digunakan!');const row={id:uid(),created_at:nowISO(),role:'guru',username:g.username,password_hash:'sha256:'+await sha256(g.password),nama_lengkap:g.nama_lengkap,mapel:g.mapel};this.d.users.push(row);this.save();return row;}
+async updateGuru(id,g){const u=this.d.users.find(x=>x.id===id);if(!u)throw new Error('Guru tidak ditemukan');u.nama_lengkap=g.nama_lengkap;u.mapel=g.mapel;if(g.password)u.password_hash='sha256:'+await sha256(g.password);this.save();}
 async deleteGuru(id){const banks=this.d.banks.filter(b=>b.guru_id===id);const user=this.d.users.find(u=>u.id===id);this.d.banks=this.d.banks.filter(b=>b.guru_id!==id);this.d.users=this.d.users.filter(u=>u.id!==id);this.save();return{user,banks};}
-async restoreGuru({user,banks}){if(user)this.d.users.push(user);banks.forEach(b=>this.d.banks.push(b));this.save();}
+async restoreGuru({user,banks}){if(user)this.d.users.push(user);(banks||[]).forEach(b=>this.d.banks.push(b));this.save();}
 async listBanks(guruId){let b=this.d.banks;if(guruId)b=b.filter(x=>x.guru_id===guruId);return b.map(x=>({...x})).sort((a,b)=>b.id-a.id);}
 async getBank(id){return this.d.banks.find(b=>b.id===id)||null;}
 async saveBank(b){if(b.id){const i=this.d.banks.findIndex(x=>x.id===b.id);if(i>=0)this.d.banks[i]={...this.d.banks[i],...b};}else{b.id=uid();b.created_at=nowISO();this.d.banks.push(b);}this.save();return b;}
@@ -404,15 +827,39 @@ async deleteBank(id){const row=this.d.banks.find(b=>b.id===id);this.d.banks=this
 async restoreBanks(rows){rows.forEach(r=>this.d.banks.push(r));this.save();}
 async listPaket(o={}){let p=this.d.pakets;if(o.guruId)p=p.filter(x=>x.guru_id===o.guruId);p=[...p].sort((a,b)=>new Date(b.waktu_mulai)-new Date(a.waktu_mulai));return o.light?p.map(({soal_json,...r})=>r):p.map(x=>({...x}));}
 async getPaket(token){return this.d.pakets.find(p=>p.token===token)||null;}
+async getPaketSiswa(token){const p=this.d.pakets.find(x=>x.token===token);
+if(!p)throw new Error('Token tidak ditemukan. Periksa kembali.');
+const st=statusKey(p);
+if(st==='akan')throw new Error('Ujian belum dimulai. Mulai: '+fmtTgl(p.waktu_mulai));
+if(st==='selesai')throw new Error('Waktu ujian untuk token ini sudah berakhir.');
+let soal=Array.isArray(p.soal_json)?p.soal_json:JSON.parse(p.soal_json||'[]');
+if(!soal.length)throw new Error('Paket ini belum memiliki soal.');
+soal=soal.map(s=>{if((s.tipe||'PG')==='PG'){const{jawaban,...rest}=s;return rest;}return s;});
+return{token:p.token,mapel:p.mapel,durasi_menit:p.durasi_menit,keterangan:p.keterangan||'',acak_soal:!!p.acak_soal,acak_opsi:!!p.acak_opsi,mode_offline:!!p.mode_offline,waktu_mulai:p.waktu_mulai,waktu_selesai:p.waktu_selesai,soal_json:soal};}
 async savePaket(p,oldToken){if(oldToken&&oldToken!==p.token){if(this.d.pakets.some(x=>x.token===p.token))throw new Error('Token sudah digunakan.');this.d.pakets=this.d.pakets.filter(x=>x.token!==oldToken);p.created_at=nowISO();this.d.pakets.push(p);}else{const i=this.d.pakets.findIndex(x=>x.token===p.token);if(i>=0)this.d.pakets[i]={...this.d.pakets[i],...p};else{p.created_at=nowISO();this.d.pakets.push(p);}}this.save();return p;}
 async deletePaket(token){const row=this.d.pakets.find(p=>p.token===token);this.d.pakets=this.d.pakets.filter(p=>p.token!==token);this.save();return row;}
 async restorePaket(row){if(row)this.d.pakets.push(row);this.save();}
 async listHasil(o={}){let h=this.d.hasil;if(o.tokens)h=h.filter(x=>o.tokens.includes(x.token));return[...h].sort((a,b)=>b.id-a.id);}
-async submitHasil(row){const i=this.d.hasil.findIndex(h=>h.token===row.token&&h.nis===row.nis&&h.mapel===row.mapel);if(i>=0)this.d.hasil[i]={...this.d.hasil[i],...row,id:this.d.hasil[i].id};else{row.id=uid();this.d.hasil.push(row);}this.save();}
+async submitUjian(d){const p=this.d.pakets.find(x=>x.token===d.token);if(!p)throw new Error('Paket tidak ditemukan.');
+const soal=Array.isArray(p.soal_json)?p.soal_json:JSON.parse(p.soal_json||'[]');
+let pg=0;const essay={},detail={};
+soal.forEach((s,i)=>{const j=d.jawaban[i]??'';detail[i]=j;if((s.tipe||'PG')==='PG'){if(String(j).trim()===String(s.jawaban).trim())pg+=parseFloat(s.poin||0);}else essay['Soal_'+(i+1)]=j;});
+const row={waktu:nowISO(),token:d.token,mapel:p.mapel,nama:d.nama,kelas:d.kelas,nis:d.nis,skor_pg:pg,jawaban_essay:essay,detail_jawaban:detail,pelanggaran:d.pelanggaran};
+const i=this.d.hasil.findIndex(h=>h.token===row.token&&h.nis===row.nis&&h.mapel===row.mapel);
+if(i>=0)this.d.hasil[i]={...this.d.hasil[i],...row};else{row.id=uid();this.d.hasil.push(row);}
+this.save();this.addLog({username:d.nis,role:'siswa',aksi:'SUBMIT',detail:`${d.nama} · ${d.token} · PG ${pg}`});
+return{skor_pg:pg};}
 async gradeHasil(id,nilai,skor){const h=this.d.hasil.find(x=>x.id===id);if(h){h.nilai_essay=nilai;h.skor_essay=skor;this.save();}}
 async deleteHasil(ids){const rows=this.d.hasil.filter(h=>ids.includes(h.id));this.d.hasil=this.d.hasil.filter(h=>!ids.includes(h.id));this.save();return rows;}
 async restoreHasil(rows){rows.forEach(r=>this.d.hasil.push(r));this.save();}
 async clearHasil(){const rows=[...this.d.hasil];this.d.hasil=[];this.save();return rows;}
+async dashboard(){const hasil=this.d.hasil;const pm={};hasil.forEach(h=>{(pm[h.mapel]=pm[h.mapel]||[]).push(totalSkor(h));});
+return{jumlah_guru:this.d.users.filter(u=>u.role==='guru').length,jumlah_bank:this.d.banks.length,jumlah_paket:this.d.pakets.length,jumlah_hasil:hasil.length,
+rata_rata:hasil.length?hasil.reduce((a,h)=>a+totalSkor(h),0)/hasil.length:0,
+jumlah_pelanggaran:hasil.reduce((a,h)=>a+(+h.pelanggaran||0),0),
+per_mapel:Object.entries(pm).map(([m,a])=>({m,avg:a.reduce((x,y)=>x+y,0)/a.length,n:a.length})).sort((a,b)=>b.n-a.n).slice(0,8),
+top:[...hasil].sort((a,b)=>totalSkor(b)-totalSkor(a)).slice(0,5).map(h=>({nama:h.nama,kelas:h.kelas,mapel:h.mapel,skor:totalSkor(h)})),
+log:[...this.d.log].sort((a,b)=>b.id-a.id).slice(0,12)};}
 async listLog(limit=30){return[...this.d.log].sort((a,b)=>b.id-a.id).slice(0,limit);}
 async addLog(l){this.d.log.push({id:uid(),waktu:nowISO(),...l});if(this.d.log.length>400)this.d.log=this.d.log.slice(-400);this.save();}
 async clearLog(){this.d.log=[];this.save();}
@@ -426,64 +873,67 @@ async importAll(json){const d=json.data;if(!d||!d.users||!d.paket)throw new Erro
 subscribe(cb){const fn=()=>cb();window.addEventListener('local-db',fn);return()=>window.removeEventListener('local-db',fn);}
 }
 
-/* ═══════════════════════ ADAPTER: SUPABASE ═══════════════════════ */
+/* ═══════════════════════ ADAPTER: SUPABASE (RPC AMAN) ═══════════════════════ */
 class SupaDB{
 constructor(url,key){this.mode='supabase';this.url=url;this.sb=supabase.createClient(url,key,{auth:{persistSession:false}});this._imgCache={};}
 err(e){if(e)throw new Error(e.message||'Kesalahan database');}
-async ping(){const{error}=await this.sb.from('pengaturan').select('key').limit(1);if(error)throw new Error(error.message);return true;}
-async seedDemo(){const d=DEMO();
-this.err((await this.sb.from('users').upsert(d.users)).error);
-this.err((await this.sb.from('pengaturan').upsert(Object.entries(d.settings).map(([key,value])=>({key,value})))).error);
-this.err((await this.sb.from('bank_soal').upsert(d.banks)).error);
-this.err((await this.sb.from('paket').upsert(d.pakets)).error);
-this.err((await this.sb.from('hasil').upsert(d.hasil,{onConflict:'token,nis,mapel'})).error);}
+async call(fn,args){const{data,error}=await this.sb.rpc(fn,args);if(error)throw new Error(error.message);return data;}
+async rpc(op,payload={}){const s=SES.load();
+try{return await this.call('panel',{p_op:op,p_payload:payload,p_token:s?.token||''});}
+catch(e){if(/sesi/i.test(e.message)){SES.clear();toast('Sesi berakhir. Silakan login kembali.','warn');go('#/login');}throw e;}}
+async ping(){await this.call('jadwal_publik',{});return true;}
+async seedDemo(){const d=DEMO();await this.rpc('seed',{data:{users:d.users,pengaturan:d.settings,bank_soal:d.banks,paket:d.pakets,hasil:d.hasil}});}
 async getSettings(){const{data,error}=await this.sb.from('pengaturan').select('*');this.err(error);const o={};(data||[]).forEach(r=>o[r.key]=r.value);return o;}
-async saveSettings(o){this.err((await this.sb.from('pengaturan').upsert(Object.entries(o).map(([key,value])=>({key,value:String(value)})))).error);}
-async listStaff(){const{data,error}=await this.sb.from('users').select('*').in('role',['admin','pengawas']);this.err(error);return data||[];}
-async findGuru(username){const{data,error}=await this.sb.from('users').select('*').eq('role','guru').eq('username',username).maybeSingle();this.err(error);return data;}
-async upgradePass(id,hash){this.err((await this.sb.from('users').update({password_hash:hash}).eq('id',id)).error);}
-async listGuru(){const{data:u,error}=await this.sb.from('users').select('id,username,nama_lengkap,mapel,role,created_at').eq('role','guru').order('created_at',{ascending:false});this.err(error);
-const{data:b,error:e2}=await this.sb.from('bank_soal').select('id,guru_id');this.err(e2);
-return(u||[]).map(x=>({...x,jumlah_bank:(b||[]).filter(y=>y.guru_id===x.id).length}));}
-async createGuru(g){const{data:ex}=await this.sb.from('users').select('id').eq('username',g.username).maybeSingle();if(ex)throw new Error('Username sudah digunakan!');const row={id:uid(),role:'guru',...g};this.err((await this.sb.from('users').insert(row)).error);return row;}
-async updateGuru(id,g){this.err((await this.sb.from('users').update(g).eq('id',id)).error);}
-async deleteGuru(id){const{data:banks}=await this.sb.from('bank_soal').select('*').eq('guru_id',id);const{data:user}=await this.sb.from('users').select('*').eq('id',id).maybeSingle();this.err((await this.sb.from('users').delete().eq('id',id)).error);return{user,banks:banks||[]};}
-async restoreGuru({user,banks}){if(user)this.err((await this.sb.from('users').insert(user)).error);if(banks?.length)this.err((await this.sb.from('bank_soal').insert(banks)).error);}
-async listBanks(guruId){let q=this.sb.from('bank_soal').select('*').order('created_at',{ascending:false});if(guruId)q=q.eq('guru_id',guruId);const{data,error}=await q;this.err(error);return data||[];}
-async getBank(id){const{data,error}=await this.sb.from('bank_soal').select('*').eq('id',id).maybeSingle();this.err(error);return data;}
-async saveBank(b){if(b.id){const{id,...rest}=b;this.err((await this.sb.from('bank_soal').update(rest).eq('id',id)).error);}else{b.id=uid();this.err((await this.sb.from('bank_soal').insert(b)).error);}return b;}
-async deleteBank(id){const{data}=await this.sb.from('bank_soal').select('*').eq('id',id).maybeSingle();this.err((await this.sb.from('bank_soal').delete().eq('id',id)).error);return data;}
-async restoreBanks(rows){if(rows?.length)this.err((await this.sb.from('bank_soal').insert(rows)).error);}
-async listPaket(o={}){const cols=o.light?'token,mapel,waktu_mulai,waktu_selesai,durasi_menit,guru_id,keterangan,acak_soal,acak_opsi,mode_offline,created_at':'*';let q=this.sb.from('paket').select(cols).order('waktu_mulai',{ascending:false});if(o.guruId)q=q.eq('guru_id',o.guruId);const{data,error}=await q;this.err(error);return data||[];}
-async getPaket(token){const{data,error}=await this.sb.from('paket').select('*').eq('token',token).maybeSingle();this.err(error);return data;}
-async savePaket(p,oldToken){if(oldToken&&oldToken!==p.token){const{data:ex}=await this.sb.from('paket').select('token').eq('token',p.token).maybeSingle();if(ex)throw new Error('Token sudah digunakan.');this.err((await this.sb.from('paket').delete().eq('token',oldToken)).error);this.err((await this.sb.from('paket').insert(p)).error);}else{this.err((await this.sb.from('paket').upsert(p)).error);}return p;}
-async deletePaket(token){const{data}=await this.sb.from('paket').select('*').eq('token',token).maybeSingle();this.err((await this.sb.from('paket').delete().eq('token',token)).error);return data;}
-async restorePaket(row){if(row)this.err((await this.sb.from('paket').insert(row)).error);}
-async listHasil(o={}){let q=this.sb.from('hasil').select('*').order('id',{ascending:false}).limit(1500);if(o.tokens?.length)q=q.in('token',o.tokens);else if(o.tokens)return[];const{data,error}=await q;this.err(error);return data||[];}
-async submitHasil(row){const{data:ex}=await this.sb.from('hasil').select('id').eq('token',row.token).eq('nis',row.nis).eq('mapel',row.mapel).maybeSingle();if(ex){const{id,...rest}=row;this.err((await this.sb.from('hasil').update(rest).eq('id',ex.id)).error);}else{row.id=uid();this.err((await this.sb.from('hasil').insert(row)).error);}}
-async gradeHasil(id,nilai,skor){this.err((await this.sb.from('hasil').update({nilai_essay:nilai,skor_essay:skor}).eq('id',id)).error);}
-async deleteHasil(ids){const{data}=await this.sb.from('hasil').select('*').in('id',ids);this.err((await this.sb.from('hasil').delete().in('id',ids)).error);return data||[];}
-async restoreHasil(rows){if(rows?.length)this.err((await this.sb.from('hasil').insert(rows)).error);}
-async clearHasil(){const{data}=await this.sb.from('hasil').select('*');this.err((await this.sb.from('hasil').delete().neq('id',0)).error);return data||[];}
-async listLog(limit=30){const{data,error}=await this.sb.from('log_aktivitas').select('*').order('id',{ascending:false}).limit(limit);this.err(error);return data||[];}
-async addLog(l){try{await this.sb.from('log_aktivitas').insert({id:uid(),...l});}catch(e){}}
-async clearLog(){this.err((await this.sb.from('log_aktivitas').delete().neq('id',0)).error);}
+async saveSettings(o){await this.rpc('set_save',{settings:o});}
+async loginStaff(pass){const r=await this.call('login_petugas',{p_username:null,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Password salah!');return{...r.user,token:r.token,exp:+r.exp};}
+async loginGuru(username,pass){const r=await this.call('login_petugas',{p_username:username,p_password:pass});if(r.status!=='success')throw new Error(r.msg||'Username atau password salah!');return{...r.user,token:r.token,exp:+r.exp};}
+async listGuru(){return await this.rpc('guru_list');}
+async createGuru(g){return await this.rpc('guru_save',{username:g.username,password:g.password,nama:g.nama_lengkap,mapel:g.mapel});}
+async updateGuru(id,g){await this.rpc('guru_save',{id,nama:g.nama_lengkap,mapel:g.mapel,password:g.password||null});}
+async deleteGuru(id){try{const imgs=await this.listImages('g'+id+'_');for(const f of imgs){try{await this.deleteImage(f.name);}catch(e){}}}catch(e){}return await this.rpc('guru_del',{id});}
+async restoreGuru(captured){await this.rpc('guru_restore',captured);}
+async listBanks(guruId){return await this.rpc('bank_list',{guruId:guruId??null});}
+async getBank(id){return await this.rpc('bank_get',{id});}
+async saveBank(b){return await this.rpc('bank_save',{row:b});}
+async deleteBank(id){return await this.rpc('bank_del',{id});}
+async restoreBanks(rows){await this.rpc('bank_restore',{rows});}
+async listPaket(o={}){if(o.guruId)return await this.rpc('paket_list',{guruId:o.guruId});if(o.light)return await this.call('jadwal_publik',{});return await this.rpc('paket_list',{});}
+async getPaket(token){return await this.rpc('paket_get',{token});}
+async getPaketSiswa(token){return await this.call('ambil_paket_siswa',{p_token:token});}
+async savePaket(p,oldToken){return await this.rpc('paket_save',{row:p,old_token:oldToken||null});}
+async deletePaket(token){return await this.rpc('paket_del',{token});}
+async restorePaket(row){await this.rpc('paket_restore',{row});}
+async listHasil(o={}){return await this.rpc('hasil_list',{tokens:o.tokens||null,light:!!o.light});}
+async submitUjian(d){return await this.call('submit_jawaban_siswa',{p_token:d.token,p_nama:d.nama,p_kelas:d.kelas,p_nis:d.nis,p_jawaban:d.jawaban,p_pelanggaran:d.pelanggaran||0});}
+async gradeHasil(id,nilai,skor){await this.rpc('hasil_grade',{id,nilai,skor});}
+async deleteHasil(ids){return await this.rpc('hasil_del',{ids});}
+async restoreHasil(rows){await this.rpc('hasil_restore',{rows});}
+async clearHasil(){return await this.rpc('hasil_clear');}
+async dashboard(){return await this.rpc('dash');}
+async listLog(limit=30){return await this.rpc('log_list',{limit});}
+async addLog(l){try{await this.rpc('log_add',{aksi:l.aksi,detail:l.detail||''});}catch(e){}}
+async clearLog(){await this.rpc('log_clear');}
 async listImages(prefix){const{data,error}=await this.sb.storage.from('gambar').list('',{limit:300,sortBy:{column:'created_at',order:'desc'}});this.err(error);return(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder'&&(!prefix||f.name.startsWith(prefix))).map(f=>({name:f.name,url:this.imageUrl(f.name),created_at:f.created_at}));}
 imageUrl(name){if(this._imgCache[name])return this._imgCache[name];const{data}=this.sb.storage.from('gambar').getPublicUrl(name);this._imgCache[name]=data.publicUrl;return data.publicUrl;}
 async uploadImage(blob,name){this.err((await this.sb.storage.from('gambar').upload(name,blob,{contentType:blob.type,upsert:false})).error);return{name,url:this.imageUrl(name)};}
 async deleteImage(name){let cached=null;try{const r=await fetch(this.imageUrl(name));if(r.ok){const b=await r.blob();cached={blob:b,type:b.type};}}catch(e){}this.err((await this.sb.storage.from('gambar').remove([name])).error);return cached;}
 async restoreImage(name,v){if(v?.blob)this.err((await this.sb.storage.from('gambar').upload(name,v.blob,{contentType:v.type,upsert:true})).error);}
-async exportAll(){const t=async n=>{const{data}=await this.sb.from(n).select('*');return data||[];};const[users,bank_soal,paket,hasil,log_aktivitas]=await Promise.all([t('users'),t('bank_soal'),t('paket'),t('hasil'),t('log_aktivitas')]);return{app:'CBT PRO',version:5,exported_at:nowISO(),data:{users,bank_soal,paket,hasil,pengaturan:await this.getSettings(),log_aktivitas}};}
-async importAll(json){const d=json.data;if(!d?.users||!d?.paket)throw new Error('Format backup tidak valid.');
-for(const tb of['hasil','log_aktivitas','bank_soal','paket','users'])await this.sb.from(tb).delete().neq(tb==='paket'?'token':'id',tb==='paket'?'':'0');
-this.err((await this.sb.from('users').insert(d.users)).error);
-if(d.bank_soal?.length)this.err((await this.sb.from('bank_soal').insert(d.bank_soal)).error);
-this.err((await this.sb.from('paket').insert(d.paket)).error);
-if(d.hasil?.length)this.err((await this.sb.from('hasil').insert(d.hasil)).error);
-if(d.log_aktivitas?.length)this.err((await this.sb.from('log_aktivitas').insert(d.log_aktivitas)).error);
-if(d.pengaturan)await this.saveSettings(d.pengaturan);}
-subscribe(cb){const ch=this.sb.channel('hasil-live-'+Math.random().toString(36).slice(2)).on('postgres_changes',{event:'*',schema:'public',table:'hasil'},p=>cb(p)).subscribe();return()=>{try{this.sb.removeChannel(ch);}catch(e){}};}
+async exportAll(){return await this.rpc('backup');}
+async importAll(json){await this.rpc('restore',{data:json.data});}
+subscribe(cb){const iv=setInterval(()=>{try{cb({poll:true});}catch(e){}},20000);return()=>clearInterval(iv);}
 }
+/* Panel 'dash' untuk Supabase — dibangun dari op yang sudah ada */
+SupaDB.prototype.dashboard=function(){return(async()=>{
+const[gurus,banks,pakets,hasilFull,log]=await Promise.all([
+ this.rpc('guru_list'),this.rpc('bank_list',{guruId:null}),this.rpc('paket_list',{}),
+ this.rpc('hasil_list',{tokens:null,light:true}),this.rpc('log_list',{limit:12})]);
+const t=h=>(parseFloat(h.skor_pg)||0)+(parseFloat(h.skor_essay)||0);
+const pm={};hasilFull.forEach(h=>{(pm[h.mapel]=pm[h.mapel]||[]).push(t(h));});
+return{jumlah_guru:gurus.length,jumlah_bank:banks.length,jumlah_paket:pakets.length,jumlah_hasil:hasilFull.length,
+rata_rata:hasilFull.length?hasilFull.reduce((a,h)=>a+t(h),0)/hasilFull.length:0,
+jumlah_pelanggaran:hasilFull.reduce((a,h)=>a+(+h.pelanggaran||0),0),
+per_mapel:Object.entries(pm).map(([m,a])=>({m,avg:a.reduce((x,y)=>x+y,0)/a.length,n:a.length})).sort((a,b)=>b.n-a.n).slice(0,8),
+top:[...hasilFull].sort((a,b)=>t(b)-t(a)).slice(0,5).map(h=>({nama:h.nama,kelas:h.kelas,mapel:h.mapel,skor:t(h)})),log};})();};
 
 /* ═══════════════════════ FASILITAS DATA & SESI ═══════════════════════ */
 let DB=new LocalDB();
@@ -492,8 +942,8 @@ async function refreshSettings(){try{SETTINGS=await DB.getSettings();}catch(e){S
 const S=(k,d)=>SETTINGS[k]??d;
 function logAct(aksi,detail){const s=SES.load();DB.addLog({username:s?.username||'siswa',role:s?.role||'siswa',aksi,detail:detail||''}).catch(()=>{});}
 const SES={load(){const s=LS.get('cbt_session',null);if(s&&s.exp>Date.now())return s;if(s)LS.del('cbt_session');return null;},
-save(s){s.exp=Date.now()+SESSION_MS;LS.set('cbt_session',s);},
-touch(){const s=LS.get('cbt_session',null);if(s){s.exp=Date.now()+SESSION_MS;LS.set('cbt_session',s);}},
+save(s){if(!s.exp)s.exp=Date.now()+SESSION_MS;LS.set('cbt_session',s);},
+touch(){const s=LS.get('cbt_session',null);if(s&&!s.token){s.exp=Date.now()+SESSION_MS;LS.set('cbt_session',s);}},
 clear(){LS.del('cbt_session');}};
 setInterval(()=>{const raw=LS.get('cbt_session',null);if(raw&&raw.exp<=Date.now()){SES.clear();toast('Sesi berakhir. Silakan login kembali.','warn');go('#/login');}},30000);
 document.addEventListener('click',()=>SES.touch(),{passive:true});
@@ -515,7 +965,7 @@ function runCleanup(){VIEW_CLEANUP.forEach(f=>{try{f();}catch(e){}});VIEW_CLEANU
 function go(h){if(location.hash===h)route();else location.hash=h;}
 const ROUTES=['siswa','jadwal','login','login-guru','guru','admin','pengawas','setup'];
 function currentRoute(){const h=(location.hash||'#/siswa').replace('#/','').split('?')[0];return ROUTES.includes(h)?h:'siswa';}
-function renderNav(){const r=currentRoute();const s=SES.load();const pub=['siswa','jadwal','setup'].includes(r);
+function renderNav(){const r=currentRoute();const s=SES.load();
 const link=(h,label)=>`<a href="#/${h}" class="navlink ${r===h?'active':''}">${label}</a>`;
 const conn=DB.mode==='supabase'?'<span class="w-2 h-2 rounded-full bg-sukses-500 live-dot"></span><span class="hidden sm:inline">Supabase</span>':'<span class="w-2 h-2 rounded-full bg-pensil-400"></span><span class="hidden sm:inline">Demo Lokal</span>';
 let right='';
@@ -561,7 +1011,7 @@ v.innerHTML=`<div class="relative overflow-hidden"><div class="aurora opacity-[.
 <section class="reveal">
 <div class="sect-idx mb-3">01 / PORTAL PESERTA</div>
 <h1 class="font-disp text-4xl md:text-[3.4rem] leading-[1.05] font-bold text-ink-900">Ujian tenang,<br>nilai <span class="relative inline-block text-biru-600">terjaga<svg class="absolute -bottom-2 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 8 Q50 2 100 6 T198 4" stroke="#FFB020" stroke-width="4" fill="none" stroke-linecap="round"/></svg></span>.</h1>
-<p class="mt-5 text-ink-500 leading-relaxed max-w-lg">Masukkan token dari guru, kerjakan Pilihan Ganda lalu Essay. Jawaban tersimpan otomatis di perangkat — koneksi hanya dibutuhkan saat masuk dan mengirim.</p>
+<p class="mt-5 text-ink-500 leading-relaxed max-w-lg">Masukkan token dari guru, kerjakan Pilihan Ganda lalu Essay. Jawaban tersimpan otomatis di perangkat — koneksi hanya dibutuhkan saat masuk dan mengirim. Nilai PG dikoreksi oleh server.</p>
 <div class="mt-8 bg-ink-900 rounded-3xl p-6 shadow-lift relative overflow-hidden">
 <div class="absolute inset-0 opacity-40" style="background:radial-gradient(60% 80% at 85% 20%,rgba(46,91,255,.5),transparent 70%)"></div>
 <div class="relative flex items-start justify-between gap-4 flex-wrap">
@@ -570,7 +1020,7 @@ v.innerHTML=`<div class="relative overflow-hidden"><div class="aurora opacity-[.
 ${ljkArt(5)}
 </div></div>
 <div class="mt-6 grid grid-cols-3 gap-3">
-${[['play','1 · Masuk','Token + identitas'],['flag','2 · Kerjakan','PG lalu Essay'],['up','3 · Kirim','Nyalakan internet']].map((x,i)=>`<div class="card p-4 reveal" style="animation-delay:${.15+i*.1}s"><div class="w-9 h-9 rounded-xl bg-biru-50 text-biru-600 flex items-center justify-center mb-2">${ic(x[0])}</div><div class="font-bold text-sm text-ink-900">${x[1]}</div><div class="text-[11px] text-ink-400 mt-0.5">${x[2]}</div></div>`).join('')}
+${[['play','1 · Masuk','Token + identitas'],['flag','2 · Kerjakan','PG lalu Essay'],['up','3 · Kirim','Dikoreksi server']].map((x,i)=>`<div class="card p-4 reveal" style="animation-delay:${.15+i*.1}s"><div class="w-9 h-9 rounded-xl bg-biru-50 text-biru-600 flex items-center justify-center mb-2">${ic(x[0])}</div><div class="font-bold text-sm text-ink-900">${x[1]}</div><div class="text-[11px] text-ink-400 mt-0.5">${x[2]}</div></div>`).join('')}
 </div>
 ${aktif.length?`<div class="mt-6"><div class="label">Sedang berlangsung</div><div class="space-y-2">${aktif.map(p=>`<div class="card px-4 py-3 flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><span class="w-2 h-2 rounded-full bg-sukses-500 live-dot shrink-0"></span><div class="min-w-0"><div class="font-bold text-sm text-ink-900 truncate">${esc(p.mapel)}</div><div class="text-[11px] text-ink-400 truncate">${esc(p.keterangan||'')} · ${p.durasi_menit} menit</div></div></div><span class="chip-green shrink-0">Aktif</span></div>`).join('')}</div></div>`:''}
 </section>
@@ -598,13 +1048,8 @@ const nama=$('#s_nama').value.trim(),kelasV=$('#s_kelas').value,nis=$('#s_nis').
 if(!nama||!kelasV||!nis||!token)return;
 const btn=$('#btn-masuk');btn.disabled=true;btn.innerHTML='<span class="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"></span> Memvalidasi…';
 try{if(DB.mode==='supabase'&&!navigator.onLine)throw new Error('Nyalakan internet untuk validasi token.');
-const p=await DB.getPaket(token);
-if(!p)throw new Error('Token tidak ditemukan. Periksa kembali.');
-const st=statusKey(p);
-if(st==='akan')throw new Error('Ujian belum dimulai. Mulai: '+fmtTgl(p.waktu_mulai));
-if(st==='selesai')throw new Error('Waktu ujian untuk token ini sudah berakhir.');
+const p=await DB.getPaketSiswa(token);
 const soal=Array.isArray(p.soal_json)?p.soal_json:JSON.parse(p.soal_json||'[]');
-if(!soal.length)throw new Error('Paket ini belum memiliki soal.');
 p.soal_json=soal;
 const key=`cbt_backup_${nis}_${token}`;const saved=LS.get(key,null);
 let resume=false;
@@ -698,7 +1143,7 @@ $('#exam-prev').style.visibility=idx===0?'hidden':'visible';
 $('#exam-next').style.display=idx===total-1?'none':'inline-flex';
 $('#exam-ragu').classList.toggle('!bg-pensil-500',!!s.ragu[idx]);},
 async confirmFinish(){const s=this.st;const kosong=s.soal.filter((_,i)=>!s.jawaban[i]||s.jawaban[i]==='').length;const ragu=Object.values(s.ragu).filter(Boolean).length;
-const ok=await confirmBox({title:'Kirim jawaban sekarang?',body:`<div class="space-y-1.5"><div>✅ Terjawab: <b>${s.soal.length-kosong}</b> dari ${s.soal.length}</div>${kosong?`<div class="text-bahaya-600">⚠️ Masih kosong: <b>${kosong} soal</b></div>`:''}${ragu?`<div class="text-pensil-700">🚩 Ditandai ragu-ragu: <b>${ragu}</b></div>`:''}<div class="text-ink-400 text-xs mt-2">Setelah dikirim, jawaban dikunci dan tidak dapat diubah.</div></div>`,okText:'Ya, Kirim Jawaban',danger:kosong>0});
+const ok=await confirmBox({title:'Kirim jawaban sekarang?',body:`<div class="space-y-1.5"><div>✅ Terjawab: <b>${s.soal.length-kosong}</b> dari ${s.soal.length}</div>${kosong?`<div class="text-bahaya-600">⚠️ Masih kosong: <b>${kosong} soal</b></div>`:''}${ragu?`<div class="text-pensil-700">🚩 Ditandai ragu-ragu: <b>${ragu}</b></div>`:''}<div class="text-ink-400 text-xs mt-2">Setelah dikirim, jawaban dikunci dan nilai PG dihitung oleh server.</div></div>`,okText:'Ya, Kirim Jawaban',danger:kosong>0});
 if(ok)this.lock(false);},
 lock(habisWaktu){const s=this.st;if(s.submitting)return;s.active=false;clearInterval(s.timer);clearInterval(s.conn);this.unbindGuards();
 document.body.classList.remove('exam-active');if(document.exitFullscreen&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
@@ -707,19 +1152,18 @@ $('#exam-root').innerHTML=`<div class="fixed inset-0 z-50 bg-ink-950/95 backdrop
 this.submit();},
 async submit(){const s=this.st;if(s.submitting)return;s.submitting=true;const box=$('#lock-status');
 if(DB.mode==='supabase'&&!navigator.onLine){s.submitting=false;box.innerHTML=`<span class="text-bahaya-600">⚠️ Tidak ada koneksi.</span><div class="flex gap-2 justify-center mt-3 flex-wrap"><button class="btn-pri btn-xs" onclick="EXAM.submit()">${ic('refresh','w-3.5 h-3.5')} Cek & Kirim Ulang</button><button class="btn-ghost btn-xs" onclick="EXAM.exportJawaban()">${ic('down','w-3.5 h-3.5')} Unduh Salinan</button></div>`;return;}
-box.innerHTML='<div class="flex items-center justify-center gap-2"><span class="w-5 h-5 border-[3px] border-biru-600 border-t-transparent rounded-full animate-spin"></span> Mengirim jawaban…</div>';
-let pg=0;const essay={},detail={};
-s.soal.forEach((so,i)=>{const j=s.jawaban[i]??'';detail[so._orig??i]=j;if((so.tipe||'PG')==='PG'){if(String(j).trim()===String(so.jawaban).trim())pg+=parseFloat(so.poin||0);}else essay['Soal_'+((so._orig??i)+1)]=j;});
-const row={waktu:nowISO(),token:s.paket.token,mapel:s.paket.mapel,nama:s.peserta.nama,kelas:s.peserta.kelas,nis:s.peserta.nis,skor_pg:pg,jawaban_essay:essay,detail_jawaban:detail,pelanggaran:s.pelanggaran};
-try{await DB.submitHasil(row);LS.del(s.key);logAct('SUBMIT',`${s.peserta.nama} · ${s.paket.token} · PG ${pg}`);this.success(pg);}
+box.innerHTML='<div class="flex items-center justify-center gap-2"><span class="w-5 h-5 border-[3px] border-biru-600 border-t-transparent rounded-full animate-spin"></span> Mengirim & mengoreksi di server…</div>';
+const jawaban={};s.soal.forEach((so,i)=>{jawaban[so._orig??i]=s.jawaban[i]??'';});
+try{const r=await DB.submitUjian({token:s.paket.token,nama:s.peserta.nama,kelas:s.peserta.kelas,nis:s.peserta.nis,jawaban,pelanggaran:s.pelanggaran});
+LS.del(s.key);this.success(r.skor_pg||0);}
 catch(e){s.submitting=false;box.innerHTML=`<span class="text-bahaya-600">❌ ${esc(e.message)}</span><div class="flex gap-2 justify-center mt-3 flex-wrap"><button class="btn-pri btn-xs" onclick="EXAM.submit()">Coba Lagi</button><button class="btn-ghost btn-xs" onclick="EXAM.exportJawaban()">Unduh Salinan</button></div>`;}},
 exportJawaban(){const s=this.st;download(`jawaban_${s.peserta.nis}_${s.paket.token}.json`,JSON.stringify({peserta:s.peserta,token:s.paket.token,jawaban:s.jawaban,ragu:s.ragu,pelanggaran:s.pelanggaran},null,2),'application/json');toast('Salinan jawaban diunduh.','ok');},
 success(pg){const s=this.st;const answered=Object.values(s.jawaban).filter(x=>x!=='').length;
 $('#exam-root').innerHTML=`<div class="fixed inset-0 z-50 bg-gradient-to-br from-ink-950 via-ink-900 to-biru-900 flex items-center justify-center p-5 relative overflow-hidden"><div class="aurora"></div>
 <div class="pop-in bg-white rounded-3xl shadow-lift max-w-md w-full p-8 text-center space-y-4 relative"><div class="relative w-20 h-20 mx-auto"><div class="burst absolute inset-0">${Array.from({length:18},(_,i)=>{const a=i/18*Math.PI*2,d=70+Math.random()*50;const cols=['#2E5BFF','#FFB020','#12B76A','#7A5AF8','#F04438','#06AED4'];return `<span style="--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;background:${cols[i%6]};animation-delay:${Math.random()*.15}s"></span>`;}).join('')}</div><div class="w-20 h-20 rounded-full bg-sukses-100 text-sukses-600 flex items-center justify-center relative">${ic('check','w-10 h-10')}</div></div>
 <h2 class="font-disp text-2xl font-bold text-sukses-600">BERHASIL DIKIRIM!</h2>
-<p class="text-sm text-ink-400">Jawaban <b>${esc(s.peserta.nama)}</b> untuk <b>${esc(s.paket.mapel)}</b> telah tersimpan${DB.mode==='supabase'?' di server Supabase':' di database lokal'}.</p>
-<div class="grid grid-cols-3 gap-2 text-center"><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold text-ink-900">${answered}/${s.soal.length}</div><div class="text-[10px] font-bold text-ink-400 uppercase">Terjawab</div></div><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold ${s.pelanggaran?'text-bahaya-600':'text-sukses-600'}">${s.pelanggaran}</div><div class="text-[10px] font-bold text-ink-400 uppercase">Pelanggaran</div></div><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold text-ink-400">🔒</div><div class="text-[10px] font-bold text-ink-400 uppercase">Nilai oleh guru</div></div></div>
+<p class="text-sm text-ink-400">Jawaban <b>${esc(s.peserta.nama)}</b> untuk <b>${esc(s.paket.mapel)}</b> telah tersimpan${DB.mode==='supabase'?' & dikoreksi di server':' di database lokal'}. Skor PG Anda: <b>${pg}</b>.</p>
+<div class="grid grid-cols-3 gap-2 text-center"><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold text-ink-900">${answered}/${s.soal.length}</div><div class="text-[10px] font-bold text-ink-400 uppercase">Terjawab</div></div><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold ${s.pelanggaran?'text-bahaya-600':'text-sukses-600'}">${s.pelanggaran}</div><div class="text-[10px] font-bold text-ink-400 uppercase">Pelanggaran</div></div><div class="bg-kertas-100 rounded-xl p-3"><div class="font-disp text-xl font-bold text-ink-400">✍️</div><div class="text-[10px] font-bold text-ink-400 uppercase">Essay oleh guru</div></div></div>
 <button class="btn-pri w-full !py-3.5" onclick="EXAM.destroy();go('#/siswa')">Kembali ke Portal</button></div></div>`;},
 destroy(){const s=this.st;if(s){s.active=false;clearInterval(s.timer);clearInterval(s.conn);this.unbindGuards();}document.body.classList.remove('exam-active');$('#exam-root').innerHTML='';this.st=null;if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});}};
 
@@ -749,42 +1193,40 @@ function loginShell(accent,iconName,title,sub,formHTML,altHTML){return `<div cla
 <div class="hidden lg:flex relative bg-ink-950 items-center justify-center p-12 overflow-hidden"><div class="aurora"></div>
 <div class="relative max-w-sm w-full"><div class="mb-8">${LOGO(56)}</div><h2 class="font-disp text-4xl font-bold text-white leading-tight">Ruang kerja<br>pendidik.</h2><p class="text-ink-300 mt-4 text-sm leading-relaxed">Kelola bank soal, jadwalkan ujian dengan token, pantau peserta secara langsung, dan koreksi essay — semuanya dalam satu lembar kendali.</p>
 <div class="mt-10 bg-white/5 border border-white/10 rounded-2xl p-5">${ljkArt(4)}</div>
-<div class="mt-6 flex gap-2 flex-wrap"><span class="chip bg-biru-500/20 text-biru-200 border-biru-500/30">Sesi 4 jam</span><span class="chip bg-pensil-400/20 text-pensil-200 border-pensil-400/30">Rate-limit login</span><span class="chip bg-sukses-500/20 text-sukses-300 border-sukses-500/30">Password ter-hash</span></div></div></div>
+<div class="mt-6 flex gap-2 flex-wrap"><span class="chip bg-biru-500/20 text-biru-200 border-biru-500/30">Sesi 4 jam</span><span class="chip bg-pensil-400/20 text-pensil-200 border-pensil-400/30">Login divalidasi server</span><span class="chip bg-sukses-500/20 text-sukses-300 border-sukses-500/30">Password ter-hash</span></div></div></div>
 <div class="flex items-center justify-center p-6 md:p-12"><div class="w-full max-w-md reveal">
 <div class="w-14 h-14 rounded-2xl ${accent} text-white flex items-center justify-center mb-5 shadow-lift">${ic(iconName,'w-7 h-7')}</div>
 <h1 class="font-disp text-3xl font-bold text-ink-900">${title}</h1><p class="text-sm text-ink-400 mt-2 mb-8">${sub}</p>
 ${formHTML}<div class="mt-8 flex flex-col gap-2.5 text-center">${altHTML}</div>
-<p class="text-[11px] text-ink-300 mt-8 text-center">5 percobaan gagal → jeda 5 menit · Sesi bertahan 4 jam dengan perpanjangan otomatis saat aktif.</p>
+<p class="text-[11px] text-ink-300 mt-8 text-center">5 percobaan gagal → jeda 5 menit · Sesi panel 4 jam (divalidasi server).</p>
 </div></div></div>`;}
 async function vLogin(v){
-v.innerHTML=loginShell('bg-ink-900','shield','LOGIN PETUGAS','Admin & Pengawas — satu kolom password, peran dikenali otomatis.',
+v.innerHTML=loginShell('bg-ink-900','shield','LOGIN PETUGAS','Admin & Pengawas — satu kolom password, peran dikenali otomatis oleh server.',
 `<form id="f-staff" class="space-y-4"><div><label class="label">Password Petugas</label><input type="password" id="l_pass" class="input !py-4" placeholder="••••••••" required autocomplete="current-password"></div><button class="btn-pri w-full !py-4 !text-base" type="submit">MASUK PANEL</button></form>`,
 `<a href="#/login-guru" class="btn-ok w-full">🎓 Login Guru / Pembuat Soal</a><a href="#/siswa" class="text-xs font-bold text-ink-400 hover:text-biru-600">← Kembali ke Portal Peserta</a>`);
 $('#f-staff').addEventListener('submit',async e=>{e.preventDefault();const lock=RL.check('staff');if(lock)return toast(`Terlalu banyak percobaan. Coba lagi dalam ${lock} menit.`,'err');
-const pass=$('#l_pass').value;try{const staff=await DB.listStaff();let found=null;for(const u of staff){if(await verifyPass(u.password_hash,pass)){found=u;break;}}
-if(!found){RL.hit('staff');throw new Error('Password salah!');}
-RL.reset('staff');if(String(found.password_hash).startsWith('plain:'))await DB.upgradePass(found.id,'sha256:'+await sha256(pass));
-SES.save({role:found.role,uid:found.id,username:found.username,nama:found.nama_lengkap,mapel:found.mapel});logAct('LOGIN',found.role+' masuk panel');
-toast(`Selamat datang, ${found.nama_lengkap}!`,'ok');go(found.role==='admin'?'#/admin':'#/pengawas');}catch(err){toast(err.message,'err');}});}
+try{const u=await DB.loginStaff($('#l_pass').value);RL.reset('staff');
+SES.save({role:u.role,uid:u.id,username:u.username,nama:u.nama,mapel:u.mapel,token:u.token||null,exp:u.exp||Date.now()+SESSION_MS});
+toast(`Selamat datang, ${u.nama}!`,'ok');go(u.role==='admin'?'#/admin':'#/pengawas');}
+catch(err){RL.hit('staff');toast(err.message,'err');}});}
 async function vLoginGuru(v){
-v.innerHTML=loginShell('bg-sukses-600','book','LOGIN GURU','Panel bank soal, penjadwalan, dan hasil — sesi panjang anti-logout.',
+v.innerHTML=loginShell('bg-sukses-600','book','LOGIN GURU','Panel bank soal, penjadwalan, dan hasil — sesi 4 jam anti-logout.',
 `<form id="f-guru" class="space-y-4"><div><label class="label">Username</label><input id="g_user" class="input !py-4" placeholder="cth: agus" required autocomplete="username"></div><div><label class="label">Password</label><input type="password" id="g_pass" class="input !py-4" placeholder="••••••••" required autocomplete="current-password"></div><button class="btn-ok w-full !py-4 !text-base" type="submit">MASUK PANEL GURU</button></form>`,
 `<a href="#/login" class="btn-ghost w-full">🛡️ Login Admin / Pengawas</a><a href="#/siswa" class="text-xs font-bold text-ink-400 hover:text-biru-600">← Portal Peserta</a>${DB.mode==='local'?'<div class="chip-amber justify-center !py-2 mt-2">Demo: agus / guru123 · hasan / hasan123</div>':''}`);
 $('#f-guru').addEventListener('submit',async e=>{e.preventDefault();const lock=RL.check('guru');if(lock)return toast(`Terlalu banyak percobaan. Coba lagi dalam ${lock} menit.`,'err');
-try{const u=await DB.findGuru($('#g_user').value.trim());const pass=$('#g_pass').value;
-if(!u||!(await verifyPass(u.password_hash,pass))){RL.hit('guru');throw new Error('Username atau password salah!');}
-RL.reset('guru');if(String(u.password_hash).startsWith('plain:'))await DB.upgradePass(u.id,'sha256:'+await sha256(pass));
-SES.save({role:'guru',uid:u.id,username:u.username,nama:u.nama_lengkap,mapel:u.mapel});logAct('LOGIN','Guru masuk panel');
-toast(`Selamat datang, ${u.nama_lengkap}!`,'ok');go('#/guru');}catch(err){toast(err.message,'err');}});}
+try{const u=await DB.loginGuru($('#g_user').value.trim(),$('#g_pass').value);RL.reset('guru');
+SES.save({role:'guru',uid:u.id,username:u.username,nama:u.nama,mapel:u.mapel,token:u.token||null,exp:u.exp||Date.now()+SESSION_MS});
+toast(`Selamat datang, ${u.nama}!`,'ok');go('#/guru');}
+catch(err){RL.hit('guru');toast(err.message,'err');}});}
 
 /* ═══════════════════════ SHELL PANEL (Guru/Admin) ═══════════════════════ */
-function panelShell(v,{role,accent,tabs,user,sub}){const s=SES.load();
+function panelShell(v,{role,accent,tabs,user,sub}){
 v.innerHTML=`<div class="lg:grid lg:grid-cols-[260px_1fr] min-h-[calc(100vh-68px)]">
 <aside class="hidden lg:flex flex-col bg-ink-950 relative overflow-hidden"><div class="absolute inset-0 opacity-30" style="background:radial-gradient(70% 40% at 50% 0%,${accent}44,transparent 70%)"></div>
 <div class="relative p-5 border-b border-white/10"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl flex items-center justify-center text-white font-disp font-bold text-lg" style="background:${accent}">${esc(user.nama[0]||'?')}</div><div class="min-w-0"><div class="font-bold text-white text-sm truncate">${esc(user.nama)}</div><div class="text-[11px] text-ink-300 truncate">${esc(sub)}</div></div></div>
 <div class="chip bg-white/5 text-ink-200 border-white/10 mt-3 w-full justify-center">🕒 Sesi aktif · ${role.toUpperCase()}</div></div>
 <nav class="relative p-3 space-y-1 flex-1">${tabs.map(t=>`<button class="tabbtn ${t.id===tabs[0].id?'active':''}" data-tab="${t.id}">${ic(t.icon,'w-[18px] h-[18px]')} ${t.label}</button>`).join('')}</nav>
-<div class="relative p-4 border-t border-white/10"><div class="text-[10px] text-ink-400 font-mono text-center">CBT·PRO v${APP.ver} · ${DB.mode==='supabase'?'SUPABASE':'DEMO'}</div></div></aside>
+<div class="relative p-4 border-t border-white/10"><div class="text-[10px] text-ink-400 font-mono text-center">CBT·PRO v${APP.ver} · ${DB.mode==='supabase'?'SUPABASE AMAN':'DEMO'}</div></div></aside>
 <div class="lg:hidden bg-white border-b border-kertas-300 px-3 py-2 flex gap-1.5 overflow-x-auto">${tabs.map(t=>`<button data-tab="${t.id}" class="tabbtn-m shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold ${t.id===tabs[0].id?'bg-ink-900 text-white':'bg-kertas-100 text-ink-500'}">${t.label}</button>`).join('')}</div>
 <div class="p-4 md:p-8 max-w-6xl w-full mx-auto" id="panel-body"></div></div>`;
 const switchTab=id=>{$$('[data-tab]').forEach(b=>{const on=b.dataset.tab===id;if(b.classList.contains('tabbtn'))b.classList.toggle('active',on);else{b.classList.toggle('bg-ink-900',on);b.classList.toggle('text-white',on);b.classList.toggle('bg-kertas-100',!on);b.classList.toggle('text-ink-500',!on);}});
@@ -859,7 +1301,7 @@ w.querySelector('#pv-prev').style.visibility=idx?'visible':'hidden';w.querySelec
 w.querySelector('#pv-prev').onclick=()=>{if(idx>0){idx--;render();}};w.querySelector('#pv-next').onclick=()=>{if(idx<data.length-1){idx++;render();}};render();},
 modal({title,nama,mapel,onSave,extra}){const w=openModal(`<div class="px-6 py-4 border-b border-kertas-300 bg-white flex justify-between items-center shrink-0"><h3 class="font-disp text-lg font-bold">${title}</h3><button class="icon-btn" onclick="closeModal()">${ic('x','w-5 h-5')}</button></div>
 <div class="flex-1 overflow-y-auto exam-scroll p-5 md:p-6"><div class="grid sm:grid-cols-2 gap-4 mb-4"><div><label class="label">Nama Bank / Paket</label><input id="ed-nama" class="input" value="${esc(nama||'')}" placeholder="cth: PSAS Matematika Kelas 8"></div><div><label class="label">Mata Pelajaran</label><input id="ed-mapel" class="input" value="${esc(mapel||'')}" placeholder="cth: Matematika"></div></div>
-<div class="bg-pensil-50 border border-pensil-200 rounded-xl p-3 text-[11px] text-pensil-800 mb-4"><b>Format:</b> math <code>$x^2$</code> / <code>$$\\frac{1}{2}$$</code> · Arab tulis langsung · gambar <code>[file.webp]</code> · seret ${ic('grip','w-3 h-3 inline')} untuk urutkan · Essay otomatis di akhir saat ujian.</div>
+<div class="bg-pensil-50 border border-pensil-200 rounded-xl p-3 text-[11px] text-pensil-800 mb-4"><b>Format:</b> math <code>$x^2$</code> / <code>$$\\frac{1}{2}$$</code> · Arab tulis langsung · gambar <code>[file.webp]</code> · seret ${ic('grip','w-3 h-3 inline')} untuk urutkan · Essay otomatis di akhir saat ujian. 🔐 Kunci disimpan aman di server.</div>
 <div class="flex justify-between items-center gap-2 flex-wrap mb-3"><h4 class="font-bold text-sm text-ink-700">Daftar Soal</h4><div class="flex gap-1.5 flex-wrap"><button class="btn-ghost btn-xs" id="ed-imp">${ic('down','w-3.5 h-3.5')} Import Teks</button><button class="btn-ghost btn-xs" id="ed-copy">${ic('copy','w-3.5 h-3.5')} Salin Semua</button><button class="btn-soft btn-xs" id="ed-pv">${ic('eye','w-3.5 h-3.5')} Preview Ujian</button><button class="btn-pri btn-xs" id="ed-add">${ic('plus','w-3.5 h-3.5')} Tambah</button></div></div>
 <div id="ed-soal" class="space-y-3 pb-4"></div></div>
 <div class="px-6 py-4 border-t border-kertas-300 bg-white flex justify-end gap-3 shrink-0"><button class="btn-ghost" onclick="closeModal()">Batal</button><button class="btn-ok" id="ed-save">${ic('save')} Simpan</button></div>`,'max-w-4xl');
@@ -874,29 +1316,29 @@ const data=this.collect();const err=this.validate(data);if(err)return toast(err,
 const btn=w.querySelector('#ed-save');btn.disabled=true;try{await onSave(nm,mp,data);closeModal(w);}catch(e){toast(e.message,'err');btn.disabled=false;}};
 return w;}};
 
-/* ═══════════════════════ EKSPOR / IMPOR ═══════════════════════ */
+/* ═══════════════════════ EKSPOR / IMPOR (lazy-load) ═══════════════════════ */
 function flattenEssay(h){const o=h.jawaban_essay;if(!o||typeof o!=='object')return String(o||'-');return Object.entries(o).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n')||'-';}
 function totalSkor(h){return(parseFloat(h.skor_pg)||0)+(parseFloat(h.skor_essay)||0);}
-function excelHasil(rows,label){if(!rows.length)return toast('Tidak ada data.','warn');
+async function excelHasil(rows,label){try{await LIB.xlsx();if(!rows.length)return toast('Tidak ada data.','warn');
 const data=rows.map(h=>({'Waktu':fmtTgl(h.waktu),'Mapel':h.mapel,'Token':h.token,'Kelas':h.kelas,'Nama':h.nama,'NIS':h.nis,'Skor PG':h.skor_pg,'Skor Essay':h.skor_essay??'','Total':totalSkor(h),'KKM':totalSkor(h)>=+S('kkm',75)?'LULUS':'BELUM','Jawaban Essay':flattenEssay(h),'Pelanggaran':h.pelanggaran}));
 const ws=XLSX.utils.json_to_sheet(data);ws['!cols']=[{wch:18},{wch:22},{wch:10},{wch:8},{wch:26},{wch:10},{wch:9},{wch:10},{wch:8},{wch:9},{wch:70},{wch:12}];
-const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Hasil');XLSX.writeFile(wb,`REKAP_${label}_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Excel diunduh.','ok');}
-function pdfHasil(rows){if(!rows.length)return toast('Tidak ada data.','warn');const{jsPDF}=window.jspdf;const doc=new jsPDF('landscape');
+const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Hasil');XLSX.writeFile(wb,`REKAP_${label}_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Excel diunduh.','ok');}catch(e){toast(e.message,'err');}}
+async function pdfHasil(rows){try{await LIB.pdf();if(!rows.length)return toast('Tidak ada data.','warn');const{jsPDF}=window.jspdf;const doc=new jsPDF('landscape');
 doc.setFontSize(14);doc.text('Rekap Hasil Ujian — '+(S('nama_sekolah','CBT PRO')),14,14);
 doc.setFontSize(9);doc.setTextColor(110);doc.text(`${S('nama_ujian','')} · KKM ${S('kkm',75)} · Dicetak ${new Date().toLocaleString('id-ID')}`,14,20);
 doc.autoTable({startY:25,head:[['Nama (NIS)','Kelas','Mapel','Token','PG','Essay','Total','Status','Essay (ringkas)','Plg']],
 body:rows.map(h=>[`${h.nama} (${h.nis})`,h.kelas,h.mapel,h.token,h.skor_pg,h.skor_essay??'—',totalSkor(h),totalSkor(h)>=+S('kkm',75)?'LULUS':'BELUM',flattenEssay(h).replace(/\n/g,'; ').slice(0,160),h.pelanggaran]),
 styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[11,18,48]},alternateRowStyles:{fillColor:[246,244,237]},
 didDrawPage:d=>{doc.setFontSize(8);doc.setTextColor(150);doc.text('CBT PRO · hal '+doc.internal.getNumberOfPages(),14,doc.internal.pageSize.height-6);}});
-doc.save('REKAP_CBT.pdf');toast('PDF diunduh.','ok');}
-function excelBank(bank){const soal=Array.isArray(bank.soal_json)?bank.soal_json:JSON.parse(bank.soal_json||'[]');if(!soal.length)return toast('Bank kosong.','warn');
+doc.save('REKAP_CBT.pdf');toast('PDF diunduh.','ok');}catch(e){toast(e.message,'err');}}
+async function excelBank(bank){try{await LIB.xlsx();const soal=Array.isArray(bank.soal_json)?bank.soal_json:JSON.parse(bank.soal_json||'[]');if(!soal.length)return toast('Bank kosong.','warn');
 const data=soal.map(s=>({'Tipe':s.tipe||'PG','Soal':s.pertanyaan,'Opsi A':s.opsi?.[0]||'','Opsi B':s.opsi?.[1]||'','Opsi C':s.opsi?.[2]||'','Opsi D':s.opsi?.[3]||'','Jawaban':s.jawaban||'','Poin':s.poin||0}));
 const ws=XLSX.utils.json_to_sheet(data);ws['!cols']=[{wch:8},{wch:60},{wch:22},{wch:22},{wch:22},{wch:22},{wch:22},{wch:7}];
-const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Soal');XLSX.writeFile(wb,`BANK_${bank.nama_bank.replace(/[^a-z0-9]/gi,'_')}.xlsx`);toast('Bank soal diekspor.','ok');}
-function templateSoal(){const data=[{'Tipe':'PG','Soal':'Hasil $2^2 + 3^2$ adalah …','Opsi A':'11','Opsi B':'13','Opsi C':'15','Opsi D':'17','Jawaban':'13','Poin':10},{'Tipe':'PG','Soal':'Arti kata:\nالمدرسة','Opsi A':'Pasar','Opsi B':'Sekolah','Opsi C':'Masjid','Opsi D':'Rumah','Jawaban':'Sekolah','Poin':10},{'Tipe':'Essay','Soal':'Jelaskan proses fotosintesis!','Opsi A':'','Opsi B':'','Opsi C':'','Opsi D':'','Jawaban':'','Poin':40}];
+const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Soal');XLSX.writeFile(wb,`BANK_${bank.nama_bank.replace(/[^a-z0-9]/gi,'_')}.xlsx`);toast('Bank soal diekspor.','ok');}catch(e){toast(e.message,'err');}}
+async function templateSoal(){try{await LIB.xlsx();const data=[{'Tipe':'PG','Soal':'Hasil $2^2 + 3^2$ adalah …','Opsi A':'11','Opsi B':'13','Opsi C':'15','Opsi D':'17','Jawaban':'13','Poin':10},{'Tipe':'PG','Soal':'Arti kata:\nالمدرسة','Opsi A':'Pasar','Opsi B':'Sekolah','Opsi C':'Masjid','Opsi D':'Rumah','Jawaban':'Sekolah','Poin':10},{'Tipe':'Essay','Soal':'Jelaskan proses fotosintesis!','Opsi A':'','Opsi B':'','Opsi C':'','Opsi D':'','Jawaban':'','Poin':40}];
 const ws=XLSX.utils.json_to_sheet(data);ws['!cols']=[{wch:8},{wch:55},{wch:20},{wch:20},{wch:20},{wch:20},{wch:20},{wch:7}];
-const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Soal');XLSX.writeFile(wb,'TEMPLATE_SOAL.xlsx');toast('Template diunduh.','ok');}
-function pickExcel(cb){const f=$('#hidden-file');f.accept='.xlsx,.xls';f.value='';f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});cb(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}));}catch(err){toast('Gagal membaca file Excel.','err');}};r.readAsArrayBuffer(file);};f.click();}
+const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Soal');XLSX.writeFile(wb,'TEMPLATE_SOAL.xlsx');toast('Template diunduh.','ok');}catch(e){toast(e.message,'err');}}
+function pickExcel(cb){const f=$('#hidden-file');f.accept='.xlsx,.xls';f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;try{await LIB.xlsx();const r=new FileReader();r.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});cb(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}));}catch(err){toast('Gagal membaca file Excel.','err');}};r.readAsArrayBuffer(file);}catch(e){toast(e.message,'err');}};f.click();}
 function importSoalExcel(mapel,onDone){pickExcel(rows=>{const soal=[];rows.forEach(r=>{const tp=String(r['Tipe']||'PG').toUpperCase().trim();const p=String(r['Soal']||'').trim();if(!p)return;soal.push({tipe:tp==='ESSAY'?'Essay':'PG',pertanyaan:p,opsi:[r['Opsi A'],r['Opsi B'],r['Opsi C'],r['Opsi D']].map(x=>String(x||'')),jawaban:String(r['Jawaban']||''),poin:parseFloat(r['Poin'])||(tp==='ESSAY'?20:10)});});
 if(!soal.length)return toast('Tidak ada soal valid pada file.','err');onDone(soal);});}
 
@@ -926,9 +1368,9 @@ let paket=null;try{paket=await DB.getPaket(h.token);}catch(e){}
 const soal=paket?(Array.isArray(paket.soal_json)?paket.soal_json:JSON.parse(paket.soal_json||'[]')):null;
 const detail=h.detail_jawaban||{};
 let review='';
-if(soal){review=soal.map((s,i)=>{const j=detail[i];const isPG=(s.tipe||'PG')==='PG';const benar=isPG&&String(j??'').trim()===String(s.jawaban).trim();
+if(soal){review=soal.map((s,i)=>{const j=detail[i]??detail[String(i)];const isPG=(s.tipe||'PG')==='PG';const benar=isPG&&String(j??'').trim()===String(s.jawaban).trim();
 return `<div class="card p-4 ${isPG?(j===undefined?'':benar?'!border-sukses-300':'!border-bahaya-200'):''}"><div class="flex gap-2 mb-2 flex-wrap"><span class="chip bg-ink-900 text-white border-ink-900 !text-[10px] font-disp">${i+1}</span><span class="${isPG?'chip-blue':'chip-violet'} !text-[10px]">${isPG?'PG':'Essay'}</span>${isPG?(j===undefined?'<span class="chip-gray !text-[10px]">tidak dijawab</span>':benar?'<span class="chip-green !text-[10px]">✔ benar · +'+s.poin+'</span>':'<span class="chip-red !text-[10px]">✘ salah</span>'):'<span class="chip-amber !text-[10px]">koreksi di bawah</span>'}</div><div class="text-sm font-semibold mb-2">${formatTeksSoal(s.pertanyaan)}</div>${isPG?`<div class="text-xs space-y-1"><div>Jawaban: <b class="${benar?'text-sukses-700':'text-bahaya-600'}">${formatTeksSoal(j??'—')||'—'}</b></div>${!benar?`<div>Kunci: <b class="text-sukses-700">${formatTeksSoal(s.jawaban)}</b></div>`:''}</div>`:`<div class="text-xs bg-kertas-100 rounded-lg p-3 border border-kertas-200 whitespace-pre-wrap">${esc(j||'(tidak dijawab)')}</div>`}</div>`;}).join('');}
-else review=`<div class="card p-4"><div class="label">Jawaban Essay</div><div class="text-sm whitespace-pre-wrap">${esc(flattenEssay(h))}</div><p class="text-[11px] text-ink-400 mt-3">Paket soal sudah dihapus — review per butir tidak tersedia. Penilaian essay total仍可 diisi.</p></div>`;
+else review=`<div class="card p-4"><div class="label">Jawaban Essay</div><div class="text-sm whitespace-pre-wrap">${esc(flattenEssay(h))}</div><p class="text-[11px] text-ink-400 mt-3">Paket soal sudah dihapus — review per butir tidak tersedia. Penilaian essay total masih bisa diisi.</p></div>`;
 const essays=soal?soal.map((s,i)=>({s,i})).filter(x=>x.s.tipe==='Essay'):[];
 const gradeForm=ctx.canGrade?`<div class="card p-5 !border-esai-200 bg-esai-50/40"><h4 class="font-bold text-esai-700 mb-3 flex items-center gap-2">${ic('edit')} Koreksi Essay</h4>${essays.length?essays.map(({s,i})=>{const key='Soal_'+(i+1);const val=h.nilai_essay?.[key]??'';return `<div class="flex items-center justify-between gap-3 mb-2.5"><div class="text-xs font-semibold text-ink-700 flex-1">Soal ${i+1} <span class="text-ink-400">(maks ${s.poin})</span></div><input type="number" data-grade="${key}" data-max="${s.poin}" class="input !w-24 !py-2 !text-center" min="0" max="${s.poin}" value="${val}" placeholder="0"></div>`;}).join(''):`<div class="flex items-center justify-between gap-3 mb-2.5"><div class="text-xs font-semibold flex-1">Nilai essay total</div><input type="number" data-grade="total" data-max="100" class="input !w-24 !py-2 !text-center" min="0" value="${h.skor_essay??''}" placeholder="0"></div>`}
 <button class="btn-ok w-full mt-2" data-d="savegrade">${ic('save')} Simpan Nilai Essay</button></div>`:'';
@@ -960,7 +1402,7 @@ ${banks?`<div><label class="label">Sumber Soal</label><select id="pk-bank" class
 <label class="card p-3 flex items-center gap-2.5 cursor-pointer text-sm font-semibold"><input type="checkbox" class="cbx" id="pk-acako" ${paket?(paket.acak_opsi?'checked':''):'checked'}> 🔀 Acak Opsi</label>
 <label class="card p-3 flex items-center gap-2.5 cursor-pointer text-sm font-semibold"><input type="checkbox" class="cbx" id="pk-offline" ${paket?.mode_offline?'checked':''}> 📴 Wajib Offline</label></div>
 <div class="card p-4 flex items-center justify-between gap-3 bg-kertas-100"><div class="text-sm font-bold text-ink-700">📝 Soal: <span id="pk-count" class="text-biru-600">${soalData.length}</span> butir</div><button class="btn-pri btn-xs" id="pk-editor">${ic('edit','w-3.5 h-3.5')} Buka Editor Soal</button></div>
-<p class="text-[11px] text-ink-400">Waktu mengikuti zona perangkat (${TZ}). Essay otomatis dipindah ke bagian akhir.</p></div>
+<p class="text-[11px] text-ink-400">Waktu mengikuti zona perangkat (${TZ}). Essay otomatis dipindah ke bagian akhir. 🔐 Kunci jawaban disimpan aman di server, tidak dikirim ke peserta.</p></div>
 <div class="px-6 py-4 border-t border-kertas-300 bg-white flex justify-end gap-3"><button class="btn-ghost" onclick="closeModal()">Batal</button><button class="btn-pri" id="pk-save">${ic('save')} ${isEdit?'Simpan Perubahan':'🚀 Buat Paket'}</button></div>`,'max-w-xl');
 w.querySelector('#pk-token').addEventListener('input',e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''));
 w.querySelector('#pk-dice').onclick=()=>w.querySelector('#pk-token').value=genToken();
@@ -990,13 +1432,13 @@ openPaketModal:o=>paketModal({...o,guruId:SES.load().uid,onSaved:()=>guruCtx().r
 editPaket:p=>paketModal({paket:p,onSaved:()=>guruCtx().refresh()}),canGrade:true});
 async function tGuruBank(c){const s=SES.load();const ctx=guruCtx();const view=LS.get('cbt_v_gbank',{q:'',sort:'new'});
 let banks=await DB.listBanks(s.uid);
+const soalArr=b=>Array.isArray(b.soal_json)?b.soal_json:JSON.parse(b.soal_json||'[]');
 const draw=()=>{let list=banks.filter(b=>(b.nama_bank+b.mapel).toLowerCase().includes(view.q.toLowerCase()));
 if(view.sort==='new')list.sort((a,b)=>b.id-a.id);else if(view.sort==='name')list.sort((a,b)=>a.nama_bank.localeCompare(b.nama_bank));else list.sort((a,b)=>soalArr(b).length-soalArr(a).length);
 $('#gb-list').innerHTML=list.length?list.map((b,i)=>{const soal=soalArr(b);const pg=soal.filter(x=>(x.tipe||'PG')==='PG').length;
 return `<div class="card p-5 hover:border-sukses-300 hover:-translate-y-0.5 transition-all reveal" style="animation-delay:${i*.05}s">
 <div class="flex items-start justify-between gap-3 flex-wrap"><button class="text-left flex-1 min-w-[200px]" data-act="detail" data-id="${b.id}"><h4 class="font-bold text-ink-900 hover:text-sukses-700 transition">${esc(b.nama_bank)}</h4><p class="text-[11px] text-ink-400 mt-0.5">${esc(b.mapel)} · ${fmtTgl(b.created_at)}</p><div class="flex gap-1.5 mt-2 flex-wrap"><span class="chip-blue !text-[10px]">PG ${pg}</span><span class="chip-violet !text-[10px]">Essay ${soal.length-pg}</span><span class="chip-amber !text-[10px]">${soal.reduce((a,x)=>a+(+x.poin||0),0)} poin</span></div></button>
 <div class="flex gap-1.5 flex-wrap"><button class="btn-soft btn-xs" data-act="edit" data-id="${b.id}">${ic('edit','w-3.5 h-3.5')} Edit</button><button class="btn-ok btn-xs" data-act="jadwal" data-id="${b.id}">${ic('cal','w-3.5 h-3.5')} Jadwalkan</button><button class="btn-ghost btn-xs" data-act="export" data-id="${b.id}">${ic('down','w-3.5 h-3.5')}</button><button class="btn-ghost btn-xs !text-bahaya-600" data-act="del" data-id="${b.id}">${ic('trash','w-3.5 h-3.5')}</button></div></div></div>`;}).join(''):emptyBox('book','Belum ada bank soal','Klik "+ Buat Bank Soal" atau import dari Excel.');};
-const soalArr=b=>Array.isArray(b.soal_json)?b.soal_json:JSON.parse(b.soal_json||'[]');
 c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">GURU / BANK SOAL</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Bank Soal Saya</h2></div>
 <div class="flex gap-2 flex-wrap"><button class="btn-ghost btn-xs" id="gb-tpl">${ic('down','w-3.5 h-3.5')} Template</button><button class="btn-amber btn-xs" id="gb-imp">${ic('up','w-3.5 h-3.5')} Import Excel</button><button class="btn-pri btn-xs" id="gb-new">${ic('plus','w-3.5 h-3.5')} Buat Bank Soal</button></div></div>
 <div class="flex gap-3 mb-5 flex-wrap"><div class="relative flex-1 min-w-[200px]"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300">${ic('search')}</span><input id="gb-q" class="input !pl-10" placeholder="Cari nama bank / mapel…" value="${esc(view.q)}"></div>
@@ -1047,43 +1489,43 @@ bindActs(c,{tag:el=>copyText('['+el.dataset.n+']','Tag gambar disalin.'),
 del:async el=>{const n=el.dataset.n;if(!(await confirmBox({title:'Hapus gambar?',body:`<code>${esc(n)}</code> — soal yang memakainya akan menampilkan "gambar tidak ditemukan".`,okText:'Hapus',danger:true})))return;
 const cached=await DB.deleteImage(n);logAct('HAPUS_GBR',n);load();
 toast('Gambar dihapus.','warn',{label:'Undo',fn:async()=>{try{await DB.restoreImage(n,cached);load();toast('Dipulihkan.','ok');}catch(e){toast('Gagal memulihkan: '+e.message,'err');}}});}});}
-async function tGuruHasil(c){const s=SES.load();const pakets=await DB.listPaket({guruId:s.uid,light:true});const tokens=pakets.map(p=>p.token);
-const rows=await DB.listHasil({tokens});renderHasilTable(c,rows,{title:'Hasil Siswa Saya',idx:'GURU / HASIL',canGrade:true,refresh:()=>tGuruHasil(c),key:'ghasil'});}
+async function tGuruHasil(c){const s=SES.load();const pakets=await DB.listPaket({guruId:s.uid,light:false});const tokens=pakets.map(p=>p.token);
+const rows=await DB.listHasil({tokens});renderHasilTable(c,rows,{title:'Hasil Siswa Saya',idx:'GURU / HASIL',canGrade:true,canDelete:false,refresh:()=>tGuruHasil(c),key:'ghasil'});}
 
-/* ═══════════════════════ TABEL HASIL (bersama Guru/Admin) ═══════════════════════ */
-function renderHasilTable(c,rows,{title,idx,canGrade,refresh,key}){const kkm=+S('kkm',75);
+/* ═══════════════════════ TABEL HASIL (Guru/Admin) ═══════════════════════ */
+function renderHasilTable(c,rows,{title,idx,canGrade,canDelete,refresh,key}){const kkm=+S('kkm',75);
 const view=LS.get('cbt_v_'+key,{q:'',mapel:'',kelas:'',token:'',sort:'waktu',dir:-1});
 const saved=LS.get('cbt_views_'+key,[]);
 let sel=new Set();
 const mapels=[...new Set(rows.map(r=>r.mapel))],kelasList=[...new Set(rows.map(r=>r.kelas))],toks=[...new Set(rows.map(r=>r.token))];
 const filtered=()=>{let l=rows.filter(r=>(!view.mapel||r.mapel===view.mapel)&&(!view.kelas||r.kelas===view.kelas)&&(!view.token||r.token===view.token)&&(r.nama+r.nis).toLowerCase().includes(view.q.toLowerCase()));
-const k=view.sort;l.sort((a,b)=>{let x,y;if(k==='skor'){x=totalSkor(a);y=totalSkor(b);}else if(k==='nama'){x=a.nama.toLowerCase();y=b.nama.toLowerCase();}else if(k==='pelanggaran'){x=a.pelanggaran;y=b.pelanggaran;}else{x=a.id;y=b.id;}return(x<y?-1:x>y?1:0)*view.dir;});return l;};
+const k=view.sort;l.sort((a,b)=>{let x,y;if(k==='skor'){x=totalSkor(a);y=totalSkor(b);}else if(k==='nama'){x=String(a.nama).toLowerCase();y=String(b.nama).toLowerCase();}else if(k==='pelanggaran'){x=a.pelanggaran;y=b.pelanggaran;}else{x=a.id;y=b.id;}return(x<y?-1:x>y?1:0)*view.dir;});return l;};
 const draw=()=>{const l=filtered();const avg=l.length?(l.reduce((a,r)=>a+totalSkor(r),0)/l.length).toFixed(1):0;const lulus=l.filter(r=>totalSkor(r)>=kkm).length;const max=l.length?Math.max(...l.map(totalSkor)):0;
 $('#hs-stats').innerHTML=[['Peserta',l.length,'biru'],['Rata-rata',avg,'sukses'],['Tertinggi',max,'esai'],['Lulus KKM '+kkm,`${lulus}/${l.length}`,'pensil']].map(x=>`<div class="card p-4 text-center"><div class="stat-num text-${x[2]}-600">${x[1]}</div><div class="text-[10px] font-extrabold text-ink-400 uppercase tracking-wider mt-1">${x[0]}</div></div>`).join('');
 const arrow=k=>view.sort===k?(view.dir===1?' ↑':' ↓'):'';
 $('#hs-body').innerHTML=l.length?`<table class="w-full"><thead class="bg-kertas-100 sticky top-0 z-10"><tr>
-<th class="th w-10"><input type="checkbox" class="cbx" id="hs-all"></th>
+${canDelete?'<th class="th w-10"><input type="checkbox" class="cbx" id="hs-all"></th>':''}
 <th class="th"><button data-sort="nama" class="hover:text-biru-600 font-extrabold uppercase">Peserta${arrow('nama')}</button></th>
 <th class="th">Mapel / Token</th>
 <th class="th"><button data-sort="skor" class="hover:text-biru-600 font-extrabold uppercase">Nilai${arrow('skor')}</button></th>
 <th class="th text-center">Status</th><th class="th text-center"><button data-sort="pelanggaran" class="hover:text-biru-600 font-extrabold uppercase">Plg${arrow('pelanggaran')}</button></th><th class="th text-right">Aksi</th></tr></thead>
-<tbody class="divide-y divide-kertas-200">${l.map(h=>{const t=totalSkor(h);const ok=t>=kkm;
+<tbody class="divide-y divide-kertas-200">${l.map(h=>{const t=totalSkor(h);const ok=t>=kkm;const belumEssay=h.skor_essay==null&&((h.jawaban_essay&&Object.keys(h.jawaban_essay||{}).length)||h.punya_essay);
 return `<tr class="hover:bg-biru-50/40 transition ${sel.has(h.id)?'bg-biru-50':''}">
-<td class="td"><input type="checkbox" class="cbx hs-cb" data-id="${h.id}" ${sel.has(h.id)?'checked':''}></td>
+${canDelete?`<td class="td"><input type="checkbox" class="cbx hs-cb" data-id="${h.id}" ${sel.has(h.id)?'checked':''}></td>`:''}
 <td class="td"><button class="text-left" data-act="detail" data-id="${h.id}"><div class="font-bold text-ink-900 hover:text-biru-600">${esc(h.nama)}</div><div class="text-[11px] text-ink-400">${esc(h.kelas)} · NIS ${esc(h.nis)} · ${fmtTglShort(h.waktu)}</div></button></td>
 <td class="td"><div class="text-xs font-bold">${esc(h.mapel)}</div><span class="font-mono text-[10px] text-bahaya-600 font-bold">${esc(h.token)}</span></td>
-<td class="td"><span class="font-disp text-lg font-bold ${ok?'text-sukses-600':'text-bahaya-600'}">${t}</span>${h.skor_essay==null&&Object.keys(h.jawaban_essay||{}).length?'<div class="text-[9px] text-pensil-600 font-bold">essay belum dinilai</div>':`<div class="text-[9px] text-ink-300 font-semibold">PG ${h.skor_pg}${h.skor_essay!=null?' + E '+h.skor_essay:''}</div>`}</td>
+<td class="td"><span class="font-disp text-lg font-bold ${ok?'text-sukses-600':'text-bahaya-600'}">${t}</span>${belumEssay?'<div class="text-[9px] text-pensil-600 font-bold">essay belum dinilai</div>':`<div class="text-[9px] text-ink-300 font-semibold">PG ${h.skor_pg}${h.skor_essay!=null?' + E '+h.skor_essay:''}</div>`}</td>
 <td class="td text-center">${ok?'<span class="chip-green !text-[10px]">LULUS</span>':'<span class="chip-red !text-[10px]">BELUM</span>'}</td>
 <td class="td text-center">${h.pelanggaran>0?`<span class="chip-red !text-[10px]">${h.pelanggaran}×</span>`:'<span class="text-sukses-500">'+ic('shield','w-4 h-4 inline')+'</span>'}</td>
-<td class="td text-right whitespace-nowrap"><button class="icon-btn" data-act="detail" data-id="${h.id}" title="Detail & koreksi">${ic('eye','w-4 h-4')}</button><button class="icon-btn !text-bahaya-500" data-act="del" data-id="${h.id}" title="Hapus">${ic('trash','w-4 h-4')}</button></td></tr>`;}).join('')}</tbody></table>`:emptyBox('chart','Belum ada hasil','Hasil muncul otomatis saat peserta mengirim jawaban.');
-$('#hs-all')?.addEventListener('change',e=>{sel=e.target.checked?new Set(l.map(r=>r.id)):new Set();draw();});
-$$('.hs-cb').forEach(cb=>cb.onchange=()=>{const id=+cb.dataset.id;cb.checked?sel.add(id):sel.delete(id);drawBulk();});
+<td class="td text-right whitespace-nowrap"><button class="icon-btn" data-act="detail" data-id="${h.id}" title="Detail & koreksi">${ic('eye','w-4 h-4')}</button>${canDelete?`<button class="icon-btn !text-bahaya-500" data-act="del" data-id="${h.id}" title="Hapus">${ic('trash','w-4 h-4')}</button>`:''}</td></tr>`;}).join('')}</tbody></table>`:emptyBox('chart','Belum ada hasil','Hasil muncul otomatis saat peserta mengirim jawaban.');
+if(canDelete){$('#hs-all')?.addEventListener('change',e=>{sel=e.target.checked?new Set(l.map(r=>r.id)):new Set();draw();});
+$$('.hs-cb').forEach(cb=>cb.onchange=()=>{const id=+cb.dataset.id;cb.checked?sel.add(id):sel.delete(id);drawBulk();});}
 $$('[data-sort]').forEach(b=>b.onclick=()=>{const k=b.dataset.sort;if(view.sort===k)view.dir*=-1;else{view.sort=k;view.dir=k==='nama'?1:-1;}saveView();draw();});
 drawBulk();};
-const drawBulk=()=>{const bar=$('#hs-bulk');if(sel.size){bar.classList.remove('hidden');$('#hs-count').textContent=sel.size;}else bar.classList.add('hidden');};
+const drawBulk=()=>{const bar=$('#hs-bulk');if(!bar)return;if(sel.size){bar.classList.remove('hidden');$('#hs-count').textContent=sel.size;}else bar.classList.add('hidden');};
 const saveView=()=>LS.set('cbt_v_'+key,view);
 c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">${idx}</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">${title}</h2></div>
-<div class="flex gap-2 flex-wrap"><button class="btn-ok btn-xs" id="hs-xls">${ic('down','w-3.5 h-3.5')} Excel</button><button class="btn-danger btn-xs" id="hs-pdf">${ic('doc','w-3.5 h-3.5')} PDF</button>${canGrade?`<button class="btn-ghost btn-xs !text-bahaya-600" id="hs-clear">${ic('trash','w-3.5 h-3.5')} Bersihkan</button>`:''}</div></div>
+<div class="flex gap-2 flex-wrap"><button class="btn-ok btn-xs" id="hs-xls">${ic('down','w-3.5 h-3.5')} Excel</button><button class="btn-danger btn-xs" id="hs-pdf">${ic('doc','w-3.5 h-3.5')} PDF</button>${canDelete?`<button class="btn-ghost btn-xs !text-bahaya-600" id="hs-clear">${ic('trash','w-3.5 h-3.5')} Bersihkan</button>`:''}</div></div>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5" id="hs-stats"></div>
 <div class="card p-4 mb-4 space-y-3"><div class="flex gap-3 flex-wrap">
 <div class="relative flex-1 min-w-[180px]"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300">${ic('search')}</span><input id="hs-q" class="input !pl-10" placeholder="Cari nama / NIS…" value="${esc(view.q)}"></div>
@@ -1091,7 +1533,7 @@ c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><d
 <select id="hs-kelas" class="input !w-auto bg-white"><option value="">Semua Kelas</option>${kelasList.map(m=>`<option ${view.kelas===m?'selected':''}>${esc(m)}</option>`).join('')}</select>
 <select id="hs-token" class="input !w-auto bg-white"><option value="">Semua Token</option>${toks.map(m=>`<option ${view.token===m?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
 <div class="flex items-center gap-2 flex-wrap"><span class="text-[10px] font-extrabold text-ink-300 uppercase tracking-wider">Tampilan tersimpan:</span><span id="hs-views" class="flex gap-1.5 flex-wrap"></span><button class="btn-ghost btn-xs" id="hs-saveview">${ic('save','w-3 h-3')} Simpan filter</button></div></div>
-<div id="hs-bulk" class="hidden card !border-bahaya-200 bg-bahaya-50 px-4 py-2.5 mb-3 flex items-center gap-3"><b class="text-sm text-bahaya-700"><span id="hs-count">0</span> dipilih</b><button class="btn-danger btn-xs" id="hs-bulkdel">${ic('trash','w-3.5 h-3.5')} Hapus terpilih</button><button class="btn-ghost btn-xs" id="hs-bulkcancel">Batal</button></div>
+${canDelete?`<div id="hs-bulk" class="hidden card !border-bahaya-200 bg-bahaya-50 px-4 py-2.5 mb-3 flex items-center gap-3"><b class="text-sm text-bahaya-700"><span id="hs-count">0</span> dipilih</b><button class="btn-danger btn-xs" id="hs-bulkdel">${ic('trash','w-3.5 h-3.5')} Hapus terpilih</button><button class="btn-ghost btn-xs" id="hs-bulkcancel">Batal</button></div>`:''}
 <div class="card overflow-hidden"><div class="overflow-auto max-h-[560px] exam-scroll" id="hs-body"></div></div>`;
 const drawViews=()=>{$('#hs-views').innerHTML=saved.length?saved.map((sv,i)=>`<span class="chip-blue cursor-pointer hover:!bg-biru-100" data-sv="${i}">${esc(sv.name)} <button data-svx="${i}" class="text-biru-400 hover:text-bahaya-600 ml-0.5">×</button></span>`).join(''):'<span class="text-[11px] text-ink-300 italic">belum ada</span>';
 $$('[data-sv]').forEach(ch=>ch.onclick=e=>{if(e.target.dataset.svx!==undefined)return;Object.assign(view,saved[+ch.dataset.sv].view);saveView();refresh();});
@@ -1102,14 +1544,14 @@ $('#hs-q').addEventListener('input',debounce(e=>{view.q=e.target.value;saveView(
 $('#hs-saveview').onclick=()=>{const name=prompt('Nama tampilan filter ini:',[view.mapel,view.kelas,view.token].filter(Boolean).join(' · ')||'Semua');if(!name)return;saved.push({name,view:{...view}});LS.set('cbt_views_'+key,saved);drawViews();toast('Tampilan disimpan.','ok');};
 $('#hs-xls').onclick=()=>excelHasil(filtered(),'HASIL');
 $('#hs-pdf').onclick=()=>pdfHasil(filtered());
-$('#hs-bulkcancel').onclick=()=>{sel=new Set();draw();};
+if(canDelete){$('#hs-bulkcancel').onclick=()=>{sel=new Set();draw();};}
 const doDelete=async ids=>{const removed=await DB.deleteHasil(ids);logAct('HAPUS_HASIL',ids.length+' baris');rows=rows.filter(r=>!ids.includes(r.id));sel=new Set();draw();
 toast(`${removed.length} hasil dihapus.`,'warn',{label:'Undo',fn:async()=>{await DB.restoreHasil(removed);rows.push(...removed);draw();toast('Dipulihkan.','ok');}});};
-$('#hs-bulkdel').onclick=async()=>{if(await confirmBox({title:`Hapus ${sel.size} hasil terpilih?`,body:'Bisa dibatalkan lewat Undo pada notifikasi.',okText:'Hapus',danger:true}))doDelete([...sel]);};
-if($('#hs-clear'))$('#hs-clear').onclick=async()=>{if(!(await confirmBox({title:'Bersihkan SEMUA hasil?',body:'Seluruh riwayat nilai pada cakupan ini akan dihapus. Segera lakukan backup bila perlu.',okText:'Hapus Semua',danger:true})))return;
-const removed=await DB.clearHasil();logAct('HAPUS_RIWAYAT','semua');rows=[];draw();toast('Riwayat dibersihkan.','warn',{label:'Undo',fn:async()=>{await DB.restoreHasil(removed);rows.push(...removed);draw();toast('Dipulihkan.','ok');}});};
+if(canDelete){$('#hs-bulkdel').onclick=async()=>{if(await confirmBox({title:`Hapus ${sel.size} hasil terpilih?`,body:'Bisa dibatalkan lewat Undo pada notifikasi.',okText:'Hapus',danger:true}))doDelete([...sel]);};
+$('#hs-clear').onclick=async()=>{if(!(await confirmBox({title:'Bersihkan SEMUA hasil?',body:'Seluruh riwayat nilai pada cakupan ini akan dihapus. Segera lakukan backup bila perlu.',okText:'Hapus Semua',danger:true})))return;
+const removed=await DB.clearHasil();logAct('HAPUS_RIWAYAT','semua');rows=[];draw();toast('Riwayat dibersihkan.','warn',{label:'Undo',fn:async()=>{await DB.restoreHasil(removed);rows.push(...removed);draw();toast('Dipulihkan.','ok');}});};}
 bindActs(c,{detail:el=>{const h=rows.find(r=>r.id===+el.dataset.id);if(h)drawerHasil(h,{canGrade,refresh:()=>{refresh();}});},
-del:async el=>{const id=+el.dataset.id;if(await confirmBox({title:'Hapus hasil ini?',body:'Satu baris hasil peserta. Bisa dibatalkan lewat Undo.',okText:'Hapus',danger:true}))doDelete([id]);}});}
+del:canDelete?(async el=>{const id=+el.dataset.id;if(await confirmBox({title:'Hapus hasil ini?',body:'Satu baris hasil peserta. Bisa dibatalkan lewat Undo.',okText:'Hapus',danger:true}))doDelete([id]);}):null});}
 
 /* ═══════════════════════ PANEL ADMIN ═══════════════════════ */
 async function vAdmin(v){const s=SES.load();
@@ -1117,29 +1559,22 @@ const switchTab=panelShell(v,{role:'admin',accent:'#2E5BFF',user:s,sub:'Administ
 {id:'dash',icon:'chart',label:'Dashboard',render:tAdminDash},{id:'guru',icon:'users',label:'Guru',render:tAdminGuru},{id:'paket',icon:'cal',label:'Jadwal & Paket',render:tAdminPaket},{id:'hasil',icon:'doc',label:'Hasil Ujian',render:tAdminHasil},{id:'gambar',icon:'img',label:'Gambar',render:tAdminGambar},{id:'sistem',icon:'cog',label:'Sistem',render:tAdminSistem}]});
 switchTab('dash');}
 const CHART_COLORS=['#2E5BFF','#FFB020','#12B76A','#7A5AF8','#06AED4','#F04438','#0E9384','#DD2590'];
-async function tAdminDash(c){const[guru,banks,pakets,hasil,log]=await Promise.all([DB.listGuru(),DB.listBanks(),DB.listPaket({light:true}),DB.listHasil(),DB.listLog(12)]);
-const totalP=hasil.reduce((a,h)=>a+(+h.pelanggaran||0),0);const avg=hasil.length?(hasil.reduce((a,h)=>a+totalSkor(h),0)/hasil.length).toFixed(1):0;
-const perMapel={};hasil.forEach(h=>{(perMapel[h.mapel]=perMapel[h.mapel]||[]).push(totalSkor(h));});
-const pm=Object.entries(perMapel).map(([m,arr])=>({m,avg:arr.reduce((a,b)=>a+b,0)/arr.length,n:arr.length})).sort((a,b)=>b.n-a.n).slice(0,8);
-const maxAvg=Math.max(...pm.map(x=>x.avg),1);
-const top=[...hasil].sort((a,b)=>totalSkor(b)-totalSkor(a)).slice(0,5);
-const cards=[['Guru',guru.length,'users','#12B76A'],['Bank Soal',banks.length,'book','#2E5BFF'],['Paket',pakets.length,'cal','#7A5AF8'],['Hasil Masuk',hasil.length,'doc','#06AED4'],['Rata-rata',avg,'chart','#FFB020'],['Pelanggaran',totalP,'alert','#F04438']];
-c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">ADMIN / DASHBOARD</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">${esc(S('nama_sekolah','Dashboard'))}</h2><p class="text-xs text-ink-400 mt-1">${esc(S('nama_ujian',''))}</p></div><span class="chip-green"><span class="w-1.5 h-1.5 rounded-full bg-sukses-500 live-dot"></span> Live ${DB.mode==='supabase'?'Realtime':'Lokal'}</span></div>
+async function tAdminDash(c){const d=await DB.dashboard();
+const maxAvg=Math.max(...d.per_mapel.map(x=>x.avg),1);
+const cards=[['Guru',d.jumlah_guru,'users','#12B76A'],['Bank Soal',d.jumlah_bank,'book','#2E5BFF'],['Paket',d.jumlah_paket,'cal','#7A5AF8'],['Hasil Masuk',d.jumlah_hasil,'doc','#06AED4'],['Rata-rata',(+d.rata_rata).toFixed(1),'chart','#FFB020'],['Pelanggaran',d.jumlah_pelanggaran,'alert','#F04438']];
+c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">ADMIN / DASHBOARD</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">${esc(S('nama_sekolah','Dashboard'))}</h2><p class="text-xs text-ink-400 mt-1">${esc(S('nama_ujian',''))}</p></div><span class="chip-green"><span class="w-1.5 h-1.5 rounded-full bg-sukses-500 live-dot"></span> Live ${DB.mode==='supabase'?'(poll 20 dtk)':'Lokal'}</span></div>
 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-6">${cards.map((x,i)=>`<div class="card p-4 reveal" style="animation-delay:${i*.06}s"><div class="flex items-center justify-between mb-2"><span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:${x[3]}18;color:${x[3]}">${ic(x[2])}</span></div><div class="stat-num" style="color:${x[3]}" data-countup="${x[1]}">0</div><div class="text-[10px] font-extrabold text-ink-400 uppercase tracking-wider mt-1">${x[0]}</div></div>`).join('')}</div>
 <div class="grid lg:grid-cols-2 gap-5 mb-5">
-<div class="card p-5"><h3 class="font-bold text-ink-900 mb-4">📊 Rata-rata per Mapel</h3>${pm.length?pm.map((x,i)=>`<div class="mb-3.5"><div class="flex justify-between text-xs font-bold mb-1"><span class="text-ink-700">${esc(x.m)}</span><span class="font-mono" style="color:${CHART_COLORS[i%8]}">${x.avg.toFixed(1)} · ${x.n} peserta</span></div><div class="h-3 rounded-full bg-kertas-200 overflow-hidden"><div class="h-3 rounded-full transition-all duration-700" style="width:${Math.max(x.avg/maxAvg*100,4)}%;background:repeating-linear-gradient(45deg,${CHART_COLORS[i%8]},${CHART_COLORS[i%8]} 6px,${CHART_COLORS[i%8]}CC 6px,${CHART_COLORS[i%8]}CC 12px)"></div></div></div>`).join(''):'<p class="text-sm text-ink-300">Belum ada data.</p>'}</div>
-<div class="card p-5"><h3 class="font-bold text-ink-900 mb-4">🏆 Top 5 Peserta</h3>${top.length?top.map((h,i)=>`<div class="flex items-center gap-3 p-2.5 rounded-xl bg-kertas-100 border border-kertas-200 mb-2"><span class="w-8 h-8 rounded-full font-disp font-bold flex items-center justify-center text-sm ${i===0?'bg-pensil-400 text-ink-900':'bg-white text-ink-500 border border-kertas-300'}">${i+1}</span><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${esc(h.nama)}</div><div class="text-[11px] text-ink-400">${esc(h.kelas)} · ${esc(h.mapel)}</div></div><span class="font-disp font-bold text-sukses-600">${totalSkor(h)}</span></div>`).join(''):'<p class="text-sm text-ink-300">Belum ada data.</p>'}</div></div>
-<div class="card p-5"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-ink-900">📜 Log Aktivitas</h3><button class="btn-ghost btn-xs !text-bahaya-600" id="ad-clearlog">${ic('trash','w-3.5 h-3.5')} Bersihkan</button></div>
-<div id="ad-log" class="space-y-1.5 max-h-64 overflow-y-auto exam-scroll">${log.length?log.map(l=>`<div class="flex items-center gap-2.5 text-xs p-2.5 bg-kertas-100 rounded-lg border border-kertas-200 flex-wrap"><span class="text-ink-300 font-mono shrink-0">${fmtTglShort(l.waktu)}</span><span class="chip-blue !text-[9px] !py-0.5">${esc(l.role)}</span><b>${esc(l.username)}</b><span class="text-ink-600">${esc(l.aksi)}</span><span class="text-ink-400 truncate flex-1">${esc(l.detail||'')}</span></div>`).join(''):'<p class="text-sm text-ink-300">Belum ada aktivitas.</p>'}</div></div>
-<div class="card p-5 mt-5 !border-sukses-200 bg-sukses-50/40"><h3 class="font-bold text-sukses-700 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-sukses-500 live-dot"></span> Pengiriman Terbaru (live)</h3><div id="ad-feed" class="space-y-1.5">${hasil.slice(0,5).map(h=>`<div class="text-xs bg-white rounded-lg border border-sukses-100 p-2.5 flex gap-2 flex-wrap"><b>${esc(h.nama)}</b><span class="text-ink-400">${esc(h.kelas)} · ${esc(h.mapel)}</span><span class="ml-auto font-mono text-ink-300">${fmtTglShort(h.waktu)}</span></div>`).join('')||'<p class="text-sm text-ink-300">Menunggu peserta…</p>'}</div></div>`;
+<div class="card p-5"><h3 class="font-bold text-ink-900 mb-4">📊 Rata-rata per Mapel</h3>${d.per_mapel.length?d.per_mapel.map((x,i)=>`<div class="mb-3.5"><div class="flex justify-between text-xs font-bold mb-1"><span class="text-ink-700">${esc(x.m)}</span><span class="font-mono" style="color:${CHART_COLORS[i%8]}">${(+x.avg).toFixed(1)} · ${x.n} peserta</span></div><div class="h-3 rounded-full bg-kertas-200 overflow-hidden"><div class="h-3 rounded-full transition-all duration-700" style="width:${Math.max(x.avg/maxAvg*100,4)}%;background:repeating-linear-gradient(45deg,${CHART_COLORS[i%8]},${CHART_COLORS[i%8]} 6px,${CHART_COLORS[i%8]}CC 6px,${CHART_COLORS[i%8]}CC 12px)"></div></div></div>`).join(''):'<p class="text-sm text-ink-300">Belum ada data.</p>'}</div>
+<div class="card p-5"><h3 class="font-bold text-ink-900 mb-4">🏆 Top 5 Peserta</h3>${d.top.length?d.top.map((h,i)=>`<div class="flex items-center gap-3 p-2.5 rounded-xl bg-kertas-100 border border-kertas-200 mb-2"><span class="w-8 h-8 rounded-full font-disp font-bold flex items-center justify-center text-sm ${i===0?'bg-pensil-400 text-ink-900':'bg-white text-ink-500 border border-kertas-300'}">${i+1}</span><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${esc(h.nama)}</div><div class="text-[11px] text-ink-400">${esc(h.kelas)} · ${esc(h.mapel)}</div></div><span class="font-disp font-bold text-sukses-600">${h.skor}</span></div>`).join(''):'<p class="text-sm text-ink-300">Belum ada data.</p>'}</div></div>
+<div class="card p-5"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-ink-900">📜 Log Aktivitas Terbaru</h3><button class="btn-ghost btn-xs !text-bahaya-600" id="ad-clearlog">${ic('trash','w-3.5 h-3.5')} Bersihkan Log</button></div>
+<div id="ad-log" class="space-y-1.5 max-h-64 overflow-y-auto exam-scroll">${d.log.length?d.log.map(l=>`<div class="flex items-center gap-2.5 text-xs p-2.5 bg-kertas-100 rounded-lg border border-kertas-200 flex-wrap"><span class="text-ink-300 font-mono shrink-0">${fmtTglShort(l.waktu)}</span><span class="chip-blue !text-[9px] !py-0.5">${esc(l.role)}</span><b>${esc(l.username)}</b><span class="text-ink-600">${esc(l.aksi)}</span><span class="text-ink-400 truncate flex-1">${esc(l.detail||'')}</span></div>`).join(''):'<p class="text-sm text-ink-300">Belum ada aktivitas.</p>'}</div></div>`;
 $$('[data-countup]').forEach(el=>{const target=parseFloat(el.dataset.countup)||0;const dec=String(el.dataset.countup).includes('.')?1:0;const t0=performance.now();const step=t=>{const p=Math.min((t-t0)/800,1);el.textContent=(target*(1-Math.pow(1-p,3))).toFixed(dec);if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);});
-$('#ad-clearlog').onclick=async()=>{if(await confirmBox({title:'Bersihkan log aktivitas?',body:'Catatan aktivitas panel akan dikosongkan.',okText:'Bersihkan',danger:true})){await DB.clearLog();tAdminDash(c);toast('Log dibersihkan.','ok');}};
-const un=DB.subscribe(p=>{const h=p?.new||p?.record;if(!h)return;const feed=$('#ad-feed');if(!feed)return;const div=document.createElement('div');div.className='pop-in text-xs bg-white rounded-lg border border-sukses-200 p-2.5 flex gap-2 flex-wrap';div.innerHTML=`<b>${esc(h.nama||'')}</b><span class="text-ink-400">${esc(h.kelas||'')} · ${esc(h.mapel||'')}</span><span class="ml-auto font-mono text-sukses-600 font-bold">baru ✓</span>`;feed.prepend(div);while(feed.children.length>6)feed.lastChild.remove();});
-onCleanup(un);}
+$('#ad-clearlog').onclick=async()=>{if(await confirmBox({title:'Bersihkan log aktivitas?',body:'Catatan aktivitas panel akan dikosongkan.',okText:'Bersihkan',danger:true})){await DB.clearLog();tAdminDash(c);toast('Log dibersihkan.','ok');}};}
 async function tAdminGuru(c){let gurus=await DB.listGuru();
 const draw=()=>{const q=($('#ag-q')?.value||'').toLowerCase();const list=gurus.filter(g=>(g.username+g.nama_lengkap+g.mapel).toLowerCase().includes(q));
 $('#ag-body').innerHTML=list.length?list.map(g=>`<tr class="hover:bg-biru-50/40"><td class="td font-mono font-bold">${esc(g.username)}</td><td class="td font-semibold">${esc(g.nama_lengkap)}</td><td class="td"><span class="chip-blue !text-[10px]">${esc(g.mapel)}</span></td><td class="td text-center"><span class="chip-green !text-[10px]">${g.jumlah_bank} bank</span></td><td class="td text-right whitespace-nowrap"><button class="btn-soft btn-xs" data-act="edit" data-id="${g.id}">Edit</button> <button class="btn-ghost btn-xs !text-bahaya-600" data-act="del" data-id="${g.id}">Hapus</button></td></tr>`).join(''):'<tr><td colspan="5" class="td">'+emptyBox('users','Belum ada guru','Tambah manual atau import Excel.')+'</td></tr>';};
-c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">ADMIN / GURU</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Manajemen Akun Guru</h2><p class="text-xs text-ink-400 mt-1">Password ter-hash SHA-256 otomatis saat login pertama.</p></div>
+c.innerHTML=`<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">ADMIN / GURU</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Manajemen Akun Guru</h2><p class="text-xs text-ink-400 mt-1">Password di-hash ${DB.mode==='supabase'?'di server (SHA-256 + validasi login server)':'SHA-256'} otomatis.</p></div>
 <div class="flex gap-2 flex-wrap"><button class="btn-ghost btn-xs" id="ag-tpl">${ic('down','w-3.5 h-3.5')} Template</button><button class="btn-amber btn-xs" id="ag-imp">${ic('up','w-3.5 h-3.5')} Import Excel</button><button class="btn-pri btn-xs" id="ag-new">${ic('plus','w-3.5 h-3.5')} Tambah Guru</button></div></div>
 <div class="relative mb-4 max-w-sm"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300">${ic('search')}</span><input id="ag-q" class="input !pl-10" placeholder="Cari guru…"></div>
 <div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full"><thead class="bg-kertas-100"><tr><th class="th">Username</th><th class="th">Nama Lengkap</th><th class="th">Mapel</th><th class="th text-center">Bank</th><th class="th text-right">Aksi</th></tr></thead><tbody id="ag-body" class="divide-y divide-kertas-200"></tbody></table></div></div>`;
@@ -1152,13 +1587,13 @@ const modalGuru=g=>{const w=openModal(`<div class="p-6"><h3 class="font-disp fon
 <div class="flex justify-end gap-2 mt-6"><button class="btn-ghost" onclick="closeModal()">Batal</button><button class="btn-pri" id="mg-go">${ic('save')} Simpan</button></div></div>`);
 w.querySelector('#mg-go').onclick=async()=>{const n=w.querySelector('#mg-n').value.trim(),m=w.querySelector('#mg-m').value.trim(),p=w.querySelector('#mg-p').value;
 if(!n||!m)return toast('Nama dan mapel wajib diisi.','warn');
-try{if(g){const upd={nama_lengkap:n,mapel:m};if(p)upd.password_hash='sha256:'+await sha256(p);await DB.updateGuru(g.id,upd);logAct('EDIT_GURU',g.username);}
-else{const u=w.querySelector('#mg-u').value.trim();if(!u||!p)return toast('Username & password wajib.','warn');await DB.createGuru({username:u,password_hash:'sha256:'+await sha256(p),nama_lengkap:n,mapel:m});logAct('TAMBAH_GURU',u);}
+try{if(g){await DB.updateGuru(g.id,{nama_lengkap:n,mapel:m,password:p||null});logAct('EDIT_GURU',g.username);}
+else{const u=w.querySelector('#mg-u').value.trim();if(!u||!p)return toast('Username & password wajib.','warn');await DB.createGuru({username:u,password:p,nama_lengkap:n,mapel:m});logAct('TAMBAH_GURU',u);}
 toast('Tersimpan.','ok');closeModal(w);tAdminGuru(c);}catch(e){toast(e.message,'err');}};};
 $('#ag-new').onclick=()=>modalGuru(null);
-$('#ag-tpl').onclick=()=>{const ws=XLSX.utils.json_to_sheet([{Username:'guru1',Password:'pass123',Nama:'Budi Santoso, S.Pd',Mapel:'Matematika'}]);ws['!cols']=[{wch:14},{wch:14},{wch:30},{wch:24}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Guru');XLSX.writeFile(wb,'TEMPLATE_GURU.xlsx');toast('Template diunduh.','ok');};
+$('#ag-tpl').onclick=templateSoal;
 $('#ag-imp').onclick=()=>pickExcel(async rows=>{let ok=0,skip=0;for(const r of rows){const u=String(r.Username||'').trim(),p=String(r.Password||'').trim(),n=String(r.Nama||'').trim(),m=String(r.Mapel||'').trim();if(!u||!p||!n||!m){skip++;continue;}
-try{await DB.createGuru({username:u,password_hash:'sha256:'+await sha256(p),nama_lengkap:n,mapel:m});ok++;}catch(e){skip++;}}
+try{await DB.createGuru({username:u,password:p,nama_lengkap:n,mapel:m});ok++;}catch(e){skip++;}}
 logAct('IMPORT_GURU',ok+' guru');toast(`${ok} guru diimport, ${skip} dilewati.`,'ok');tAdminGuru(c);});
 bindActs(c,{edit:el=>modalGuru(gurus.find(g=>g.id===+el.dataset.id)),
 del:async el=>{const g=gurus.find(x=>x.id===+el.dataset.id);if(!g)return;
@@ -1190,7 +1625,7 @@ dup:async el=>{const p=pakets.find(x=>x.token===el.dataset.tok);if(!p)return;con
 del:async el=>{const p=pakets.find(x=>x.token===el.dataset.tok);if(!p)return;if(!(await confirmBox({title:'Hapus paket '+esc(p.token)+'?',body:'Token tidak berlaku lagi. Undo tersedia di notifikasi.',okText:'Hapus',danger:true})))return;
 const row=await DB.deletePaket(p.token);logAct('HAPUS_PAKET',p.token);tAdminPaket(c);
 toast('Paket dihapus.','warn',{label:'Undo',fn:async()=>{await DB.restorePaket(row);tAdminPaket(c);toast('Dipulihkan.','ok');}});}});}
-async function tAdminHasil(c){const rows=await DB.listHasil();renderHasilTable(c,rows,{title:'Hasil Ujian & Analisis',idx:'ADMIN / HASIL',canGrade:true,refresh:()=>tAdminHasil(c),key:'ahasil'});}
+async function tAdminHasil(c){const rows=await DB.listHasil();renderHasilTable(c,rows,{title:'Hasil Ujian & Analisis',idx:'ADMIN / HASIL',canGrade:true,canDelete:true,refresh:()=>tAdminHasil(c),key:'ahasil'});}
 async function tAdminGambar(c){c.innerHTML=`<div class="mb-6"><div class="sect-idx">ADMIN / GAMBAR</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Semua Gambar Soal</h2></div>
 <label class="card border-2 !border-dashed !border-biru-300 p-8 flex flex-col items-center cursor-pointer hover:bg-biru-50/50 transition mb-5"><span class="w-12 h-12 rounded-2xl bg-biru-100 text-biru-600 flex items-center justify-center mb-3">${ic('up','w-6 h-6')}</span><span class="font-bold text-sm">Klik / seret gambar — kompres otomatis</span><input type="file" id="ga-file" accept="image/*" multiple class="hidden"></label>
 <div id="ga-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>`;
@@ -1214,12 +1649,12 @@ c.innerHTML=`<div class="mb-6"><div class="sect-idx">ADMIN / SISTEM</div><h2 cla
 <div><label class="label">Daftar Kelas (pisahkan koma)</label><input id="set-kelas" class="input font-mono !text-xs" value="${esc(st.daftar_kelas||'')}"></div>
 <button class="btn-pri w-full" id="set-save">${ic('save')} Simpan Pengaturan</button></div></div>
 <div class="space-y-5">
-<div class="card p-6 !border-sukses-200"><h3 class="font-bold text-sukses-700 mb-2">💾 Backup Database</h3><p class="text-xs text-ink-400 mb-4">Unduh seluruh data (guru, bank, paket, hasil, pengaturan, log) sebagai JSON.</p><button class="btn-ok w-full" id="sys-backup">${ic('down')} Download Backup JSON</button></div>
+<div class="card p-6 !border-sukses-200"><h3 class="font-bold text-sukses-700 mb-2">💾 Backup Database</h3><p class="text-xs text-ink-400 mb-4">Unduh seluruh data (guru, bank, paket, hasil, pengaturan, log) sebagai JSON.${DB.mode==='supabase'?' <i>(File gambar di storage tidak ikut — tetap tersimpan di bucket.)</i>':''}</p><button class="btn-ok w-full" id="sys-backup">${ic('down')} Download Backup JSON</button></div>
 <div class="card p-6 !border-pensil-300"><h3 class="font-bold text-pensil-700 mb-2">📤 Restore Database</h3><p class="text-xs text-ink-400 mb-4">Ganti seluruh data dengan file backup. <b>Berbahaya</b> — data saat ini ditimpa.</p><button class="btn-amber w-full" id="sys-restore">${ic('up')} Pilih File Backup…</button></div>
 <div class="card p-6"><h3 class="font-bold text-ink-900 mb-2">🧪 Data & Koneksi</h3><div class="grid grid-cols-2 gap-2.5">
 <button class="btn-soft" id="sys-demo">${ic('db')} Muat Data Demo</button>
 <a href="#/setup" class="btn-ghost">${ic('link')} ${DB.mode==='supabase'?'Kelola Koneksi':'Hubungkan Supabase'}</a></div>
-<p class="text-[11px] text-ink-400 mt-3">Mode aktif: <b>${DB.mode==='supabase'?'Supabase Cloud':'Demo Lokal (browser)'}</b>${DB.mode==='supabase'?' · '+esc(DB.url):''}</p></div></div></div>`;
+<p class="text-[11px] text-ink-400 mt-3">Mode aktif: <b>${DB.mode==='supabase'?'Supabase Cloud (aman)':'Demo Lokal (browser)'}</b>${DB.mode==='supabase'?' · '+esc(DB.url):''}</p></div></div></div>`;
 $('#set-save').onclick=async()=>{try{await DB.saveSettings({nama_sekolah:$('#set-sek').value.trim(),nama_ujian:$('#set-uj').value.trim(),kkm:$('#set-kkm').value,durasi_default:$('#set-dur').value,daftar_kelas:$('#set-kelas').value});await refreshSettings();logAct('PENGATURAN','ubah');toast('Pengaturan tersimpan.','ok');renderNav();}catch(e){toast(e.message,'err');}};
 $('#sys-backup').onclick=async()=>{try{const json=await DB.exportAll();download('backup_cbt_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(json,null,2),'application/json');logAct('BACKUP','JSON');toast('Backup diunduh.','ok');}catch(e){toast(e.message,'err');}};
 $('#sys-restore').onclick=()=>{const f=$('#hidden-file');f.accept='.json';f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;
@@ -1229,32 +1664,32 @@ $('#sys-demo').onclick=async()=>{if(!(await confirmBox({title:'Muat data demo?',
 try{await DB.seedDemo();await refreshSettings();toast('Data demo dimuat. Token aktif: MTK8A & PAI8B','ok');route();}catch(e){toast(e.message,'err');}};}
 
 /* ═══════════════════════ PANEL PENGAWAS ═══════════════════════ */
-async function vPengawas(v){const s=SES.load();const[pakets,hasil]=await Promise.all([DB.listPaket({light:true}),DB.listHasil()]);
+async function vPengawas(v){const s=SES.load();const[pakets,hasil]=await Promise.all([DB.listPaket({light:true}),DB.listHasil({light:true})]);
 const aktif=pakets.filter(p=>statusKey(p)==='aktif');
 v.innerHTML=`<div class="max-w-7xl mx-auto px-4 py-8">
-<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">PENGAWAS / MONITOR</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Ruang Pantau Ujian</h2><p class="text-xs text-ink-400 mt-1">${esc(s.nama)} · nilai peserta disembunyikan untuk pengawas</p></div>
-<div class="flex items-center gap-2">${s.role==='admin'?'<a href="#/admin" class="btn-ghost btn-xs">← Admin</a>':''}<span class="chip-green"><span class="w-1.5 h-1.5 rounded-full bg-sukses-500 live-dot"></span> LIVE ${DB.mode==='supabase'?'Realtime':'Lokal'}</span></div></div>
+<div class="flex items-end justify-between gap-3 flex-wrap mb-6"><div><div class="sect-idx">PENGAWAS / MONITOR</div><h2 class="font-disp text-2xl font-bold text-ink-900 mt-1">Ruang Pantau Ujian</h2><p class="text-xs text-ink-400 mt-1">${esc(s.nama)} · nilai peserta disembunyikan untuk pengawas · refresh otomatis 20 dtk</p></div>
+<div class="flex items-center gap-2">${s.role==='admin'?'<a href="#/admin" class="btn-ghost btn-xs">← Admin</a>':''}<span class="chip-green"><span class="w-1.5 h-1.5 rounded-full bg-sukses-500 live-dot"></span> LIVE ${DB.mode==='supabase'?'(poll)':'Lokal'}</span></div></div>
 <div class="grid xl:grid-cols-3 gap-5">
 <div class="space-y-5">
 <div class="card p-5"><h3 class="font-bold mb-3">📋 Paket Aktif (${aktif.length})</h3><div class="space-y-2.5" id="pw-aktif">${aktif.length?aktif.map(p=>{const n=hasil.filter(h=>h.token===p.token).length;return `<div class="bg-kertas-100 rounded-xl p-3.5 border border-kertas-200"><div class="flex justify-between items-center gap-2"><b class="text-sm">${esc(p.mapel)}</b><span class="token-chip !text-xs">${esc(p.token)}</span></div><div class="flex justify-between text-[11px] text-ink-400 mt-1.5"><span>${p.durasi_menit} menit</span><span><b class="text-sukses-600" data-pwcount="${esc(p.token)}">${n}</b> terkirim</span></div></div>`;}).join(''):'<p class="text-sm text-ink-300">Tidak ada paket aktif.</p>'}</div></div>
 <div class="card p-5 !border-sukses-200 bg-sukses-50/40"><h3 class="font-bold text-sukses-700 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-sukses-500 live-dot"></span> Feed Pengiriman</h3><div id="pw-feed" class="space-y-2 max-h-[420px] overflow-y-auto exam-scroll">${hasil.slice(0,12).map(h=>feedItem(h)).join('')||'<p class="text-sm text-ink-300">Menunggu peserta…</p>'}</div></div></div>
-<div class="xl:col-span-2 card p-5"><div class="flex justify-between items-center gap-3 flex-wrap mb-4"><h3 class="font-bold">📊 Peserta Terkirim (${hasil.length})</h3><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300">${ic('search','w-4 h-4')}</span><input id="pw-q" class="input !pl-9 !py-2 !text-xs" placeholder="Cari nama / kelas…"></div></div>
+<div class="xl:col-span-2 card p-5"><div class="flex justify-between items-center gap-3 flex-wrap mb-4"><h3 class="font-bold">📊 Peserta Terkirim (<span id="pw-total">${hasil.length}</span>)</h3><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300">${ic('search','w-4 h-4')}</span><input id="pw-q" class="input !pl-9 !py-2 !text-xs" placeholder="Cari nama / kelas…"></div></div>
 <div class="overflow-auto max-h-[600px] exam-scroll rounded-xl border border-kertas-200"><table class="w-full"><thead class="bg-kertas-100 sticky top-0 z-10"><tr><th class="th">Peserta</th><th class="th">Mapel / Kelas</th><th class="th text-center">Nilai</th><th class="th text-center">Keamanan</th></tr></thead><tbody id="pw-body" class="divide-y divide-kertas-200"></tbody></table></div></div></div></div>`;
 function feedItem(h){return `<div class="pop-in bg-white rounded-xl border border-sukses-100 p-3 text-xs"><div class="flex justify-between gap-2"><b>${esc(h.nama)}</b><span class="font-mono text-ink-300">${fmtTglShort(h.waktu)}</span></div><div class="flex justify-between mt-1"><span class="text-ink-400">${esc(h.kelas)} · ${esc(h.mapel)}</span>${h.pelanggaran>0?`<span class="chip-red !text-[9px] !py-0">${h.pelanggaran}× plg</span>`:'<span class="text-sukses-500">'+ic('shield','w-3.5 h-3.5')+'</span>'}</div></div>`;}
 let rows=[...hasil];
 const draw=()=>{const q=($('#pw-q').value||'').toLowerCase();const l=rows.filter(h=>(h.nama+h.kelas+h.mapel).toLowerCase().includes(q));
+$('#pw-total').textContent=rows.length;
 $('#pw-body').innerHTML=l.length?l.map(h=>`<tr class="hover:bg-biru-50/40"><td class="td"><div class="font-bold">${esc(h.nama)}</div><div class="text-[11px] text-ink-400">NIS ${esc(h.nis)} · ${fmtTglShort(h.waktu)}</div></td><td class="td text-xs"><b>${esc(h.mapel)}</b><br><span class="chip-blue !text-[9px] !py-0 mt-0.5">${esc(h.kelas)}</span></td><td class="td text-center"><span class="chip-gray !text-[10px]">🔒 tersembunyi</span></td><td class="td text-center">${h.pelanggaran>0?`<span class="chip-red">${h.pelanggaran}× ❌</span>`:'<span class="chip-green">Aman ✅</span>'}</td></tr>`).join(''):'<tr><td colspan="4" class="td text-center text-ink-300 py-8">Belum ada respons.</td></tr>';};
 draw();$('#pw-q').addEventListener('input',debounce(draw,200));
-const un=DB.subscribe(async p=>{try{rows=await DB.listHasil();draw();const h=p?.new||p?.record;if(h?.nama){const feed=$('#pw-feed');if(feed){feed.insertAdjacentHTML('afterbegin',feedItem(h));while(feed.children.length>15)feed.lastChild.remove();}
-aktif.forEach(pk=>{const el=document.querySelector(`[data-pwcount="${pk.token}"]`);if(el)el.textContent=rows.filter(x=>x.token===pk.token).length;});}}catch(e){}});
-onCleanup(un);
-const poll=DB.mode==='local'?null:setInterval(async()=>{try{rows=await DB.listHasil();draw();}catch(e){}},45000);
-if(poll)onCleanup(()=>clearInterval(poll));}
+const un=DB.subscribe(async p=>{try{rows=await DB.listHasil({light:true});draw();
+const feed=$('#pw-feed');if(feed&&p?.poll){feed.innerHTML=rows.slice(0,12).map(h=>feedItem(h)).join('')||'<p class="text-sm text-ink-300">Menunggu peserta…</p>';}
+aktif.forEach(pk=>{const el=document.querySelector(`[data-pwcount="${pk.token}"]`);if(el)el.textContent=rows.filter(x=>x.token===pk.token).length;});}catch(e){}});
+onCleanup(un);}
 
 /* ═══════════════════════ HALAMAN: SETUP SUPABASE ═══════════════════════ */
 async function vSetup(v){const conn=LS.get('cbt_conn',null);
 v.innerHTML=`<div class="max-w-3xl mx-auto px-4 py-12">
-<div class="text-center mb-10 reveal"><div class="sect-idx mb-3">SETUP / KONEKSI</div><h1 class="font-disp text-3xl md:text-4xl font-bold text-ink-900">Hubungkan ke Supabase</h1><p class="text-sm text-ink-400 mt-3">Aplikasi ini 100% statis (GitHub Pages). Database, gambar, dan realtime berjalan di proyek Supabase gratis milik Anda.</p>
+<div class="text-center mb-10 reveal"><div class="sect-idx mb-3">SETUP / KONEKSI</div><h1 class="font-disp text-3xl md:text-4xl font-bold text-ink-900">Hubungkan ke Supabase</h1><p class="text-sm text-ink-400 mt-3">Aplikasi 100% statis (GitHub Pages) · database & koreksi nilai di Supabase · <b>kunci jawaban tidak pernah dikirim ke peserta</b>.</p>
 <div class="mt-4">${DB.mode==='supabase'?'<span class="chip-green">● Tersambung: '+esc(DB.url)+'</span>':'<span class="chip-amber">● Mode Demo Lokal aktif — data hanya di browser ini</span>'}</div></div>
 <div class="space-y-5">
 <div class="card p-6 reveal"><div class="flex gap-4"><span class="stepdot on">1</span><div class="flex-1"><h3 class="font-bold text-ink-900">Buat proyek & tempel kredensial</h3><p class="text-xs text-ink-400 mt-1 mb-4">Daftar gratis di <a class="text-biru-600 font-bold underline" href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com/dashboard</a> → New Project → <b>Settings → API</b> → salin <b>Project URL</b> dan kunci <b>anon public</b>.</p>
@@ -1262,13 +1697,13 @@ v.innerHTML=`<div class="max-w-3xl mx-auto px-4 py-12">
 <div><label class="label">Anon Public Key</label><input id="su-key" class="input font-mono !text-xs" placeholder="eyJhbGciOi…" value="${esc(conn?.anon||PRESET.anon||'')}"></div>
 <div class="flex gap-2 flex-wrap"><button class="btn-pri" id="su-test">${ic('link')} Simpan & Uji Koneksi</button>${DB.mode==='supabase'?'<button class="btn-ghost !text-bahaya-600" id="su-disc">Putuskan (kembali ke Demo)</button>':''}</div>
 <p class="text-[11px] text-ink-400">Kredensial disimpan di browser ini. Untuk semua pengunjung, isi konstanta <code class="chip-gray !text-[10px]">PRESET</code> di bagian atas file index.html.</p></div></div></div></div>
-<div class="card p-6 reveal" style="animation-delay:.08s"><div class="flex gap-4"><span class="stepdot ${conn?'on':''}">2</span><div class="flex-1"><h3 class="font-bold text-ink-900">Jalankan SQL skema (sekali)</h3><p class="text-xs text-ink-400 mt-1 mb-3">Buka <b>SQL Editor</b> di dashboard Supabase → tempel → <b>Run</b>. Membuat tabel, RLS, realtime, bucket gambar, akun awal & pengaturan.</p>
+<div class="card p-6 reveal" style="animation-delay:.08s"><div class="flex gap-4"><span class="stepdot ${conn?'on':''}">2</span><div class="flex-1"><h3 class="font-bold text-ink-900">Jalankan SQL v5.1 (sekali)</h3><p class="text-xs text-ink-400 mt-1 mb-3">Buka <b>SQL Editor</b> di dashboard Supabase → tempel → <b>Run</b>. SQL ini membuat tabel, mengunci akses langsung anon, membuat fungsi aman (login server, soal tanpa kunci, koreksi server, panel HMAC), bucket gambar & akun awal. Aman dijalankan ulang.</p>
 <div class="flex gap-2 mb-3 flex-wrap"><button class="btn-amber btn-xs" id="su-copy">${ic('copy','w-3.5 h-3.5')} Salin SQL Lengkap</button><a class="btn-ghost btn-xs" target="_blank" rel="noopener" href="https://supabase.com/dashboard/project/_/sql">${ic('link','w-3.5 h-3.5')} Buka SQL Editor</a></div>
 <div class="sqlbox" id="su-sql">${esc(SQL_SCHEMA)}</div></div></div></div>
-<div class="card p-6 reveal" style="animation-delay:.16s"><div class="flex gap-4"><span class="stepdot" id="su-dot3">3</span><div class="flex-1"><h3 class="font-bold text-ink-900">Verifikasi & masuk</h3><p class="text-xs text-ink-400 mt-1 mb-4">Periksa seluruh tabel dan bucket, lalu mulai memakai aplikasi.</p>
+<div class="card p-6 reveal" style="animation-delay:.16s"><div class="flex gap-4"><span class="stepdot" id="su-dot3">3</span><div class="flex-1"><h3 class="font-bold text-ink-900">Verifikasi & masuk</h3><p class="text-xs text-ink-400 mt-1 mb-4">Periksa seluruh komponen keamanan, lalu mulai memakai aplikasi.</p>
 <div id="su-checks" class="grid sm:grid-cols-2 gap-2 mb-4 text-xs"></div>
 <div class="flex gap-2 flex-wrap"><button class="btn-pri" id="su-verify">${ic('refresh')} Verifikasi Sekarang</button><button class="btn-soft" id="su-seed">${ic('db')} Isi Data Demo</button><a href="#/siswa" class="btn-ok">${ic('check')} Mulai Aplikasi</a></div>
-<div class="mt-5 bg-kertas-100 border border-kertas-300 rounded-xl p-4 text-xs"><b class="text-ink-700">Akun awal (dari SQL):</b><div class="grid sm:grid-cols-2 gap-1.5 mt-2 font-mono text-[11px]"><span>🛡 admin / <b>adminagus</b></span><span>👁 pengawas / <b>pengawas123</b></span><span>🎓 agus / <b>guru123</b></span><span>🎓 hasan / <b>hasan123</b></span></div><p class="text-ink-400 mt-2">Password otomatis升级为 SHA-256 saat login pertama. Ganti segera lewat Admin → Guru / SQL. Catatan keamanan: kebijakan RLS mengizinkan akses anon penuh agar aplikasi statis berfungsi — gunakan untuk data ujian sekolah, bukan data sensitif.</p></div></div></div></div>
+<div class="mt-5 bg-kertas-100 border border-kertas-300 rounded-xl p-4 text-xs"><b class="text-ink-700">Akun awal (dari SQL):</b><div class="grid sm:grid-cols-2 gap-1.5 mt-2 font-mono text-[11px]"><span>🛡 admin / <b>adminagus</b></span><span>👁 pengawas / <b>pengawas123</b></span><span>🎓 agus / <b>guru123</b></span><span>🎓 hasan / <b>hasan123</b></span></div><p class="text-ink-400 mt-2">Password otomatis升级为 SHA-256 saat login pertama. Ganti segera lewat Admin → Guru. Tombol "Isi Data Demo" memerlukan login admin.</p></div></div></div></div>
 </div></div>`;
 $('#su-copy').onclick=()=>copyText(SQL_SCHEMA,'SQL disalin — tempel di SQL Editor Supabase.');
 $('#su-test').onclick=async()=>{const url=$('#su-url').value.trim().replace(/\/$/,''),key=$('#su-key').value.trim();
@@ -1279,13 +1714,22 @@ catch(e){toast('Gagal: '+e.message+' — pastikan SQL langkah 2 sudah dijalankan
 btn.disabled=false;btn.innerHTML=ic('link')+' Simpan & Uji Koneksi';};
 const disc=$('#su-disc');if(disc)disc.onclick=async()=>{LS.del('cbt_conn');DB=new LocalDB();await refreshSettings();toast('Kembali ke Mode Demo Lokal.','info');route();};
 $('#su-verify').onclick=async()=>{if(DB.mode!=='supabase')return toast('Hubungkan dulu (langkah 1).','warn');
-const items=[['users','Tabel akun'],['bank_soal','Tabel bank soal'],['paket','Tabel paket'],['hasil','Tabel hasil'],['pengaturan','Tabel pengaturan'],['log_aktivitas','Tabel log']];
-const box=$('#su-checks');box.innerHTML=items.map(i=>`<div class="chip-gray" id="chk-${i[0]}">⏳ ${i[1]}</div>`).join('')+'<div class="chip-gray" id="chk-storage">⏳ Bucket gambar</div>';
+const checks=[
+['Pengaturan (baca publik)',async()=>{await DB.getSettings();}],
+['RPC jadwal_publik',async()=>{await DB.call('jadwal_publik',{});}],
+['RPC ambil_paket_siswa (tanpa kunci)',async()=>{try{await DB.call('ambil_paket_siswa',{p_token:'___'});}catch(e){if(!/token/i.test(e.message))throw e;}}],
+['RPC login_petugas (server)',async()=>{const r=await DB.call('login_petugas',{p_username:'__',p_password:'__'});if(r.status!=='error')throw new Error('Respons tidak terduga');}],
+['RPC panel (terkunci tanpa sesi)',async()=>{try{await DB.call('panel',{p_op:'guru_list',p_payload:{},p_token:''});throw new Error('Panel terbuka tanpa sesi!');}catch(e){if(!/sesi|akses/i.test(e.message))throw e;}}],
+['Tabel paket terkunci (select langsung)',async()=>{const{error}=await DB.sb.from('paket').select('token').limit(1);if(!error)throw new Error('Tabel paket masih terbuka!');}],
+['Storage gambar',async()=>{await DB.listImages();}],
+];
+const box=$('#su-checks');box.innerHTML=checks.map((c,i)=>`<div class="chip-gray" id="chk-${i}">⏳ ${c[0]}</div>`).join('');
 let allOk=true;
-for(const[t,label]of items){try{const{error}=await DB.sb.from(t).select('*').limit(1);if(error)throw error;$('#chk-'+t).className='chip-green';$('#chk-'+t).textContent='✓ '+label;}catch(e){allOk=false;$('#chk-'+t).className='chip-red';$('#chk-'+t).textContent='✗ '+label;}}
-try{await DB.listImages();$('#chk-storage').className='chip-green';$('#chk-storage').textContent='✓ Bucket gambar';}catch(e){allOk=false;$('#chk-storage').className='chip-red';$('#chk-storage').textContent='✗ Bucket gambar (jalankan SQL)';}
-if(allOk){$('#su-dot3').classList.add('done');toast('Semua siap! Silakan login & mulai ujian.','ok');}else toast('Ada komponen belum siap — jalankan SQL langkah 2.','err');};
+for(let i=0;i<checks.length;i++){try{await checks[i][1]();$('#chk-'+i).className='chip-green';$('#chk-'+i).textContent='✓ '+checks[i][0];}
+catch(e){allOk=false;$('#chk-'+i).className='chip-red';$('#chk-'+i).textContent='✗ '+checks[i][0];}}
+if(allOk){$('#su-dot3').classList.add('done');toast('Semua siap & aman! Silakan login & mulai ujian.','ok');}else toast('Ada komponen belum siap — jalankan SQL langkah 2.','err');};
 $('#su-seed').onclick=async()=>{if(DB.mode!=='supabase')return toast('Hubungkan dulu (langkah 1).','warn');
+const s=SES.load();if(!s||s.role!=='admin')return toast('Login sebagai admin dulu (#/login dengan adminagus), lalu klik tombol ini lagi.','warn');
 try{await DB.seedDemo();await refreshSettings();toast('Data demo masuk ke Supabase! Token aktif: MTK8A & PAI8B','ok');}catch(e){toast(e.message,'err');}};}
 
 /* ═══════════════════════ INISIALISASI ═══════════════════════ */
